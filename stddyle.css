@@ -1,0 +1,129 @@
+body{
+    background-color: #444444;
+}
+textarea{
+    font-weight: 300;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 30px 30px;
+    width: 100%;
+    height: 300px;
+    background-color: #191919;
+    color: greenyellow;
+    border: none;
+    border-radius: 1%;
+    font-size: 20px;
+    outline: none;
+    animation-name: t;
+    animation-duration: 3s;
+    animation-delay: 0.50s;
+    animation-iteration-count: infinite;
+}
+textarea:hover{
+    animation: reverse;
+    color: #fff;
+}
+
+@keyframes t{
+    0%{
+        color: greenyellow;
+    }
+    50%{
+        color: aqua;
+    }
+    75%{
+        color: rgb(218, 0, 218);
+    }
+    100%{
+        color: greenyellow;
+    }
+}
+
+.gg{
+    width: 100%;
+    height: 50px;
+    font-weight: bolder;
+    padding: 5px 5px;
+    background-color: goldenrod;
+    border-radius: 100px;
+    border: none;
+    transition: 0.25s;
+    box-shadow: 0 8px 10px 0px black;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+.gg:hover{
+    cursor: pointer;
+    transition: 0.25s;
+    background-color: #fff;
+    font-size: 20px;
+}
+.gg:active{
+    background-color: rgb(0, 211, 0);
+    transition: 0.1s;
+}
+.outpu{
+    width: 100%;
+    height: 500px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 1%;
+    font-size: 20px;
+    outline: none;
+    display: inline-flex;
+}
+
+.button1{
+    width: 49.50%;
+    padding: 10px;
+    font-size: 20px;
+    box-shadow: 0 6px 8px 0px #fff;
+    background-color: black;
+    border-radius: 100px;
+    border: none;
+    font-weight: bolder;
+    margin-bottom: 20px;
+    transition: 0.25s;
+    color: #fff;
+}
+.button1:hover{
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.25s;
+}
+.button2{
+    width: 49.50%;
+    padding: 10px;
+    font-size: 20px;
+    box-shadow: 0 10px 20px 2px black;
+    background-color: white;
+    border-radius: 100px;
+    border: none;
+    font-weight: bolder;
+    margin-bottom: 20px;
+    transition: 0.25s;
+    color: black;
+}
+.button2:hover{
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.25s;
+}
+.button3{
+    width: 40%;
+    padding: 10px;
+    font-size: 20px;
+    box-shadow: 0 10px 20px 2px #191919;
+    background-color: #999999;
+    border-radius: 100px;
+    border: none;
+    font-weight: bolder;
+    margin-bottom: 20px;
+    transition: 0.25s;
+    color: #222222;
+}
+.button3:hover{
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.25s;
+}
