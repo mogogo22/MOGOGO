@@ -50,10 +50,23 @@ section{
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: url(img/df.jpg);
+    background: url(img/Pngtreebeautiful.png);
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
+}
+.sd{
+    width: 35%;
+    background-color: #222;
+    padding: 30px 10px;
+    border-radius: 10px;
+    border: 2px black solid;
+    transition: 1s;
+    box-shadow: 0 10px 35px rgba(2 2 2 / 55%);
+}
+.sd:hover{
+    transform: scale(1.1);
+    transition: 1s;
 }
 .s h2{
     color: #fff;
