@@ -36,7 +36,7 @@ setInterval( ()=>{
     let blockTop = parseInt (window.getComputedStyle(block).getPropertyValue('top'));
 
     if(playerLeft == blockLeft && blockTop < 450 && blockTop > 300) {
-        alert(`خسرت يا عبيط عشان انت نووووب\n Your Score: ${score}` );
+        alert(`انت خسرت ليه عيد المحاوله ممكن تحطم رقمي\n Your Score: ${score}` );
         setTimeout(function(){location.reload()})
         score = 0;
     }
