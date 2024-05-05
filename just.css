@@ -1,0 +1,33 @@
+body{
+    background-color: #222;
+    color: #fff;
+}
+.wsm{
+text-align: center;
+align-items: center;
+font-size: 17px;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+border: 5px black solid;
+border-radius: 50px;
+background-color: rgb(202, 212, 11);
+padding: 20px 0;
+}
+.wsm a{
+    text-decoration: none;
+    font-size: 30px;
+    color: #580096;
+    transition: 0.2s;
+}
+.wsm a:hover{
+    color: #48007c;
+    font-size: 29px;
+    transition: 0.2s;
+}
+video{
+    border-radius: 10px;
+    color: rgb(255, 191, 0);
+    background-color: rgb(255, 191, 0);
+}
+img{
+    border-radius: 100px;
+}

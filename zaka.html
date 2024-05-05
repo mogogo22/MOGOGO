@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الذكاء</title>
+    <link rel="icon" href="img/toon.png" type="image/png">
+    <link rel="stylesheet" href="zaka.css">
+</head>
+<body><center>
+    <div class="container">
+        <h1 id="question">سؤال هنا</h1>
+        <ul id="options">
+            <li class="option" onclick="checkAnswer(0)">اختيار 1</li>
+            <li class="option" onclick="checkAnswer(1)">اختيار 2</li>
+            <li class="option" onclick="checkAnswer(2)">اختيار 3</li>
+        </ul>
+        <button onclick="nextQuestion()">التالي</button>
+        <p id="score">النقاط: 0</p>
+    </div>
+    <a href="gindex.html">الرجوع للالعاب</a>
+    </center>
+    <script src="zaka.js"></script>
+</body>
+</html>
