@@ -13,15 +13,22 @@ background-color: rgb(202, 212, 11);
 padding: 20px 0;
 }
 .wsm a{
+    color: rgb(189, 120, 0);
     text-decoration: none;
-    font-size: 30px;
-    color: #580096;
-    transition: 0.2s;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0 6px;
+    transition: 0.25s;
+    background-color: yellow;
+    margin: 0 5px;
+    border-radius: 10px;
+    padding: 2px 5px;
 }
 .wsm a:hover{
-    color: #48007c;
-    font-size: 29px;
-    transition: 0.2s;
+    color: yellow;
+    background-color: unset;
 }
 video{
     border-radius: 10px;

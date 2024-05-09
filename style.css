@@ -18,7 +18,7 @@ header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 100px;
+    padding: 0 50px;
 }
 .logo{
     text-decoration: none;
@@ -29,18 +29,21 @@ header{
     font-weight: bolder;
 }
 .ab a{
-    color: rgb(255, 163, 4);
+    color: rgb(189, 120, 0);
     text-decoration: none;
     font-size: 27px;
     font-family: Arial, Helvetica, sans-serif;
     text-transform: uppercase;
     font-weight: bold;
-    padding-left: 100px;
+    padding: 0 20px;
     transition: 0.25s;
+    background-color: yellow;
+    margin: 0 10px;
+    border-radius: 10px;
 }
 .ab a:hover{
     color: yellow;
-    font-size: 25px;
+    background-color: unset;
 }
 section{
     padding: 30px 200px;
@@ -75,7 +78,7 @@ section{
     cursor: context-menu;
 }
 .s h2 span{
-    color: dodgerblue;
+    color: rgb(0, 158, 197);
     font-size: 45px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-weight: bolder;
@@ -94,13 +97,12 @@ section{
 }
 .ad{
     border-radius: 100px;
-    width: 100px;
 }
 .aa{
     text-decoration: none;
     font-size: 20px;
     border: 1px black solid;
-    background-color: rgb(0, 0, 184);
+    background-color: rgb(0, 158, 197);
     padding: 15px 20px;
     color: #fff;
     border-radius: 20px;
@@ -110,8 +112,9 @@ section{
     transition: 0.50s;
 }
 .aa:hover{
-    background-color: rgb(0, 0, 218);
-    font-size: 22px;
+    background-color: rgb(0, 175, 219);
+    transform: scale(1.1);
+    transition: 0.50s;
 }
 .s h3{
     color: #fff;
@@ -122,7 +125,7 @@ section{
     cursor: context-menu;
 }
 .aaa a img:hover{
-    width: 45px;
+    transform: scale(1.1);
 }
 
 .se{
@@ -207,45 +210,87 @@ display: flex;
     font-family: Arial, Helvetica, sans-serif;
 }
 
+
 @media (max-width:1023px){
-    .ad{
-        display: inline-block;
-        width: 50px;
-        border-radius: 50px;
-        padding: 5px;
-        margin-top: 10px;
-        transition: 0.50s;
-    }
     header{
-        padding: 10px 15px;
-    }
-    .ab a{
-        color: rgb(250, 158, 0);
-        text-decoration: none;
-        font-size: 20px;
-        font-family: Arial, Helvetica, sans-serif;
-        text-transform: uppercase;
-        font-weight: bold;
-        padding-left: 5px;
-        transition: 0.25s;
-    }
-    .ab a:hover{
-        color: yellow;
-        font-size: 20px;
-    }
-    section{
-        padding: 10px 90px;
+        background-color: rgb(101, 0, 76);
+        position: fixed;
+        z-index: 999;
+        opacity: 90%;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 3px;
     }
     .logo{
         text-decoration: none;
         color: rgb(0, 158, 197);
         text-transform: uppercase;
-        font-size: 25px;
+        font-size: 16px;
         font-family: Arial, Helvetica, sans-serif;
         font-weight: bolder;
     }
-    .aaa a img:hover{
-        width: 45px;
+    .ab a{
+        color: rgb(189, 120, 0);
+        text-decoration: none;
+        font-size: 20px;
+        font-family: Arial, Helvetica, sans-serif;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 0 6px;
+        transition: 0.25s;
+        background-color: yellow;
+        margin: 0 5px;
+        border-radius: 10px;
+        padding: 2px 5px;
+    }
+    .ab a:hover{
+        color: yellow;
+        background-color: unset;
+    }
+    section{
+        padding: 30px 200px;
+    }
+    .s{
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: url(img/df.jpg);
+        background-position: center;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+    .sd{
+        width: 50%;
+        background-color: #222;
+        padding: 30px 10px;
+        border-radius: 10px;
+        border: 2px black solid;
+        transition: 1s;
+        box-shadow: 0 10px 35px rgba(2 2 2 / 55%);
+    }
+    .sd:hover{
+        transform: scale(1.1);
+        transition: 1s;
+    }
+    .s h2{
+        color: #fff;
+        font-size: 20px;
+        font-weight: 900;
+        cursor: context-menu;
+    }
+    .s h2 span{
+        color: rgb(0, 158, 197);
+        font-size: 30px;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-weight: bolder;
+        display: inline-block;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        cursor: context-menu;
     }
     .aaa a img{
         display: inline-block;
@@ -255,21 +300,110 @@ display: flex;
         margin-top: 10px;
         transition: 0.50s;
     }
-    .foot{
-    height: 50px;
-    color: #fff;
-    padding: 20px;
-    justify-content: space-between;
-    display: flex;
-    font-size: 10px;
+    .ad{
+        border-radius: 100px;
+    }
+    .aa{
+        text-decoration: none;
+        font-size: 15px;
+        border: 1px black solid;
+        background-color: rgb(0, 158, 197);
+        padding: 15px 20px;
+        color: #fff;
+        border-radius: 20px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+        display: inline-block;
+        transition: 0.50s;
+    }
+    .aa:hover{
+        background-color: rgb(0, 175, 219);
+        transform: scale(1.1);
+        transition: 0.50s;
+    }
+    .s h3{
+        color: #fff;
+        font-size: 15px;
+        font-weight: 900;
+        margin-bottom: 10px;
+        margin-top: 10px;
+        cursor: context-menu;
+    }
+    .aaa a img:hover{
+        transform: scale(1.1);
+    }
+    
+    .se{
+        background-color: rgb(255, 255, 255);
+    }
+    .se1{
+        background-color: rgb(0, 0, 40);
+    }
+    
+    .ti{
+        display: flex;
+        justify-content: center;
+        color: rgb(0, 171, 238);
+        text-transform: uppercase;
+        font-family: system-ui;
+        font-weight: 700;
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 100px;
+        margin-top: 50px;
+    }
+    .ch{
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .cha{
+        background-color: rgb(255, 255, 255);
+        width: 300px;
+        height: 350px;
+        box-shadow: 0 5px 25px rgba(1 1 1 / 15%);
+        border-radius: 10px;
+        padding: 25px;
+        margin: 15px;
+        transition: 0.50s;
+    }
+    .cha:hover{
+        transform: scale(1.1);
+    }
+    .icon{
+        text-align: center;
+    }
+    .info h3{
+        color: rgb(0, 131, 183);
+        font-size: 15px;
+        font-weight: 700;
+        margin: 10px;
+        text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .info p{
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+        .foot{
+        height: 70px;
+        color: #fff;
+        padding: 25px;
+        justify-content: space-between;
+        display: flex;
     }
     .links a{
         text-decoration: none;
         font-size: 10px;
         color: rgb(0, 175, 219);
-        margin: 5px;
+        margin: 8px;
         font-weight: 400;
         font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
     }
     .ssss{
         color: rgb(87, 87, 252);
@@ -278,5 +412,10 @@ display: flex;
     .links a:hover{
         text-decoration: underline;
         color: blueviolet;
+    }
+    .fop{
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        line-height: 25px;
     }
 }

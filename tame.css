@@ -30,20 +30,22 @@ header{
     font-weight: bolder;
 }
 .ab a{
-    color: rgb(255, 230, 0);
+    color: rgb(189, 120, 0);
     text-decoration: none;
-    font-size: 25px;
+    font-size: 20px;
     font-family: Arial, Helvetica, sans-serif;
     text-transform: uppercase;
     font-weight: bold;
-    padding-left: 100px;
+    padding: 0 6px;
     transition: 0.25s;
+    background-color: yellow;
+    margin: 0 5px;
+    border-radius: 10px;
+    padding: 2px 5px;
 }
 .ab a:hover{
-    transition: 0.25s;
-    font-size: 24px;
-    color: rgb(241, 217, 0);
-
+    color: yellow;
+    background-color: unset;
 }
 p{
     text-align: center;
