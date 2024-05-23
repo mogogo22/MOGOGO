@@ -210,6 +210,49 @@ display: flex;
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.chn{
+    background-color: #fff;
+    border: solid #fff 1px;
+    min-height: 14em;
+    width: 23em;
+    overflow: hidden;
+    border-radius: 10px;
+    margin: 20px;
+    transition: 0.7s ease;
+}
+.chn:hover{
+    transform: scale(1.1);
+}
+.imgw img{
+    width: 100%;
+}
+.chn:hover .imgw{
+    opacity: 0.9;
+}
+.mal{
+    padding: 1em;
+}
+.bos{
+    font-size: 0.8em;
+    color: #000;
+}
+.wow{
+    display: flex;
+    justify-content: space-between;
+    font-weight: 800;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.hey{
+    text-decoration: none;
+    color: #3a6cf4;
+    font-size: 15px;
+}
+.hey:hover{
+    text-decoration: none;
+    color: #601cfc;
+}
 
 @media (max-width:1023px){
     header{
