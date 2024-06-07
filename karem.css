@@ -9,7 +9,7 @@ font-size: 17px;
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 border: 5px black solid;
 border-radius: 50px;
-background-color: rgb(202, 212, 11);
+background-color: rgb(18, 212, 11);
 padding: 20px 0;
 }
 .wsm a{
@@ -30,10 +30,10 @@ padding: 20px 0;
     color: yellow;
     background-color: unset;
 }
+img{
+    border-radius: 100px;
+}
 h2{
     color: rgb(0, 0, 0);
     background-color: #fff;
-}
-img{
-    border-radius: 100px;
 }
