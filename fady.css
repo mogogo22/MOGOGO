@@ -9,7 +9,7 @@ font-size: 17px;
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 border: 5px black solid;
 border-radius: 50px;
-background-color: rgb(202, 212, 11);
+background-color: rgb(36, 52, 36);
 padding: 20px 0;
 }
 .wsm a{
@@ -27,7 +27,7 @@ padding: 20px 0;
     padding: 2px 5px;
 }
 .wsm a:hover{
-    color: rgb(226, 143, 0);
+    color: yellow;
     background-color: unset;
 }
 h2{

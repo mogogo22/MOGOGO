@@ -10,19 +10,22 @@ body{
 }
 header{
     background-color: rgb(101, 0, 76);
+    background-image: url(img/Whats.png);
+    background-position: center;
+    background-size: cover;
     position: fixed;
     z-index: 999;
     opacity: 90%;
     width: 100%;
-    height: 60px;
+    height: 80px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 50px;
+    padding: 0 30px;
 }
 .logo{
     text-decoration: none;
-    color: rgb(0, 158, 197);
+    color: rgb(0, 120, 150);
     text-transform: uppercase;
     font-size: 33px;
     font-family: Arial, Helvetica, sans-serif;
@@ -53,32 +56,34 @@ section{
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: url(img/df.jpg);
+    background: url(img/thearth.png);
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
 }
 .sd{
     width: 35%;
-    background-color: #222;
+    opacity: 90%;
+    background-color: rgb(190, 190, 190);
     padding: 30px 10px;
     border-radius: 10px;
-    border: 2px black solid;
+    border: 2px rgb(255, 255, 255) solid;
     transition: 1s;
     box-shadow: 0 10px 35px rgba(2 2 2 / 55%);
 }
 .sd:hover{
     transform: scale(1.1);
     transition: 1s;
+    opacity: 1;
 }
 .s h2{
-    color: #fff;
+    color: rgb(25, 25, 25);
     font-size: 30px;
     font-weight: 900;
     cursor: context-menu;
 }
 .s h2 span{
-    color: rgb(0, 158, 197);
+    color: rgb(0, 112, 141);
     font-size: 45px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-weight: bolder;
@@ -102,7 +107,7 @@ section{
     text-decoration: none;
     font-size: 20px;
     border: 1px black solid;
-    background-color: rgb(0, 158, 197);
+    background-color: rgb(0, 69, 86);
     padding: 15px 20px;
     color: #fff;
     border-radius: 20px;
@@ -117,7 +122,7 @@ section{
     transition: 0.50s;
 }
 .s h3{
-    color: #fff;
+    color: rgb(96, 23, 23);
     font-size: 20px;
     font-weight: 900;
     margin-bottom: 10px;
@@ -183,6 +188,10 @@ section{
     font-weight: 600;
     text-align: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.mone{
+    border-radius: 100px;
+    width: 70px;
 }
 .foot{
 height: 70px;
@@ -254,211 +263,188 @@ display: flex;
     color: #601cfc;
 }
 
-@media (max-width:1023px){
-    header{
-        background-color: rgb(101, 0, 76);
-        position: fixed;
-        z-index: 999;
-        opacity: 90%;
+@media (max-width: 1023px) {
+    header {
+        padding: 0 20px;
+    }
+
+    .logo {
+        font-size: 25px;
+    }
+
+    .ab a {
+        font-size: 16px;
+        padding: 0 10px;
+    }
+
+    section {
+        padding: 30px 50px;
+    }
+
+    .sd {
         width: 100%;
-        height: 60px;
-        display: flex;
-        justify-content: space-between;
+        padding: 20px;
+    }
+
+    .s h2 {
+        font-size: 25px;
+    }
+
+    .s h2 span {
+        font-size: 35px;
+    }
+
+    .aa {
+        font-size: 15px;
+    }
+
+    .s h3 {
+        font-size: 18px;
+    }
+
+    .ti {
+        font-size: 25px;
+    }
+
+    .info h3 {
+        font-size: 18px;
+    }
+
+    .info p {
+        font-size: 14px;
+    }
+
+    .foot {
+        flex-direction: column;
         align-items: center;
+    }
+
+    .links a {
+        font-size: 14px;
+    }
+
+    .fop {
+        font-size: 14px;
+    }
+    .mone{
+        width: 55px;
+    }
+}
+
+@media (max-width: 768px) {
+    .logo {
+        font-size: 20px;
+    }
+
+    .ab a {
+        font-size: 14px;
+        padding: 0 5px;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    .sd {
+        padding: 15px;
+    }
+
+    .s h2 {
+        font-size: 22px;
+    }
+
+    .s h2 span {
+        font-size: 30px;
+    }
+
+    .aa {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+
+    .s h3 {
+        font-size: 16px;
+    }
+
+    .ti {
+        font-size: 20px;
+    }
+
+    .info h3 {
+        font-size: 16px;
+    }
+
+    .info p {
+        font-size: 12px;
+    }
+
+    .links a {
+        font-size: 12px;
+    }
+
+    .fop {
+        font-size: 12px;
+    }
+    .mone{
+        width: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 12px;
+    }
+
+    .ab a {
+        font-size: 14px;
         padding: 0 3px;
     }
-    .logo{
-        text-decoration: none;
-        color: rgb(0, 158, 197);
-        text-transform: uppercase;
-        font-size: 16px;
-        font-family: Arial, Helvetica, sans-serif;
-        font-weight: bolder;
+
+    section {
+        padding: 10px;
     }
-    .ab a{
-        color: rgb(189, 120, 0);
-        text-decoration: none;
+
+    .sd {
+        padding: 10px;
+    }
+
+    .s h2 {
         font-size: 20px;
-        font-family: Arial, Helvetica, sans-serif;
-        text-transform: uppercase;
-        font-weight: bold;
-        padding: 0 6px;
-        transition: 0.25s;
-        background-color: yellow;
-        margin: 0 5px;
-        border-radius: 10px;
-        padding: 2px 5px;
     }
-    .ab a:hover{
-        color: yellow;
-        background-color: unset;
+
+    .s h2 span {
+        font-size: 25px;
     }
-    section{
-        padding: 30px 200px;
-    }
-    .s{
-        width: 100%;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        background: url(img/df.jpg);
-        background-position: center;
-        background-size: cover;
-        background-attachment: fixed;
-    }
-    .sd{
-        width: 50%;
-        background-color: #222;
-        padding: 30px 10px;
-        border-radius: 10px;
-        border: 2px black solid;
-        transition: 1s;
-        box-shadow: 0 10px 35px rgba(2 2 2 / 55%);
-    }
-    .sd:hover{
-        transform: scale(1.1);
-        transition: 1s;
-    }
-    .s h2{
-        color: #fff;
-        font-size: 20px;
-        font-weight: 900;
-        cursor: context-menu;
-    }
-    .s h2 span{
-        color: rgb(0, 158, 197);
-        font-size: 30px;
-        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        font-weight: bolder;
-        display: inline-block;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        cursor: context-menu;
-    }
-    .aaa a img{
-        display: inline-block;
-        width: 50px;
-        border-radius: 50px;
-        padding: 5px;
-        margin-top: 10px;
-        transition: 0.50s;
-    }
-    .ad{
-        border-radius: 100px;
-    }
-    .aa{
-        text-decoration: none;
-        font-size: 15px;
-        border: 1px black solid;
-        background-color: rgb(0, 158, 197);
-        padding: 15px 20px;
-        color: #fff;
-        border-radius: 20px;
-        margin-bottom: 10px;
-        margin-top: 10px;
-        display: inline-block;
-        transition: 0.50s;
-    }
-    .aa:hover{
-        background-color: rgb(0, 175, 219);
-        transform: scale(1.1);
-        transition: 0.50s;
-    }
-    .s h3{
-        color: #fff;
-        font-size: 15px;
-        font-weight: 900;
-        margin-bottom: 10px;
-        margin-top: 10px;
-        cursor: context-menu;
-    }
-    .aaa a img:hover{
-        transform: scale(1.1);
-    }
-    
-    .se{
-        background-color: rgb(255, 255, 255);
-    }
-    .se1{
-        background-color: rgb(0, 0, 40);
-    }
-    
-    .ti{
-        display: flex;
-        justify-content: center;
-        color: rgb(0, 171, 238);
-        text-transform: uppercase;
-        font-family: system-ui;
-        font-weight: 700;
-        font-size: 20px;
-        text-align: center;
-        margin-bottom: 100px;
-        margin-top: 50px;
-    }
-    .ch{
-        display: flex;
-        justify-content: center;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-    
-    .cha{
-        background-color: rgb(255, 255, 255);
-        width: 300px;
-        height: 350px;
-        box-shadow: 0 5px 25px rgba(1 1 1 / 15%);
-        border-radius: 10px;
-        padding: 25px;
-        margin: 15px;
-        transition: 0.50s;
-    }
-    .cha:hover{
-        transform: scale(1.1);
-    }
-    .icon{
-        text-align: center;
-    }
-    .info h3{
-        color: rgb(0, 131, 183);
-        font-size: 15px;
-        font-weight: 700;
-        margin: 10px;
-        text-align: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .info p{
-        font-size: 13px;
-        font-weight: 600;
-        text-align: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-        .foot{
-        height: 70px;
-        color: #fff;
-        padding: 25px;
-        justify-content: space-between;
-        display: flex;
-    }
-    .links a{
-        text-decoration: none;
+
+    .aa {
         font-size: 10px;
-        color: rgb(0, 175, 219);
-        margin: 8px;
-        font-weight: 400;
-        font-family: Arial, Helvetica, sans-serif;
+        padding: 8px 10px;
+    }
+
+    .s h3 {
+        font-size: 14px;
+    }
+
+    .ti {
+        font-size: 18px;
+    }
+
+    .info h3 {
+        font-size: 14px;
+    }
+
+    .info p {
         font-size: 10px;
     }
-    .ssss{
-        color: rgb(87, 87, 252);
+
+    .links a {
         font-size: 10px;
     }
-    .links a:hover{
-        text-decoration: underline;
-        color: blueviolet;
+
+    .fop {
+        font-size: 10px;
     }
-    .fop{
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 11px;
-        line-height: 25px;
+    .mone{
+        width: 30px;
     }
 }

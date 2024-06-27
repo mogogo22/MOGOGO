@@ -33,18 +33,21 @@ header{
     font-weight: bolder;
 }
 .ab a{
-    color: rgb(237, 237, 237);
+    color: rgb(189, 120, 0);
     text-decoration: none;
     font-size: 25px;
     font-family: Arial, Helvetica, sans-serif;
     text-transform: uppercase;
     font-weight: bold;
-    padding-left: 90px;
+    padding: 0 15px;
     transition: 0.25s;
+    background-color: yellow;
+    margin: 0 7px;
+    border-radius: 10px;
 }
 .ab a:hover{
     color: yellow;
-    font-size: 24px;
+    background-color: unset;
 }
 
 .mntg{
