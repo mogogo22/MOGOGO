@@ -5,6 +5,8 @@
     color: rgb(0, 102, 255);
     margin: auto;
     font-weight: 700;
+    transform: scale(1.7);
+    margin-top: 70px;
 }
 .title{
     background-color: rgb(218, 0, 65);
