@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="icon" href="img/ackarth.png" type="image/png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MOGOGO Game | لعبة موجوجو</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="MOGOGO" content="موقع خاص بقناة MOHAND WORLD">
+    <title>Cube Move - MOHAND WORLD</title>
+    <link rel="icon" href="img/Acartoonst.png" type="image/png">
   <p>W.S.A.D.MOVE <b></b>
     تحريك.ي.ش.س.ص
   </p>
@@ -15,7 +16,7 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-      background: linear-gradient(to left, #a05d00, #4104cf, rgb(135, 0, 193)); /* يمكنك تغيير الألوان حسب احتياجاتك */
+      background: linear-gradient(to left, #080035, #1b1b1b); /* يمكنك تغيير الألوان حسب احتياجاتك */
     }
 
     #character {
@@ -139,8 +140,6 @@ a:hover{
     <button onclick="changeSize('increase')">Increase Size | تكبير</button>
     <button onclick="changeSize('decrease')">Decrease Size | تصغير</button>
     <button onclick="changeColor()">Change Color | تغيير اللون</button>
-    <button class="f" onclick="toggleMusic()">Music | موسيقى</button>
-    <audio id="music" src="MOGOGO.mp3"></audio>
     <div class="reset-button" onclick="resetPage()">
         <h2>أعادة تشغيل الصفحه</h2>
     </div>
@@ -208,27 +207,13 @@ a:hover{
       }
       return color;
     }
-
-    var musicPlaying = false;
-        var musicElement = document.getElementById('music');
-
-        function toggleMusic() {
-            if (musicPlaying) {
-                musicElement.pause();
-            } else {
-                musicElement.play();
-            }
-            musicPlaying = !musicPlaying;
-        }
-
         function resetPage() {
             location.reload();
         }
 
   </script>
       <footer>
-        <h1>© MOGOGO Game | 2024</h1>
-        <a href="https://discord.gg/v9FgZNGg" target="_blank">Discord</a>
+        <h1>© MOGOGO Game | 2025</h1>
         <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank">Youtube</a>
         <a href="index.html">موقع القناة | Channel website</a>
     </footer>

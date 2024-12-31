@@ -16,9 +16,9 @@ let imgBox = document.querySelector(".img-box");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
 
-
-
-function resetValue(){
+// دالة لإعادة تعيين التأثيرات
+function resetValue() {
+    // إعادة تعيين تأثيرات الفلاتر
     img.style.filter = 'none';
     saturate.value = '100';
     contrast.value = '100';
@@ -27,10 +27,23 @@ function resetValue(){
     grayscale.value = '0';
     blur.value = '0';
     huerotate.value = '0';
+    
+    // إعادة تحميل الصورة الأصلية إلى الـ canvas
+    let file = new FileReader();
+    file.readAsDataURL(upload.files[0]);
+    file.onload = function() {
+        img.src = file.result;  // تحميل الصورة من جديد
+    }
+    img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);  // مسح الـ canvas قبل رسم الصورة من جديد
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);  // رسم الصورة من جديد بدون فلاتر
+        img.style.display = 'none';  // إخفاء الـ img بعد رسمها على الـ canvas
+    }
 }
 
-
-
+// تحميل الصورة عند التغيير في input file
 window.onload = function(){
     download.style.display = 'none';
     reset.style.display = 'none';
@@ -54,8 +67,9 @@ upload.onchange = function(){
     }
 }
 
+// تطبيق الفلاتر بناءً على التغييرات في قيم الـ input
 let filters = document.querySelectorAll("ul li input");
-filters.forEach(  filter =>{
+filters.forEach( filter => {
     filter.addEventListener('input', function(){
         ctx.filter = `
         saturate(${saturate.value}%)
@@ -67,11 +81,10 @@ filters.forEach(  filter =>{
         hue-rotate(${huerotate.value}deg)
         `
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
     })
-}  )
+})
 
+// تحميل الصورة عند الضغط على زر تحميل
 download.onclick = function(){
     download.href = canvas.toDataURL();
 }
-

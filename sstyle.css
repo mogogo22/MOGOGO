@@ -4,13 +4,14 @@
     font-family: sans-serif;
 }
 body{
-    background: #333;
+    background: rgb(0, 6, 59);
 
 }
 .container{
+    border: rgb(255, 255, 255) solid 2px;
     background: #222;
-    width: 80vw;
-    height: 100vh;
+    width: 90vw;
+    height: 90vh;
     margin: auto;
     padding: 20px;
     border-radius: 10px;
@@ -34,7 +35,7 @@ body{
 .upload label{
     color: #fff;
     padding: 8px 20px;
-    border: 2px white dashed;
+    border: 4px white dashed;
     cursor: pointer;
 }
 .filters ul, .filters ul li{
@@ -51,6 +52,7 @@ body{
     justify-content: space-around;
 }
 .filters ul li a, span{
+    border-radius: 10px;
     color: #fff;
     padding: 10px 20px;
     background: green;
