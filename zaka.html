@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="MOGOGO" content="موقع خاص بقناة MOHAND WORLD">
-    <title>Iq Test - MOHAND WORLD</title>
-    <link rel="icon" href="img/Acartoonst.png" type="image/png">
+    <title>اختبار ذكاء - MOHAND WORLD</title>
     <link rel="stylesheet" href="zaka.css">
 </head>
-<body><center>
+<body>
+
+    <div class="flash" id="flash"></div>
+
     <div class="container">
-        <h1 id="question">سؤال هنا</h1>
-        <ul id="options">
-            <li class="option" onclick="checkAnswer(0)">اختيار 1</li>
-            <li class="option" onclick="checkAnswer(1)">اختيار 2</li>
-            <li class="option" onclick="checkAnswer(2)">اختيار 3</li>
-        </ul>
-        <button onclick="nextQuestion()">التالي</button>
+        <h1 id="question">سؤال...</h1>
+
+        <ul id="options"></ul>
+
         <p id="score">النقاط: 0</p>
+
+        <div id="result" style="font-size:28px;margin-top:25px;"></div>
+
+        <a href="index.html">الرجوع للصفحة الرئيسية</a>
     </div>
-    <a href="index.html">الرجوع للصفحة الرئيسية</a>
-    </center>
+
     <script src="zaka.js"></script>
 </body>
 </html>
