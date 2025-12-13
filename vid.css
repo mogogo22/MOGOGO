@@ -1,0 +1,222 @@
+/* ================== RESET ================== */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+  }
+  
+  body{
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: linear-gradient(180deg,#0b1220,#0f1b2d);
+    color:#fff;
+    min-height:100vh;
+  }
+  
+  /* ================== HEADER ================== */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 22px;
+    background:rgba(15,27,45,.9);
+    backdrop-filter: blur(8px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  
+  .mone{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    box-shadow:0 8px 25px rgba(0,0,0,.4);
+  }
+  
+  .ab a{
+    text-decoration:none;
+    color:#fff;
+    font-weight:800;
+    padding:10px 16px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#1da1ff,#0066ff);
+    transition:.3s;
+  }
+  
+  .ab a:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 30px rgba(0,102,255,.45);
+  }
+  
+  /* ================== SECTION ================== */
+  .se1{
+    padding:50px 18px 70px;
+    max-width:1200px;
+    margin:auto;
+  }
+  
+  .ti{
+    text-align:center;
+    font-size:26px;
+    margin-bottom:35px;
+    font-weight:900;
+    letter-spacing:.5px;
+  }
+  
+  /* ================== GRID ================== */
+  .ch{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:22px;
+  }
+  
+  /* ================== VIDEO CARD ================== */
+  .chn{
+    background:linear-gradient(180deg,#121c30,#0c1526);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.45);
+    transition:.35s ease;
+  }
+  
+  .chn:hover{
+    transform:translateY(-8px) scale(1.02);
+    box-shadow:0 35px 80px rgba(0,0,0,.7);
+  }
+  
+  /* ================== IMAGE ================== */
+  .imgw{
+    position:relative;
+    overflow:hidden;
+  }
+  
+  .imgw img{
+    width:100%;
+    height:190px;
+    object-fit:cover;
+    transition:transform .4s ease;
+  }
+  
+  .chn:hover .imgw img{
+    transform:scale(1.1);
+  }
+  
+  /* duration */
+  .bos{
+    position:absolute;
+    bottom:10px;
+    right:10px;
+    background:rgba(0,0,0,.7);
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:700;
+  }
+  
+  /* ================== INFO ================== */
+  .mal{
+    padding:16px;
+  }
+  
+  .wow{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  
+  .wow span{
+    direction: rtl;
+    font-size:15px;
+    font-weight:800;
+    line-height:1.5;
+    color:#eaf3ff;
+  }
+  
+  /* button */
+  .hey{
+    align-self:flex-start;
+    text-decoration:none;
+    font-weight:900;
+    padding:9px 18px;
+    border-radius:14px;
+    color:#fff;
+    background:linear-gradient(135deg,#ff3c3c,#ff006a);
+    box-shadow:0 10px 30px rgba(255,0,106,.45);
+    transition:.3s;
+  }
+  
+  .hey:hover{
+    transform:translateY(-3px);
+    box-shadow:0 18px 40px rgba(255,0,106,.7);
+  }
+  
+  /* ================== FOOTER ================== */
+  .foot{
+    margin-top:60px;
+    padding:22px 18px;
+    background:#0a111e;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:space-between;
+    align-items:center;
+  }
+  
+  .fop{
+    font-weight:800;
+  }
+  
+  .ssss{
+    color:#1da1ff;
+  }
+  
+  .links a{
+    margin-left:8px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:800;
+    padding:6px 12px;
+    border-radius:10px;
+    background:rgba(255,255,255,.08);
+    transition:.3s;
+  }
+  
+  .links a:hover{
+    background:rgba(255,255,255,.15);
+  }
+
+  .imgw{
+    position:relative;
+    overflow:hidden;
+  }
+  
+  .bos{
+    position:absolute;
+    bottom:10px;
+    right:10px;
+    background:rgba(0,0,0,.75);
+    color:#fff;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:800;
+    z-index:2;
+    pointer-events:none;
+  }
+  
+  
+  /* ================== MOBILE ================== */
+  @media (max-width:600px){
+    .ti{
+      font-size:22px;
+    }
+  
+    .imgw img{
+      height:170px;
+    }
+  
+    header{
+      padding:12px 14px;
+    }
+  }
+  
