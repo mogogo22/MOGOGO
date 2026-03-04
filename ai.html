@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUBE DASH - MOHAND WORLD</title>
+  <link rel="icon" href="img/Acartoonst.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #060d1a;
+      color: #e8f0fe;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(6,13,26,0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(168,85,247,0.15);
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 54px;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand img { width: 34px; height: 34px; border-radius: 8px; border: 2px solid rgba(168,85,247,0.3); }
+    .brand span {
+      font-weight: 900; font-size: 15px;
+      background: linear-gradient(90deg, #a855f7, #2a9df4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      text-decoration: none; color: #b8d4f0; font-weight: 800; font-size: 13px;
+      padding: 6px 14px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(168,85,247,0.15);
+      transition: all 0.2s;
+    }
+    .back-btn:hover { background: rgba(168,85,247,0.12); color: #fff; }
+
+    /* ===== HUD ===== */
+    #hud {
+      position: fixed; top: 54px; left: 0; right: 0; z-index: 90;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 20px;
+      background: rgba(6,13,26,0.8);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .hud-item {
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+    }
+    .hud-val { font-size: 20px; font-weight: 900; color: #a855f7; }
+    .hud-label { font-size: 10px; color: #5a7a9a; font-weight: 700; }
+    #livesRow { display: flex; gap: 4px; align-items: center; }
+    .heart { font-size: 18px; transition: all 0.3s; }
+    .heart.lost { opacity: 0.2; filter: grayscale(1); }
+    #comboEl { color: #f59e0b; }
+    #levelEl { color: #2a9df4; }
+
+    /* ===== GAME CANVAS AREA ===== */
+    #gameArea {
+      position: fixed;
+      top: 54px; left: 0; right: 0; bottom: 0;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    /* GRID BACKGROUND */
+    #gameArea::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(168,85,247,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(168,85,247,0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* PLAYER */
+    #player {
+      position: absolute;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 0 20px rgba(168,85,247,0.8), 0 0 40px rgba(168,85,247,0.4);
+      transition: border-radius 0.2s;
+      z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      will-change: transform;
+    }
+    #player.dashing {
+      box-shadow: 0 0 40px rgba(168,85,247,1), 0 0 80px rgba(168,85,247,0.6);
+      background: linear-gradient(135deg, #c084fc, #818cf8);
+    }
+    #player.invincible {
+      animation: invBlink 0.15s infinite;
+    }
+    @keyframes invBlink {
+      0%,100% { opacity:1; }
+      50% { opacity:0.3; }
+    }
+
+    /* TRAIL */
+    .trail {
+      position: absolute; border-radius: 50%;
+      background: rgba(168,85,247,0.4);
+      pointer-events: none; z-index: 5;
+      animation: trailFade 0.4s ease forwards;
+    }
+    @keyframes trailFade {
+      to { opacity:0; transform:scale(0.2); }
+    }
+
+    /* ENEMIES */
+    .enemy {
+      position: absolute; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 900; color: rgba(255,255,255,0.8);
+      pointer-events: none; z-index: 8;
+      will-change: transform;
+    }
+    .enemy-normal  { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 0 12px rgba(239,68,68,0.6); }
+    .enemy-fast    { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 0 12px rgba(245,158,11,0.6); border-radius: 50%; }
+    .enemy-big     { background: linear-gradient(135deg, #8b5cf6, #7c3aed); box-shadow: 0 0 16px rgba(139,92,246,0.7); border-radius: 12px; }
+    .enemy-tracker { background: linear-gradient(135deg, #06b6d4, #0284c7); box-shadow: 0 0 12px rgba(6,182,212,0.6); border-radius: 4px; }
+    .enemy-split   { background: linear-gradient(135deg, #ec4899, #db2777); box-shadow: 0 0 12px rgba(236,72,153,0.6); border-radius: 50% 0 50% 0; }
+
+    /* COINS */
+    .coin {
+      position: absolute; width: 22px; height: 22px;
+      border-radius: 50%; z-index: 7; pointer-events: none;
+      background: radial-gradient(circle at 35% 35%, #fde68a, #f59e0b);
+      box-shadow: 0 0 10px rgba(245,158,11,0.8);
+      animation: coinFloat 1.5s ease-in-out infinite;
+    }
+    @keyframes coinFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-6px) rotate(180deg)} }
+
+    /* POWERUPS */
+    .powerup {
+      position: absolute; width: 30px; height: 30px; z-index: 7;
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; pointer-events: none;
+      animation: puFloat 2s ease-in-out infinite;
+      box-shadow: 0 0 18px rgba(255,255,255,0.3);
+    }
+    @keyframes puFloat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+    .pu-shield { background: rgba(42,157,244,0.2); border: 1px solid rgba(42,157,244,0.5); }
+    .pu-slow   { background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.5); }
+    .pu-magnet { background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.5); }
+    .pu-bomb   { background: rgba(239,68,68,0.2);  border: 1px solid rgba(239,68,68,0.5); }
+
+    /* SHIELD RING */
+    #shieldRing {
+      position: absolute; width: 60px; height: 60px;
+      border-radius: 50%; border: 3px solid rgba(42,157,244,0.8);
+      box-shadow: 0 0 20px rgba(42,157,244,0.5);
+      pointer-events: none; z-index: 9;
+      display: none;
+      transform: translate(-50%,-50%);
+    }
+
+    /* PARTICLES */
+    .particle {
+      position: absolute; border-radius: 50%;
+      pointer-events: none; z-index: 20;
+      animation: partExp 0.6s ease forwards;
+    }
+    @keyframes partExp {
+      to { opacity: 0; transform: var(--tx); }
+    }
+
+    /* FLOATING TEXT */
+    .float-text {
+      position: absolute; z-index: 30; pointer-events: none;
+      font-size: 18px; font-weight: 900;
+      animation: floatUp 0.9s ease forwards;
+    }
+    @keyframes floatUp {
+      to { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    }
+
+    /* ===== SCREENS ===== */
+    .screen {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .screen.active { display: flex; }
+    .screen-bg {
+      position: absolute; inset: 0;
+      background: rgba(6,13,26,0.92); backdrop-filter: blur(8px);
+    }
+
+    .screen-card {
+      position: relative; z-index: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(168,85,247,0.25);
+      border-radius: 24px; padding: 40px 36px;
+      max-width: 480px; width: 100%; text-align: center;
+      box-shadow: 0 20px 80px rgba(168,85,247,0.1);
+      animation: scaleIn 0.4s ease;
+    }
+    @keyframes scaleIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+
+    .screen-icon { font-size: 64px; display: block; margin-bottom: 14px; }
+    .screen-title { font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+    .screen-title span {
+      background: linear-gradient(90deg, #a855f7, #2a9df4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .screen-sub { color: #7db9e8; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+
+    /* CONTROLS GRID */
+    .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .ctrl-item {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 12px 8px; text-align: center;
+    }
+    .ctrl-item .key { font-size: 18px; margin-bottom: 4px; }
+    .ctrl-item .desc { font-size: 11px; color: #5a7a9a; font-weight: 700; }
+
+    /* HIGH SCORE */
+    .hs-badge {
+      background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25);
+      color: #fde68a; padding: 8px 16px; border-radius: 50px;
+      font-size: 13px; font-weight: 800; margin-bottom: 24px; display: inline-block;
+    }
+
+    /* STATS */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px;
+    }
+    .stat-b {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 12px 6px;
+    }
+    .stat-b .sv { font-size: 22px; font-weight: 900; color: #a855f7; }
+    .stat-b .sl { font-size: 11px; color: #5a7a9a; font-weight: 700; margin-top: 3px; }
+
+    /* BUTTONS */
+    .play-btn {
+      width: 100%; padding: 15px; border-radius: 14px; border: none; cursor: pointer;
+      font-family: 'Cairo', sans-serif; font-size: 17px; font-weight: 900; color: #fff;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 8px 30px rgba(168,85,247,0.35); transition: all 0.3s;
+      margin-bottom: 10px;
+    }
+    .play-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(168,85,247,0.5); }
+    .sec-btn {
+      width: 100%; padding: 12px; border-radius: 12px; border: none; cursor: pointer;
+      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 800; color: #b8d4f0;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+    }
+    .sec-btn:hover { background: rgba(255,255,255,0.08); color:#fff; }
+
+    /* POWERUP STATUS */
+    #puStatus {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 90; display: flex; gap: 8px;
+    }
+    .pu-pill {
+      background: rgba(10,20,40,0.9); border-radius: 50px;
+      padding: 6px 14px; font-size: 13px; font-weight: 800;
+      border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 6px;
+    }
+    .pu-bar { width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow:hidden; }
+    .pu-fill { height: 100%; border-radius: 4px; transition: width 0.1s; }
+
+    /* MOBILE DPAD */
+    #dpad {
+      position: fixed; bottom: 20px; right: 20px; z-index: 90;
+      display: none;
+      flex-direction: column; align-items: center; gap: 4px;
+    }
+    .dpad-row { display: flex; gap: 4px; }
+    .dpad-btn {
+      width: 52px; height: 52px; border-radius: 12px;
+      background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3);
+      color: #c084fc; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      active-background: rgba(168,85,247,0.4); transition: background 0.1s;
+    }
+    .dpad-btn:active { background: rgba(168,85,247,0.4); }
+
+    @media (pointer: coarse) {
+      #dpad { display: flex; }
+      #gameArea { cursor: default; }
+    }
+
+    /* FLASH */
+    #flash {
+      position: fixed; inset: 0; z-index: 150; pointer-events: none;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    #flash.show { opacity: 1; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px) scale(0.9);
+      z-index: 300; background: rgba(10,20,40,0.96);
+      border: 1px solid rgba(168,85,247,0.3); color: #c084fc;
+      padding: 10px 20px; border-radius: 50px; font-size: 14px; font-weight: 800;
+      opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
+
+    /* DASH COOLDOWN */
+    #dashBar {
+      position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+      z-index: 90; width: 120px; display: none; flex-direction: column; align-items: center; gap: 4px;
+    }
+    #dashBar.active { display: flex; }
+    .dash-label { font-size: 11px; color: #5a7a9a; font-weight: 800; }
+    .dash-track { width: 100%; height: 5px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+    .dash-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg,#a855f7,#2a9df4); transition: width 0.05s; }
+  </style>
+</head>
+<body>
+
+  <div id="flash"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <img src="img/Acartoonst.png" alt="logo">
+      <span>CUBE DASH</span>
+    </div>
+    <a href="index.html" class="back-btn">← الرجوع للقناة</a>
+  </header>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-item">
+      <span class="hud-val" id="scoreEl">0</span>
+      <span class="hud-label">SCORE</span>
+    </div>
+    <div id="livesRow">
+      <span class="heart" id="h1">❤️</span>
+      <span class="heart" id="h2">❤️</span>
+      <span class="heart" id="h3">❤️</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-val" id="comboEl">x1</span>
+      <span class="hud-label">COMBO</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-val" id="levelEl">1</span>
+      <span class="hud-label">LEVEL</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-val" id="coinsEl">0</span>
+      <span class="hud-label">🪙</span>
+    </div>
+  </div>
+
+  <!-- GAME AREA -->
+  <div id="gameArea">
+    <div id="player">🟣</div>
+    <div id="shieldRing"></div>
+  </div>
+
+  <!-- POWERUP STATUS -->
+  <div id="puStatus"></div>
+
+  <!-- DASH BAR -->
+  <div id="dashBar" class="active">
+    <span class="dash-label">⚡ DASH</span>
+    <div class="dash-track"><div class="dash-fill" id="dashFill" style="width:100%"></div></div>
+  </div>
+
+  <!-- MOBILE DPAD -->
+  <div id="dpad">
+    <div class="dpad-row"><button class="dpad-btn" data-dir="up">↑</button></div>
+    <div class="dpad-row">
+      <button class="dpad-btn" data-dir="left">←</button>
+      <button class="dpad-btn" data-dir="down">↓</button>
+      <button class="dpad-btn" data-dir="right">→</button>
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="screen active" id="startScreen">
+    <div class="screen-bg"></div>
+    <div class="screen-card">
+      <span class="screen-icon">🟣</span>
+      <h1 class="screen-title">CUBE <span>DASH</span></h1>
+      <p class="screen-sub">تحرك، اجمع العملات، تجنب الأعداء!<br>كل ما زدت النقاط كل ما صعبت اللعبة 🔥</p>
+
+      <div class="controls-grid">
+        <div class="ctrl-item"><div class="key">⬆️⬇️⬅️➡️</div><div class="desc">تحريك / W A S D</div></div>
+        <div class="ctrl-item"><div class="key">Space / SHIFT</div><div class="desc">داش سريع</div></div>
+        <div class="ctrl-item"><div class="key">🪙</div><div class="desc">اجمع العملات</div></div>
+        <div class="ctrl-item"><div class="key">🛡️⚡🧲💣</div><div class="desc">باور أبس</div></div>
+      </div>
+
+      <div class="hs-badge">🏆 أعلى نقطة: <span id="hsDisplay">0</span></div>
+
+      <button class="play-btn" onclick="startGame()">🚀 العب الآن!</button>
+      <a href="index.html" style="display:block;margin-top:8px;color:#5a7a9a;font-size:13px;text-decoration:none">← الرجوع للقناة</a>
+    </div>
+  </div>
+
+  <!-- PAUSE SCREEN -->
+  <div class="screen" id="pauseScreen">
+    <div class="screen-bg"></div>
+    <div class="screen-card">
+      <span class="screen-icon">⏸️</span>
+      <h1 class="screen-title">مؤقت <span>⏸</span></h1>
+      <p class="screen-sub">اللعبة وقفت — ارجع واستمر!</p>
+      <button class="play-btn" onclick="togglePause()">▶️ استمر</button>
+      <button class="sec-btn" onclick="confirmQuit()">🏠 الخروج</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="screen" id="gameOverScreen">
+    <div class="screen-bg"></div>
+    <div class="screen-card">
+      <span class="screen-icon" id="goEmoji">💀</span>
+      <h1 class="screen-title" id="goTitle">Game <span>Over</span></h1>
+      <p class="screen-sub" id="goSub">حاول تاني!</p>
+      <div class="stats-row">
+        <div class="stat-b"><div class="sv" id="goScore">0</div><div class="sl">النقاط</div></div>
+        <div class="stat-b"><div class="sv" id="goCoins">0</div><div class="sl">🪙 عملات</div></div>
+        <div class="stat-b"><div class="sv" id="goLevel">1</div><div class="sl">Level</div></div>
+      </div>
+      <div class="hs-badge" id="hsRow">🏆 أعلى نقطة: <span id="hsEnd">0</span></div>
+      <button class="play-btn" onclick="startGame()">🔄 العب مرة ثانية</button>
+      <button class="sec-btn" style="margin-top:8px" onclick="showScreen('startScreen')">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // ================================================================
+  //  CUBE DASH — Full Game Engine
+  // ================================================================
+
+  const STEP = 40;
+  let gameRunning = false, paused = false;
+  let score = 0, lives = 3, combo = 1, level = 1, coinsCollected = 0;
+  let highScore = parseInt(localStorage.getItem('cubeDashHS') || '0');
+  let frameId = null, lastTime = 0;
+
+  // Player state
+  const player = document.getElementById('player');
+  const gameArea = document.getElementById('gameArea');
+  let px = 0, py = 0;
+  let dashing = false, dashCooldown = 0, dashMaxCooldown = 120;
+  let invincible = false, invTimer = 0;
+  let shieldActive = false, shieldTimer = 0;
+  let slowActive = false, slowTimer = 0;
+  let magnetActive = false, magnetTimer = 0;
+  let puStatus = document.getElementById('puStatus');
+
+  // Objects
+  let enemies = [], coins = [], powerups = [];
+  let enemyTimer = 0, coinTimer = 0, puTimer = 0;
+  let scoreTimer = 0;
+
+  // Input
+  const keys = {};
+  document.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if ((e.key === ' ' || e.key === 'Shift') && gameRunning && !paused) tryDash();
+    if (e.key === 'Escape' || e.key === 'p') { if (gameRunning) togglePause(); }
+    e.preventDefault();
+  });
+  document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+  // DPAD
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    const dir = btn.dataset.dir;
+    btn.addEventListener('touchstart', e => { e.preventDefault(); keys['_' + dir] = true; });
+    btn.addEventListener('touchend',   e => { e.preventDefault(); keys['_' + dir] = false; });
+  });
+
+  // HS Display
+  document.getElementById('hsDisplay').textContent = highScore;
+
+  // ================================================================
+  //  GAME LOOP
+  // ================================================================
+  function gameLoop(ts) {
+    if (!gameRunning || paused) return;
+    const dt = Math.min((ts - lastTime) / 16.67, 3);
+    lastTime = ts;
+
+    updatePlayer(dt);
+    updateEnemies(dt);
+    updateCoins(dt);
+    updatePowerups(dt);
+    updateTimers(dt);
+    checkCollisions();
+    updateHUD();
+
+    frameId = requestAnimationFrame(gameLoop);
+  }
+
+  // ================================================================
+  //  PLAYER MOVEMENT
+  // ================================================================
+  function updatePlayer(dt) {
+    const speed = dashing ? STEP * 3.5 : STEP;
+    const area = gameArea.getBoundingClientRect();
+    const pw = 38, ph = 38;
+
+    let nx = px, ny = py;
+
+    if (keys['arrowup']    || keys['w'] || keys['ص'] || keys['_up'])    ny -= speed * dt * 0.18;
+    if (keys['arrowdown']  || keys['s'] || keys['س'] || keys['_down'])  ny += speed * dt * 0.18;
+    if (keys['arrowleft']  || keys['a'] || keys['ش'] || keys['_left'])  nx -= speed * dt * 0.18;
+    if (keys['arrowright'] || keys['d'] || keys['ي'] || keys['_right']) nx += speed * dt * 0.18;
+
+    // bounds
+    nx = Math.max(0, Math.min(area.width - pw, nx));
+    ny = Math.max(54, Math.min(area.height - ph, ny));
+
+    px = nx; py = ny;
+    player.style.left = px + 'px';
+    player.style.top  = py + 'px';
+
+    // Trail during dash
+    if (dashing) spawnTrail();
+  }
+
+  function tryDash() {
+    if (dashCooldown > 0) return;
+    dashing = true;
+    dashCooldown = dashMaxCooldown;
+    player.classList.add('dashing');
+    showToast('⚡ DASH!');
+    setTimeout(() => { dashing = false; player.classList.remove('dashing'); }, 200);
+  }
+
+  function spawnTrail() {
+    const t = document.createElement('div');
+    t.className = 'trail';
+    const sz = 14 + Math.random() * 10;
+    t.style.cssText = `width:${sz}px;height:${sz}px;left:${px+10}px;top:${py+10}px;`;
+    gameArea.appendChild(t);
+    setTimeout(() => t.remove(), 400);
+  }
+
+  // ================================================================
+  //  ENEMIES
+  // ================================================================
+  const ENEMY_TYPES = [
+    { type:'normal',  emoji:'😈', w:34, h:34, spd:1.6, pts:10, hp:1 },
+    { type:'fast',    emoji:'⚡', w:26, h:26, spd:3.0, pts:15, hp:1 },
+    { type:'big',     emoji:'👾', w:52, h:52, spd:0.8, pts:20, hp:2 },
+    { type:'tracker', emoji:'🎯', w:32, h:32, spd:1.2, pts:25, hp:1 },
+    { type:'split',   emoji:'💥', w:28, h:28, spd:2.0, pts:18, hp:1 },
+  ];
+
+  function spawnEnemy() {
+    const area = gameArea.getBoundingClientRect();
+    // unlock types by level
+    const available = ENEMY_TYPES.filter((t,i) => {
+      if (i===1 && level<2) return false;
+      if (i===2 && level<3) return false;
+      if (i===3 && level<4) return false;
+      if (i===4 && level<5) return false;
+      return true;
+    });
+    const tmpl = available[Math.floor(Math.random() * available.length)];
+
+    const side = Math.floor(Math.random() * 4);
+    let ex, ey, vx, vy;
+
+    if (side === 0) { ex = Math.random()*(area.width-tmpl.w); ey = -tmpl.h; vx=(Math.random()-0.5)*0.8; vy=1; }
+    else if (side===1){ ex=area.width; ey=80+Math.random()*(area.height-80-tmpl.h); vx=-1; vy=(Math.random()-0.5)*0.8;}
+    else if (side===2){ ex=Math.random()*(area.width-tmpl.w); ey=area.height; vx=(Math.random()-0.5)*0.8; vy=-1;}
+    else { ex=-tmpl.w; ey=80+Math.random()*(area.height-80-tmpl.h); vx=1; vy=(Math.random()-0.5)*0.8; }
+
+    const spd = tmpl.spd * (1 + (level-1)*0.2) * (slowActive ? 0.4 : 1);
+
+    const el = document.createElement('div');
+    el.className = `enemy enemy-${tmpl.type}`;
+    el.style.width = tmpl.w+'px';
+    el.style.height = tmpl.h+'px';
+    el.style.left = ex+'px';
+    el.style.top = ey+'px';
+    el.textContent = tmpl.emoji;
+    gameArea.appendChild(el);
+
+    enemies.push({ el, x:ex, y:ey, vx, vy, spd, tmpl, hp: tmpl.hp });
+  }
+
+  function updateEnemies(dt) {
+    const area = gameArea.getBoundingClientRect();
+    enemies = enemies.filter(e => {
+      if (!e.el.parentNode) return false;
+
+      // tracker homes in on player
+      if (e.tmpl.type === 'tracker') {
+        const dx = px - e.x, dy = py - e.y;
+        const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+        e.vx += (dx/dist) * 0.04 * dt;
+        e.vy += (dy/dist) * 0.04 * dt;
+        // normalize
+        const speed = Math.sqrt(e.vx*e.vx+e.vy*e.vy);
+        if (speed > 1) { e.vx /= speed; e.vy /= speed; }
+      }
+
+      const finalSpd = e.spd * (slowActive ? 0.4 : 1);
+      e.x += e.vx * finalSpd * dt;
+      e.y += e.vy * finalSpd * dt;
+      e.el.style.left = e.x + 'px';
+      e.el.style.top  = e.y + 'px';
+
+      // remove if off screen (large margin)
+      if (e.x < -200 || e.x > area.width+200 || e.y < -200 || e.y > area.height+200) {
+        e.el.remove();
+        return false;
+      }
+      return true;
+    });
+
+    // spawn rate
+    enemyTimer += dt;
+    const spawnRate = Math.max(40, 90 - level * 8);
+    if (enemyTimer >= spawnRate) {
+      enemyTimer = 0;
+      const count = Math.min(1 + Math.floor(level/3), 3);
+      for (let i=0;i<count;i++) spawnEnemy();
+    }
+  }
+
+  // ================================================================
+  //  COINS
+  // ================================================================
+  function spawnCoin() {
+    const area = gameArea.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'coin';
+    const cx = 20 + Math.random()*(area.width-60);
+    const cy = 80 + Math.random()*(area.height-120);
+    el.style.left = cx+'px';
+    el.style.top  = cy+'px';
+    gameArea.appendChild(el);
+    coins.push({ el, x:cx, y:cy });
+  }
+
+  function updateCoins(dt) {
+    coinTimer += dt;
+    if (coinTimer >= 80) { coinTimer=0; spawnCoin(); }
+
+    const COIN_R = 11;
+    const PR = 19;
+    const magnetRange = magnetActive ? 140 : PR+COIN_R;
+
+    coins = coins.filter(c => {
+      if (!c.el.parentNode) return false;
+      // magnet pull
+      if (magnetActive) {
+        const dx = (px+19) - (c.x+11);
+        const dy = (py+19) - (c.y+11);
+        const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+        if (dist < magnetRange) {
+          c.x += (dx/dist)*5*dt;
+          c.y += (dy/dist)*5*dt;
+          c.el.style.left = c.x+'px';
+          c.el.style.top  = c.y+'px';
+        }
+      }
+      // collect
+      if (rectsOverlap(px,py,38,38, c.x,c.y,22,22)) {
+        const pts = combo * 5;
+        score += pts;
+        coinsCollected++;
+        combo = Math.min(combo+1, 8);
+        spawnFloatText(c.x, c.y, `+${pts}🪙`, '#fde68a');
+        explodeParticles(c.x+11, c.y+11, '#f59e0b', 6);
+        c.el.remove();
+        return false;
+      }
+      return true;
+    });
+  }
+
+  // ================================================================
+  //  POWERUPS
+  // ================================================================
+  const PU_TYPES = [
+    { type:'shield', emoji:'🛡️', cls:'pu-shield', label:'شيلد', color:'#2a9df4', dur:300 },
+    { type:'slow',   emoji:'🐌', cls:'pu-slow',   label:'تبطيء', color:'#a855f7', dur:250 },
+    { type:'magnet', emoji:'🧲', cls:'pu-magnet', label:'مغناطيس', color:'#f59e0b', dur:280 },
+    { type:'bomb',   emoji:'💣', cls:'pu-bomb',   label:'قنبلة',  color:'#ef4444', dur:0 },
+  ];
+
+  function spawnPowerup() {
+    const area = gameArea.getBoundingClientRect();
+    const tmpl = PU_TYPES[Math.floor(Math.random()*PU_TYPES.length)];
+    const el = document.createElement('div');
+    el.className = `powerup ${tmpl.cls}`;
+    const px2 = 30+Math.random()*(area.width-90);
+    const py2 = 90+Math.random()*(area.height-130);
+    el.style.left = px2+'px';
+    el.style.top  = py2+'px';
+    el.textContent = tmpl.emoji;
+    gameArea.appendChild(el);
+    powerups.push({ el, x:px2, y:py2, tmpl, life:600 });
+  }
+
+  function updatePowerups(dt) {
+    puTimer += dt;
+    if (puTimer >= 300) { puTimer=0; spawnPowerup(); }
+
+    powerups = powerups.filter(p => {
+      if (!p.el.parentNode) return false;
+      p.life -= dt;
+      if (p.life <= 0) { p.el.remove(); return false; }
+      // fade warning
+      if (p.life < 120) p.el.style.opacity = (p.life/120).toFixed(2);
+
+      if (rectsOverlap(px,py,38,38, p.x,p.y,30,30)) {
+        activatePowerup(p.tmpl);
+        explodeParticles(p.x+15, p.y+15, p.tmpl.color, 10);
+        p.el.remove();
+        return false;
+      }
+      return true;
+    });
+  }
+
+  function activatePowerup(tmpl) {
+    showToast(`${tmpl.emoji} ${tmpl.label}!`);
+
+    if (tmpl.type === 'shield') {
+      shieldActive = true; shieldTimer = tmpl.dur;
+      document.getElementById('shieldRing').style.display = 'block';
+    }
+    if (tmpl.type === 'slow') { slowActive = true; slowTimer = tmpl.dur; }
+    if (tmpl.type === 'magnet') { magnetActive = true; magnetTimer = tmpl.dur; }
+    if (tmpl.type === 'bomb') {
+      // destroy all enemies on screen
+      enemies.forEach(e => {
+        explodeParticles(e.x+e.tmpl.w/2, e.y+e.tmpl.h/2, '#ef4444', 8);
+        score += e.tmpl.pts;
+        e.el.remove();
+      });
+      enemies = [];
+      flashEffect('rgba(239,68,68,0.3)');
+      showToast('💥 KA-BOOM!');
+    }
+    updatePuStatus();
+  }
+
+  function updateTimers(dt) {
+    // dash cooldown
+    if (dashCooldown > 0) {
+      dashCooldown = Math.max(0, dashCooldown-dt);
+      document.getElementById('dashFill').style.width = ((1 - dashCooldown/dashMaxCooldown)*100)+'%';
+    }
+
+    // invincibility
+    if (invTimer > 0) {
+      invTimer -= dt;
+      if (invTimer <= 0) { invincible=false; player.classList.remove('invincible'); }
+    }
+
+    // shield
+    if (shieldTimer > 0) {
+      shieldTimer -= dt;
+      const ring = document.getElementById('shieldRing');
+      ring.style.left = (px+19)+'px'; ring.style.top = (py+19)+'px';
+      if (shieldTimer <= 0) { shieldActive=false; ring.style.display='none'; updatePuStatus(); }
+    }
+    if (slowTimer > 0) { slowTimer-=dt; if(slowTimer<=0){slowActive=false; updatePuStatus();} }
+    if (magnetTimer > 0) { magnetTimer-=dt; if(magnetTimer<=0){magnetActive=false; updatePuStatus();} }
+
+    // score over time
+    scoreTimer += dt;
+    if (scoreTimer >= 60) { scoreTimer=0; score += level; }
+
+    // combo decay
+    if (keys['_comboDecay'] !== undefined) { /* noop */ }
+  }
+
+  function updatePuStatus() {
+    puStatus.innerHTML = '';
+    if (shieldActive) addPuPill('🛡️','شيلد','#2a9df4', shieldTimer/300);
+    if (slowActive)   addPuPill('🐌','تبطيء','#a855f7', slowTimer/250);
+    if (magnetActive) addPuPill('🧲','مغناطيس','#f59e0b', magnetTimer/280);
+  }
+
+  function addPuPill(em, label, color, pct) {
+    const div = document.createElement('div');
+    div.className='pu-pill';
+    div.innerHTML = `${em} ${label} <div class="pu-bar"><div class="pu-fill" style="width:${Math.max(0,pct*100).toFixed(0)}%;background:${color}"></div></div>`;
+    puStatus.appendChild(div);
+  }
+
+  // ================================================================
+  //  COLLISIONS
+  // ================================================================
+  function checkCollisions() {
+    if (invincible) return;
+
+    enemies.forEach(e => {
+      if (!e.el.parentNode) return;
+      const hw = e.tmpl.w/2, hh = e.tmpl.h/2;
+      if (rectsOverlap(px,py,36,36, e.x+4,e.y+4, e.tmpl.w-8, e.tmpl.h-8)) {
+        if (shieldActive) {
+          // shield absorbs
+          shieldActive = false; shieldTimer = 0;
+          document.getElementById('shieldRing').style.display='none';
+          flashEffect('rgba(42,157,244,0.4)');
+          showToast('🛡️ الشيلد امتص الضربة!');
+          updatePuStatus();
+          e.el.remove();
+          enemies = enemies.filter(x => x !== e);
+          return;
+        }
+        takeDamage(e);
+      }
+    });
+  }
+
+  function takeDamage(e) {
+    lives--;
+    combo = 1;
+    invincible = true; invTimer = 90;
+    player.classList.add('invincible');
+    flashEffect('rgba(239,68,68,0.35)');
+    explodeParticles(e.x+e.tmpl.w/2, e.y+e.tmpl.h/2, '#ef4444', 12);
+    e.el.remove();
+    enemies = enemies.filter(x => x !== e);
+
+    updateHearts();
+    showToast(['💔 آوتش!', '😱 ضربة!', '🔥 اتحرك!'][Math.floor(Math.random()*3)]);
+
+    if (lives <= 0) endGame();
+  }
+
+  // ================================================================
+  //  HUD UPDATE
+  // ================================================================
+  function updateHUD() {
+    document.getElementById('scoreEl').textContent = score;
+    document.getElementById('comboEl').textContent = 'x'+combo;
+    document.getElementById('coinsEl').textContent = coinsCollected;
+
+    // Level up every 200 pts
+    const newLevel = 1 + Math.floor(score / 200);
+    if (newLevel > level) {
+      level = newLevel;
+      document.getElementById('levelEl').textContent = level;
+      showToast(`⬆️ Level ${level}!`);
+      flashEffect('rgba(168,85,247,0.25)');
+    }
+    document.getElementById('levelEl').textContent = level;
+
+    updatePuStatus();
+  }
+
+  function updateHearts() {
+    for (let i=1;i<=3;i++) {
+      document.getElementById('h'+i).classList.toggle('lost', i > lives);
+    }
+  }
+
+  // ================================================================
+  //  START / END
+  // ================================================================
+  function startGame() {
+    // Reset
+    score=0; lives=3; combo=1; level=1; coinsCollected=0;
+    dashCooldown=0; invincible=false; invTimer=0;
+    shieldActive=false; shieldTimer=0;
+    slowActive=false; slowTimer=0;
+    magnetActive=false; magnetTimer=0;
+    enemyTimer=0; coinTimer=0; puTimer=0; scoreTimer=0;
+    lastTime = performance.now();
+
+    // clear objects
+    [...document.querySelectorAll('.enemy,.coin,.powerup,.trail,.particle,.float-text')].forEach(e=>e.remove());
+    enemies=[]; coins=[]; powerups=[];
+
+    // place player center
+    const area = gameArea.getBoundingClientRect();
+    px = area.width/2 - 19; py = area.height/2 - 19;
+    player.style.left=px+'px'; player.style.top=py+'px';
+    player.className = '';
+
+    updateHearts();
+    document.getElementById('dashFill').style.width='100%';
+    document.getElementById('shieldRing').style.display='none';
+    puStatus.innerHTML='';
+
+    hideAllScreens();
+    gameRunning = true; paused = false;
+    frameId = requestAnimationFrame(ts => { lastTime=ts; gameLoop(ts); });
+  }
+
+  function endGame() {
+    gameRunning = false;
+    cancelAnimationFrame(frameId);
+
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('cubeDashHS', highScore);
+      showToast('🏆 أعلى نقطة جديدة!');
+    }
+
+    let emoji='😢', title='انتهت الحياة', sub='حاول تاني!';
+    if (score>=500) { emoji='🏆'; title='أسطورة!'; sub='نقطة مجنونة!'; }
+    else if (score>=300) { emoji='🎉'; title='رائع جداً!'; sub='أداء ممتاز!'; }
+    else if (score>=150) { emoji='👏'; title='كويس!'; sub='يمكنك أحسن!'; }
+
+    document.getElementById('goEmoji').textContent = emoji;
+    document.getElementById('goTitle').innerHTML = `${title.split(' ')[0]} <span>${title.split(' ')[1]||''}</span>`;
+    document.getElementById('goSub').textContent = sub;
+    document.getElementById('goScore').textContent = score;
+    document.getElementById('goCoins').textContent = coinsCollected;
+    document.getElementById('goLevel').textContent = level;
+    document.getElementById('hsEnd').textContent = highScore;
+    document.getElementById('hsDisplay').textContent = highScore;
+
+    showScreen('gameOverScreen');
+  }
+
+  function togglePause() {
+    if (!gameRunning) return;
+    paused = !paused;
+    if (paused) {
+      showScreen('pauseScreen');
+    } else {
+      hideAllScreens();
+      lastTime = performance.now();
+      frameId = requestAnimationFrame(ts => { lastTime=ts; gameLoop(ts); });
+    }
+  }
+
+  function confirmQuit() {
+    gameRunning = false;
+    cancelAnimationFrame(frameId);
+    showScreen('startScreen');
+  }
+
+  // ================================================================
+  //  UTILS
+  // ================================================================
+  function rectsOverlap(ax,ay,aw,ah, bx,by,bw,bh) {
+    return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by;
+  }
+
+  function explodeParticles(cx, cy, color, n) {
+    for (let i=0;i<n;i++) {
+      const p = document.createElement('div');
+      p.className='particle';
+      const sz = 4+Math.random()*6;
+      const ang = (Math.PI*2/n)*i;
+      const dist = 30+Math.random()*30;
+      const tx = Math.cos(ang)*dist, ty = Math.sin(ang)*dist;
+      p.style.cssText=`width:${sz}px;height:${sz}px;left:${cx}px;top:${cy}px;background:${color};--tx:translate(${tx}px,${ty}px) scale(0)`;
+      gameArea.appendChild(p);
+      setTimeout(()=>p.remove(), 650);
+    }
+  }
+
+  function spawnFloatText(x, y, text, color) {
+    const el = document.createElement('div');
+    el.className='float-text';
+    el.style.cssText=`left:${x}px;top:${y}px;color:${color}`;
+    el.textContent=text;
+    gameArea.appendChild(el);
+    setTimeout(()=>el.remove(), 950);
+  }
+
+  function flashEffect(color) {
+    const f = document.getElementById('flash');
+    f.style.background=color; f.classList.add('show');
+    setTimeout(()=>f.classList.remove('show'), 300);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    clearTimeout(t._t);
+    t._t=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  function showScreen(id) {
+    hideAllScreens();
+    document.getElementById(id).classList.add('active');
+  }
+
+  function hideAllScreens() {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  }
+  </script>
+</body>
+</html>

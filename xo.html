@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>لعبة X•O - MOHAND WORLD</title>
+  <link rel="icon" href="img/Acartoonst.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060d1a;
+      --card: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+      --x: #a855f7;
+      --o: #2a9df4;
+      --text: #e8f0fe;
+      --muted: #5a7a9a;
+    }
+    body.light {
+      --bg: #f0f4ff;
+      --card: rgba(255,255,255,0.9);
+      --border: rgba(0,0,0,0.08);
+      --text: #0f1720;
+      --muted: #6b7280;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    /* ===== PARTICLES ===== */
+    #particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+    .particle {
+      position:absolute; border-radius:50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.4), transparent);
+      animation: floatP linear infinite;
+    }
+    @keyframes floatP {
+      0%   { transform:translateY(100vh) scale(0); opacity:0; }
+      10%  { opacity:0.8; }
+      90%  { opacity:0.2; }
+      100% { transform:translateY(-100px) scale(1); opacity:0; }
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: sticky; top:0; z-index:100;
+      background: rgba(6,13,26,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(168,85,247,0.15);
+      padding: 12px 22px;
+      display: flex; align-items:center; justify-content:space-between;
+    }
+    body.light header { background: rgba(240,244,255,0.92); }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .brand img { width:36px; height:36px; border-radius:9px; border:2px solid rgba(168,85,247,0.3); }
+    .brand span {
+      font-weight:900; font-size:16px;
+      background: linear-gradient(90deg,#a855f7,#2a9df4);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .header-btns { display:flex; gap:8px; }
+    .icon-btn {
+      padding:7px 12px; border-radius:9px; cursor:pointer;
+      background: rgba(255,255,255,0.05); border:1px solid rgba(168,85,247,0.15);
+      color: var(--text); font-size:14px; transition: all 0.2s;
+      font-family:'Cairo',sans-serif; font-weight:700;
+    }
+    .icon-btn:hover { background:rgba(168,85,247,0.12); }
+    .back-btn { text-decoration:none; }
+
+    /* ===== SCREENS ===== */
+    .screen { display:none; position:relative; z-index:1; }
+    .screen.active { display:block; }
+
+    /* ===== START SCREEN ===== */
+    #startScreen {
+      display: none;
+      min-height: calc(100vh - 60px);
+      align-items:center; justify-content:center; padding:30px 20px;
+    }
+    #startScreen.active { display:flex; }
+
+    .start-card {
+      background: var(--card); border:1px solid rgba(168,85,247,0.2);
+      border-radius:24px; padding:44px 36px; max-width:500px; width:100%;
+      text-align:center; box-shadow:0 20px 80px rgba(168,85,247,0.08);
+      animation: scaleIn 0.5s ease;
+    }
+    @keyframes scaleIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    .start-icon { font-size:64px; display:block; margin-bottom:16px; }
+    .start-title { font-size:32px; font-weight:900; margin-bottom:8px; }
+    .start-title span {
+      background:linear-gradient(90deg,#a855f7,#2a9df4);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .start-sub { color:var(--muted); font-size:14px; margin-bottom:32px; line-height:1.7; }
+
+    .diff-label { font-size:13px; color:var(--muted); font-weight:700; margin-bottom:10px; text-align:right; }
+    .diff-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
+    .diff-btn {
+      padding:12px 8px; border-radius:12px; cursor:pointer;
+      border:2px solid var(--border); background:var(--card);
+      font-family:'Cairo',sans-serif; transition:all 0.2s;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+    }
+    .diff-btn:hover, .diff-btn.sel {
+      border-color:rgba(168,85,247,0.5); background:rgba(168,85,247,0.08);
+    }
+    .diff-btn .di { font-size:22px; }
+    .diff-btn .dn { font-size:12px; font-weight:800; color:#c084fc; }
+    .diff-btn .dd { font-size:10px; color:var(--muted); }
+
+    .mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; }
+    .mode-btn {
+      padding:16px; border-radius:14px; cursor:pointer;
+      border:1px solid var(--border); background:var(--card);
+      font-family:'Cairo',sans-serif; font-size:15px; font-weight:900;
+      color:var(--text); transition:all 0.3s; text-align:center;
+    }
+    .mode-btn.primary {
+      background:linear-gradient(135deg,#a855f7,#6366f1); color:#fff;
+      border-color:transparent; box-shadow:0 8px 25px rgba(168,85,247,0.3);
+    }
+    .mode-btn:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(168,85,247,0.2); }
+    .mode-btn .mi { font-size:28px; display:block; margin-bottom:6px; }
+
+    /* ===== GAME SCREEN ===== */
+    #gameScreen {
+      min-height: calc(100vh - 60px);
+      display:none; flex-direction:column; align-items:center;
+      padding:24px 20px 40px; gap:20px;
+    }
+    #gameScreen.active { display:flex; }
+
+    /* SCORE ROW */
+    .score-row {
+      display:grid; grid-template-columns:1fr auto 1fr; gap:12px;
+      max-width:520px; width:100%;
+    }
+    .player-card {
+      background:var(--card); border-radius:16px; padding:16px 12px;
+      text-align:center; border:2px solid var(--border);
+      transition:all 0.3s; position:relative; overflow:hidden;
+    }
+    .player-card.active-turn {
+      border-color:rgba(168,85,247,0.5);
+      box-shadow:0 0 20px rgba(168,85,247,0.15);
+    }
+    .player-card.x-card.active-turn { border-color:rgba(168,85,247,0.6); }
+    .player-card.o-card.active-turn { border-color:rgba(42,157,244,0.6); }
+    .player-card .p-sym { font-size:28px; font-weight:900; }
+    .x-sym { color:#a855f7 !important; }
+    .o-sym { color:#2a9df4 !important; }
+    .player-card .p-name { font-size:11px; color:var(--muted); font-weight:700; margin-top:2px; }
+    .player-card .p-score { font-size:26px; font-weight:900; margin-top:4px; }
+    .x-card .p-score { color:#a855f7; }
+    .o-card .p-score { color:#2a9df4; }
+    .turn-indicator {
+      position:absolute; bottom:0; left:0; right:0; height:3px;
+      background:linear-gradient(90deg,#a855f7,#2a9df4);
+      transform:scaleX(0); transition:transform 0.3s;
+    }
+    .player-card.active-turn .turn-indicator { transform:scaleX(1); }
+
+    .draw-card {
+      background:var(--card); border-radius:16px; padding:12px 10px;
+      text-align:center; border:1px solid var(--border);
+      display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+      min-width:70px;
+    }
+    .draw-card .d-label { font-size:10px; color:var(--muted); font-weight:700; }
+    .draw-card .d-score { font-size:22px; font-weight:900; color:#fbbf24; }
+
+    /* TURN BANNER */
+    .turn-banner {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:50px; padding:8px 20px;
+      font-size:14px; font-weight:800; color:var(--muted);
+      transition:all 0.3s;
+    }
+
+    /* BOARD */
+    .board-wrap {
+      position:relative; width:100%; max-width:400px;
+      isolation: isolate;
+      direction: ltr; /* fixes absolute child positioning in RTL page */
+    }
+    .board {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+      width:100%; max-width:400px;
+    }
+    .cell {
+      aspect-ratio:1; border-radius:16px;
+      background:var(--card); border:2px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:52px; font-weight:900; cursor:pointer;
+      transition:all 0.2s; position:relative; overflow:hidden;
+      user-select:none;
+    }
+    .cell:hover:not(.taken) {
+      border-color:rgba(168,85,247,0.4); background:rgba(168,85,247,0.05);
+      transform:scale(1.04);
+    }
+    .cell.taken { cursor:default; }
+    .cell.x-cell {
+      color:#a855f7; border-color:rgba(168,85,247,0.3);
+      background:rgba(168,85,247,0.06); animation:popIn 0.25s ease;
+    }
+    .cell.o-cell {
+      color:#2a9df4; border-color:rgba(42,157,244,0.3);
+      background:rgba(42,157,244,0.06); animation:popIn 0.25s ease;
+    }
+    .cell.win-cell {
+      animation:winPulse 0.5s ease forwards;
+    }
+    .cell.x-cell.win-cell { background:rgba(168,85,247,0.2); border-color:#a855f7; box-shadow:0 0 20px rgba(168,85,247,0.4); }
+    .cell.o-cell.win-cell { background:rgba(42,157,244,0.2); border-color:#2a9df4; box-shadow:0 0 20px rgba(42,157,244,0.4); }
+
+    @keyframes popIn {
+      0%  { transform:scale(0) rotate(-20deg); opacity:0; }
+      70% { transform:scale(1.15) rotate(5deg); }
+      100%{ transform:scale(1) rotate(0); opacity:1; }
+    }
+    @keyframes winPulse {
+      0%,100%{ transform:scale(1); }
+      50%    { transform:scale(1.08); }
+    }
+
+    /* WIN LINES */
+    .win-line {
+      position:absolute; border-radius:4px;
+      background:linear-gradient(90deg,#a855f7,#2a9df4);
+      box-shadow:0 0 12px rgba(168,85,247,0.6);
+      pointer-events:none; z-index:5;
+      animation:drawLine 0.4s ease forwards;
+    }
+    @keyframes drawLine { from{opacity:0;transform:scaleX(0)} to{opacity:1;transform:scaleX(1)} }
+
+    /* RESULT BANNER */
+    .result-banner {
+      background:var(--card); border:1px solid rgba(168,85,247,0.25);
+      border-radius:20px; padding:20px 28px; max-width:400px; width:100%;
+      text-align:center; animation:scaleIn 0.4s ease;
+      display:none;
+    }
+    .result-banner.show { display:block; }
+    .res-emoji { font-size:44px; display:block; margin-bottom:8px; }
+    .res-title { font-size:22px; font-weight:900; margin-bottom:4px; }
+    .res-sub { font-size:13px; color:var(--muted); }
+
+    /* ACTION BUTTONS */
+    .action-row { display:flex; gap:10px; max-width:400px; width:100%; }
+    .act-btn {
+      flex:1; padding:13px; border-radius:12px; border:none; cursor:pointer;
+      font-family:'Cairo',sans-serif; font-size:14px; font-weight:900;
+      transition:all 0.3s;
+    }
+    .act-btn.primary {
+      background:linear-gradient(135deg,#a855f7,#6366f1); color:#fff;
+      box-shadow:0 6px 20px rgba(168,85,247,0.3);
+    }
+    .act-btn.primary:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(168,85,247,0.45); }
+    .act-btn.secondary {
+      background:var(--card); color:var(--text); border:1px solid var(--border);
+    }
+    .act-btn.secondary:hover { background:rgba(255,255,255,0.06); }
+
+    /* FLASH */
+    #flash { position:fixed; inset:0; z-index:200; pointer-events:none; opacity:0; transition:opacity 0.3s; }
+    #flash.show { opacity:1; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-10px) scale(0.9);
+      z-index:300; background:rgba(10,20,40,0.96);
+      border:1px solid rgba(168,85,247,0.3); color:#c084fc;
+      padding:10px 22px; border-radius:50px; font-size:14px; font-weight:800;
+      opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+
+    /* FOOTER */
+    footer {
+      padding:20px; text-align:center; position:relative; z-index:1;
+      font-size:12px; color:var(--muted);
+    }
+    footer span { color:#a855f7; }
+
+    /* RESPONSIVE */
+    @media (max-width:480px) {
+      .board { max-width:320px; }
+      .cell { font-size:40px; border-radius:12px; }
+      .start-card { padding:30px 20px; }
+      .score-row { max-width:340px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="flash"></div>
+  <div id="particles"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <img src="img/Acartoonst.png" alt="logo">
+      <span>X • O</span>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a class="icon-btn back-btn" href="index.html">← الرجوع</a>
+    </div>
+  </header>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="active">
+    <div class="start-card">
+      <span class="start-icon">🎮</span>
+      <h1 class="start-title">لعبة <span>X • O</span></h1>
+      <p class="start-sub">العب مع صديق أو تحدى الكمبيوتر!<br>اختار الصعوبة وابدأ التحدي 🔥</p>
+
+      <p class="diff-label">🎯 مستوى الصعوبة (ضد الكمبيوتر)</p>
+      <div class="diff-grid">
+        <button class="diff-btn" data-diff="easy">
+          <span class="di">😊</span><span class="dn">سهل</span><span class="dd">عشوائي</span>
+        </button>
+        <button class="diff-btn sel" data-diff="medium">
+          <span class="di">🤔</span><span class="dn">متوسط</span><span class="dd">ذكي شوية</span>
+        </button>
+        <button class="diff-btn" data-diff="hard">
+          <span class="di">🤖</span><span class="dn">صعب</span><span class="dd">لا يُهزم</span>
+        </button>
+      </div>
+
+      <div class="mode-grid">
+        <button class="mode-btn" onclick="startGame(false)">
+          <span class="mi">👥</span>مع صديق
+        </button>
+        <button class="mode-btn primary" onclick="startGame(true)">
+          <span class="mi">🤖</span>ضد الكمبيوتر
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="gameScreen">
+
+    <div class="score-row">
+      <div class="player-card x-card active-turn" id="cardX">
+        <div class="p-sym x-sym">✕</div>
+        <div class="p-name" id="nameX">اللاعب 1</div>
+        <div class="p-score" id="scoreX">0</div>
+        <div class="turn-indicator"></div>
+      </div>
+      <div class="draw-card">
+        <div class="d-label">🤝 تعادل</div>
+        <div class="d-score" id="scoreDraw">0</div>
+      </div>
+      <div class="player-card o-card" id="cardO">
+        <div class="p-sym o-sym">○</div>
+        <div class="p-name" id="nameO">اللاعب 2</div>
+        <div class="p-score" id="scoreO">0</div>
+        <div class="turn-indicator"></div>
+      </div>
+    </div>
+
+    <div class="turn-banner" id="turnBanner">دور: <strong>✕ اللاعب 1</strong></div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <span class="res-emoji" id="resEmoji">🏆</span>
+      <div class="res-title" id="resTitle">فاز!</div>
+      <div class="res-sub" id="resSub"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="act-btn primary" id="nextRoundBtn">▶ جولة جديدة</button>
+      <button class="act-btn secondary" onclick="goHome()">🏠 القائمة</button>
+    </div>
+
+  </div>
+
+  <footer>صنع بواسطة <span>MOHAND WORLD</span> — بالتوفيق 😉</footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // ================================================================
+  //  XO — Full Game
+  // ================================================================
+
+  // PARTICLES
+  (() => {
+    const c = document.getElementById('particles');
+    for (let i=0;i<12;i++) {
+      const p = document.createElement('div'); p.className='particle';
+      const sz = Math.random()*5+3;
+      p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;bottom:-20px;animation-delay:${Math.random()*14}s;animation-duration:${Math.random()*18+12}s;opacity:${Math.random()*0.35+0.1}`;
+      c.appendChild(p);
+    }
+  })();
+
+  // STATE
+  let board = Array(9).fill('');
+  let current = 'X';
+  let vsAI = false;
+  let diff = 'medium';
+  let scores = { X:0, O:0, D:0 };
+  let gameOver = false;
+  let aiThinking = false;
+
+  const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  // DIFFICULTY SELECT
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      diff = btn.dataset.diff;
+    });
+  });
+
+  // THEME
+  document.getElementById('themeToggle').onclick = () => {
+    document.body.classList.toggle('light');
+    document.getElementById('themeToggle').textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+  };
+
+  // ================================================================
+  //  START GAME
+  // ================================================================
+  function startGame(ai) {
+    vsAI = ai;
+    scores = { X:0, O:0, D:0 };
+    document.getElementById('scoreX').textContent = '0';
+    document.getElementById('scoreO').textContent = '0';
+    document.getElementById('scoreDraw').textContent = '0';
+    document.getElementById('nameX').textContent = 'اللاعب 1';
+    document.getElementById('nameO').textContent = ai ? '🤖 كمبيوتر' : 'اللاعب 2';
+
+    document.getElementById('startScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+    resetRound();
+  }
+
+  function goHome() {
+    document.getElementById('gameScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+  }
+
+  // ================================================================
+  //  RESET ROUND
+  // ================================================================
+  function resetRound() {
+    board = Array(9).fill('');
+    current = 'X';
+    gameOver = false;
+    aiThinking = false;
+
+    // hide result banner
+    document.getElementById('resultBanner').classList.remove('show');
+
+    // build board
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
+    // remove old win lines
+    document.querySelectorAll('.win-line').forEach(l => l.remove());
+
+    for (let i=0;i<9;i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.i = i;
+      cell.addEventListener('click', () => cellClick(i));
+      boardEl.appendChild(cell);
+    }
+    updateTurnBanner();
+    updateCards();
+  }
+
+  // ================================================================
+  //  CELL CLICK
+  // ================================================================
+  function cellClick(i) {
+    if (board[i] || gameOver || aiThinking) return;
+    place(i, current);
+  }
+
+  function place(i, sym) {
+    board[i] = sym;
+    const cell = document.querySelector(`.cell[data-i="${i}"]`);
+    cell.textContent = sym === 'X' ? '✕' : '○';
+    cell.classList.add('taken', sym === 'X' ? 'x-cell' : 'o-cell');
+
+    const result = checkWin();
+    if (result) { endRound(result); return; }
+
+    current = current === 'X' ? 'O' : 'X';
+    updateTurnBanner();
+    updateCards();
+
+    if (vsAI && current === 'O' && !gameOver) {
+      aiThinking = true;
+      const delay = diff === 'easy' ? 400 : diff === 'medium' ? 500 : 300;
+      setTimeout(aiMove, delay);
+    }
+  }
+
+  // ================================================================
+  //  AI
+  // ================================================================
+  function aiMove() {
+    if (gameOver) return;
+    let move = -1;
+
+    if (diff === 'easy') {
+      move = randomMove();
+    } else if (diff === 'medium') {
+      // 70% smart, 30% random
+      move = Math.random() < 0.7 ? bestMove() : randomMove();
+    } else {
+      // hard = perfect minimax
+      move = bestMove();
+    }
+
+    aiThinking = false;
+    if (move !== -1) place(move, 'O');
+  }
+
+  function randomMove() {
+    const empty = board.map((v,i) => v===''?i:null).filter(v=>v!==null);
+    return empty[Math.floor(Math.random()*empty.length)] ?? -1;
+  }
+
+  function bestMove() {
+    // Win immediately
+    for (const [a,b,c] of WINS) {
+      if (board[a]==='O'&&board[b]==='O'&&board[c]==='') return c;
+      if (board[a]==='O'&&board[c]==='O'&&board[b]==='') return b;
+      if (board[b]==='O'&&board[c]==='O'&&board[a]==='') return a;
+    }
+    // Block player
+    for (const [a,b,c] of WINS) {
+      if (board[a]==='X'&&board[b]==='X'&&board[c]==='') return c;
+      if (board[a]==='X'&&board[c]==='X'&&board[b]==='') return b;
+      if (board[b]==='X'&&board[c]==='X'&&board[a]==='') return a;
+    }
+    // Hard: full minimax
+    if (diff === 'hard') {
+      let best = -Infinity, move = -1;
+      for (let i=0;i<9;i++) {
+        if (board[i]==='') {
+          board[i]='O';
+          const s = minimax(board, false, -Infinity, Infinity);
+          board[i]='';
+          if (s > best) { best=s; move=i; }
+        }
+      }
+      return move;
+    }
+    // Medium: center > corner > side
+    if (board[4]==='') return 4;
+    const corners = [0,2,6,8].filter(i=>board[i]==='');
+    if (corners.length) return corners[Math.floor(Math.random()*corners.length)];
+    return randomMove();
+  }
+
+  function minimax(b, isMax, alpha, beta) {
+    const r = evalBoard(b);
+    if (r !== null) return r;
+    if (isMax) {
+      let best = -Infinity;
+      for (let i=0;i<9;i++) {
+        if (b[i]==='') {
+          b[i]='O'; best=Math.max(best,minimax(b,false,alpha,beta)); b[i]='';
+          alpha=Math.max(alpha,best); if(beta<=alpha) break;
+        }
+      }
+      return best;
+    } else {
+      let best = Infinity;
+      for (let i=0;i<9;i++) {
+        if (b[i]==='') {
+          b[i]='X'; best=Math.min(best,minimax(b,true,alpha,beta)); b[i]='';
+          beta=Math.min(beta,best); if(beta<=alpha) break;
+        }
+      }
+      return best;
+    }
+  }
+
+  function evalBoard(b) {
+    for (const [a,bI,c] of WINS) {
+      if (b[a]&&b[a]===b[bI]&&b[bI]===b[c]) return b[a]==='O' ? 10 : -10;
+    }
+    if (b.every(v=>v!=='')) return 0;
+    return null;
+  }
+
+  // ================================================================
+  //  CHECK WIN / DRAW
+  // ================================================================
+  function checkWin() {
+    for (const combo of WINS) {
+      const [a,b,c] = combo;
+      if (board[a]&&board[a]===board[b]&&board[b]===board[c]) {
+        return { winner: board[a], combo };
+      }
+    }
+    if (board.every(v=>v!=='')) return { winner: null };
+    return null;
+  }
+
+  // ================================================================
+  //  END ROUND
+  // ================================================================
+  function endRound(result) {
+    gameOver = true;
+
+    if (result.winner) {
+      scores[result.winner]++;
+      updateScoreDisplay();
+
+      // highlight win cells
+      result.combo.forEach(i => {
+        document.querySelector(`.cell[data-i="${i}"]`).classList.add('win-cell');
+      });
+      drawWinLine(result.combo);
+
+      const isX = result.winner === 'X';
+      const name = isX ? 'اللاعب 1' : (vsAI ? '🤖 الكمبيوتر' : 'اللاعب 2');
+      const emojis = ['🏆','🎉','🥳','👑','⚡'];
+
+      showResult(
+        emojis[Math.floor(Math.random()*emojis.length)],
+        `فاز ${name}!`,
+        isX ? '✕ أحسن!' : '○ رائع!'
+      );
+      flashEffect(isX ? 'rgba(168,85,247,0.25)' : 'rgba(42,157,244,0.25)');
+      spawnConfetti(isX ? '#a855f7' : '#2a9df4');
+      showToast(isX ? '🏆 فاز اللاعب 1!' : `🏆 فاز ${vsAI?'الكمبيوتر':'اللاعب 2'}!`);
+    } else {
+      scores.D++;
+      updateScoreDisplay();
+      showResult('🤝', 'تعادل!', 'لعبة مثيرة 🔥');
+      flashEffect('rgba(251,191,36,0.2)');
+      showToast('🤝 تعادل!');
+    }
+
+    document.getElementById('nextRoundBtn').onclick = resetRound;
+  }
+
+  function drawWinLine(combo) {
+    const wrap = document.querySelector('.board-wrap');
+    const wRect = wrap.getBoundingClientRect();
+    const cells = document.querySelectorAll('.cell');
+    const c0 = cells[combo[0]].getBoundingClientRect();
+    const c2 = cells[combo[2]].getBoundingClientRect();
+
+    // coords relative to wrapper — using raw viewport values avoids RTL confusion
+    const x1 = (c0.left + c0.width  / 2) - wRect.left;
+    const y1 = (c0.top  + c0.height / 2) - wRect.top;
+    const x2 = (c2.left + c2.width  / 2) - wRect.left;
+    const y2 = (c2.top  + c2.height / 2) - wRect.top;
+
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    const line = document.createElement('div');
+    line.className = 'win-line';
+    line.style.cssText = `
+      position:absolute;
+      width:${len}px;
+      height:5px;
+      left:${x1}px;
+      top:${y1 - 2.5}px;
+      transform-origin: 0 50%;
+      transform: rotate(${angle}deg);
+    `;
+    document.querySelector('.board-wrap').appendChild(line);
+  }
+
+  function showResult(emoji, title, sub) {
+    document.getElementById('resEmoji').textContent = emoji;
+    document.getElementById('resTitle').textContent = title;
+    document.getElementById('resSub').textContent = sub;
+    document.getElementById('resultBanner').classList.add('show');
+  }
+
+  // ================================================================
+  //  CONFETTI
+  // ================================================================
+  function spawnConfetti(color) {
+    const colors = [color, '#fbbf24', '#4ade80', '#f472b6', '#60a5fa'];
+    for (let i=0;i<22;i++) {
+      const p = document.createElement('div');
+      p.style.cssText=`
+        position:fixed;
+        left:${Math.random()*100}vw;
+        top:-10px;
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'3px'};
+        z-index:500;
+        pointer-events:none;
+        animation: confettiFall ${1.2+Math.random()*1.5}s ease forwards;
+        animation-delay:${Math.random()*0.4}s;
+      `;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(), 3000);
+    }
+  }
+
+  // confetti keyframes
+  const confettiStyle = document.createElement('style');
+  confettiStyle.textContent = `
+    @keyframes confettiFall {
+      0%   { transform:translateY(0) rotate(0deg); opacity:1; }
+      100% { transform:translateY(100vh) rotate(${360+Math.random()*360}deg); opacity:0; }
+    }
+  `;
+  document.head.appendChild(confettiStyle);
+
+  // ================================================================
+  //  UI HELPERS
+  // ================================================================
+  function updateTurnBanner() {
+    const name = current === 'X' ? '✕ اللاعب 1' : `○ ${vsAI?'🤖 الكمبيوتر':'اللاعب 2'}`;
+    const color = current === 'X' ? '#a855f7' : '#2a9df4';
+    document.getElementById('turnBanner').innerHTML = `دور: <strong style="color:${color}">${name}</strong>`;
+  }
+
+  function updateCards() {
+    document.getElementById('cardX').classList.toggle('active-turn', current==='X' && !gameOver);
+    document.getElementById('cardO').classList.toggle('active-turn', current==='O' && !gameOver);
+  }
+
+  function updateScoreDisplay() {
+    document.getElementById('scoreX').textContent = scores.X;
+    document.getElementById('scoreO').textContent = scores.O;
+    document.getElementById('scoreDraw').textContent = scores.D;
+  }
+
+  function flashEffect(color) {
+    const f=document.getElementById('flash');
+    f.style.background=color; f.classList.add('show');
+    setTimeout(()=>f.classList.remove('show'),350);
+  }
+
+  function showToast(msg) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    clearTimeout(t._t);
+    t._t=setTimeout(()=>t.classList.remove('show'),2000);
+  }
+  </script>
+</body>
+</html>

@@ -3,163 +3,182 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="MOGOGO" content="موقع خاص بقناة MOHAND WORLD">
   <title>MOHAND WORLD</title>
-  <meta 
-  property="og.title"
-  content="MOHAND WORLD"/>
-  <meta 
-  property="og.discription"
-  content="موقع قناة MOHAND WORLD"/>
-  <meta property="og.type" content="website"/>
   <link rel="icon" href="img/Acartoonst.png" type="image/png">
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- ========== HEADER ========== -->
-  <header class="container">
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <div class="particles" id="particles"></div>
 
-    <!-- desktop nav -->
-    <nav class="navbar" aria-label="الرئيسية">
-      <a href="#youtube">اهداف القناه</a>
-
-      <!-- dropdown example (الهيدر كومبو بوكس) -->
-      <a href="#data">العاب</a>
-      <div class="dropdown" id="videoDropdown">
-        <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">فيديوهاتي ▾</button>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <!-- لا تغيّر هذه الروابط لو بتحافظ على صفحاتك -->
-          <a href="video.html" target="_blank">الفيديوهات</a>
-          <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">Shorts</a>
-        </div>
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <img class="logo-img" src="img/Acartoonst.png" alt="logo">
+        <a class="logo-text" href="#">MOHAND WORLD</a>
       </div>
-    </nav>
-
-    <!-- hamburger / mobile -->
-    <button class="hamburger" id="hamburger" aria-label="فتح القائمة">
-      <span class="bar"></span>
-    </button>
-    <div class="header-left">
-      <a class="logo" href="#">MOHAND WORLD</a>
-      <img class="mone" src="img/Acartoonst.png" alt="logo">
+      <nav class="navbar">
+        <a href="#youtube" class="nav-link">🎯 اهداف القناه</a>
+        <a href="#data" class="nav-link">🎮 العاب</a>
+        <div class="dropdown" id="videoDropdown">
+          <button class="nav-link dropdown-toggle" id="dropdownToggle">🎬 فيديوهاتي ▾</button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="video.html" target="_blank">📹 الفيديوهات</a>
+            <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">⚡ Shorts</a>
+          </div>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
-  <!-- mobile menu (same items + mobile dropdown) -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="#youtube">اهداف القناه</a>
-    <a href="#data">العاب</a>
-    <div>
-      <button id="mobileDropdownToggle" style="width:100%;text-align:center;padding:10px;border-radius:10px;background:#fff;border:1px solid rgba(11,59,91,0.04);font-weight:800">فيديوهاتي ▾</button>
-      <div class="mobile-submenu" id="mobileSubmenu">
-        <a href="video.html" target="_blank">الفيديوهات</a>
-        <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">Shorts</a>
-      </div>
+    <a href="#youtube" class="mob-link">🎯 اهداف القناه</a>
+    <a href="#data" class="mob-link">🎮 العاب</a>
+    <button class="mob-link mob-drop-btn" id="mobileDropdownToggle">🎬 فيديوهاتي ▾</button>
+    <div class="mobile-submenu" id="mobileSubmenu">
+      <a href="video.html" target="_blank">📹 الفيديوهات</a>
+      <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">⚡ Shorts</a>
     </div>
   </div>
 
-  <!-- ========== HERO ========== -->
-  <section class="s" id="index">
-    <div class="container">
-      <div class="sd" role="region" aria-label="مقدمة القناة">
-        <h2>هبقا مشهور في يوم من الأيام 😶<br><span>يوتيوبر متواضع</span></h2>
-        <h3>اهلاً بيك في عالم مهند</h3>
-
-        <a class="aa" href="#foont">التواصل</a>
-        <div class="aaa" aria-hidden="false">
-          <a href="https://discord.com/invite/rxneXG2PxS" target="_blank" title="Discord"><img src="img/Untcitled.png" alt="discord"></a>
-          <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank" title="Youtube"><img src="img/Untitled.png" alt="youtube"></a>
+  <section class="hero" id="index">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🌟 يوتيوبر متواضع</div>
+      <h1 class="hero-title">هبقا مشهور<br><span class="gradient-text">في يوم من الأيام 😶</span></h1>
+      <p class="hero-sub">اهلاً بيك في عالم مهند</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#foont">💬 تواصل معايا</a>
+        <a class="btn-secondary" href="#youtube">🎯 اعرف أكتر</a>
+      </div>
+      <div class="social-row">
+        <a href="https://discord.com/invite/rxneXG2PxS" target="_blank" class="social-btn discord">
+          <img src="img/Untcitled.png" alt="discord"><span>Discord</span>
+        </a>
+        <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank" class="social-btn yt">
+          <img src="img/Untitled.png" alt="youtube"><span>YouTube</span>
+        </a>
+      </div>
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-num" data-target="50">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">فيديو</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" data-target="2022">0</span>
+          <span class="stat-label">تاريخ البدء</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" data-target="4">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">ألعاب</span>
         </div>
       </div>
     </div>
+    <div class="hero-scroll-hint"><span>اسكرول للأسفل</span><div class="scroll-arrow">↓</div></div>
   </section>
 
-  <!-- ========== CHANNEL GOALS ========== -->
-  <section class="section-block container" id="youtube">
-    <h2 class="ti">Channel goals | اهداف القناه</h2>
-    <div class="ch">
-      <article class="cha">
-        <div class="icon"><img src="img/Luffy.png" alt=""></div>
-        <div class="info">
+  <section class="section-goals" id="youtube">
+    <div class="section-container">
+      <div class="section-header reveal">
+        <span class="section-tag">Channel Goals</span>
+        <h2 class="section-title">اهداف القناه 🎯</h2>
+        <p class="section-desc">رحلتي ورسالتي لكل من يتابعني</p>
+      </div>
+      <div class="goals-grid">
+        <article class="goal-card reveal">
+          <div class="card-glow"></div>
+          <div class="card-icon-wrap"><img src="img/Luffy.png" alt="هدف"></div>
           <h3>الهدف المحدد من القناه</h3>
           <p>هدفي في القناه هو اني اسعد كل شخص مكتئب بمقطع فيديو واتمنى لكم السعادة دائماً</p>
-        </div>
-      </article>
-
-      <article class="cha">
-        <div class="icon"><img src="img/Untiddtled.png" alt=""></div>
-        <div class="info">
+          <div class="card-tag">💙 السعادة</div>
+        </article>
+        <article class="goal-card reveal">
+          <div class="card-glow"></div>
+          <div class="card-icon-wrap"><img src="img/Untiddtled.png" alt="دعم"></div>
           <h3>هدفي في القناه</h3>
           <p>انكم تدعموني وده بيفرق معايا جداً كل كلمة حلوه في تعليق بتخليني استمر اكتر واكتر</p>
-        </div>
-      </article>
+          <div class="card-tag">❤️ الدعم</div>
+        </article>
+      </div>
     </div>
   </section>
 
-
-  <!-- ========== MINI APPS ========== -->
-  <section class="section-block container" id="data">
-    <h2 class="ti">Games | العاب</h2>
-    <div class="mntgs container">
-      <div class="mn">
-        <a href="insdex.html" target="_blank"><img src="img/Ya5utK8.png" alt=""></a>
-        <h6>EDIT IMG</h6><p>فلتر للصور</p>
+  <section class="section-games" id="data">
+    <div class="section-container">
+      <div class="section-header reveal">
+        <span class="section-tag">Mini Games</span>
+        <h2 class="section-title">العاب 🎮</h2>
+        <p class="section-desc">العب وتسلى مع ألعابي الصغيرة</p>
       </div>
-
-      <div class="mn">
-        <a href="zaka.html" target="_blank"><img src="img/cfSv.png" alt=""></a>
-        <h6>IQ Test</h6><p>إختبار الذكاء</p>
+      <div class="games-grid">
+        <div class="game-card reveal">
+          <div class="game-img-wrap"><a href="insdex.html" target="_blank"><img src="img/Ya5utK8.png" alt="EDIT IMG"><div class="game-overlay"><span>العب الآن ▶</span></div></a></div>
+          <div class="game-info"><h6>EDIT IMG</h6><p>فلتر للصور</p></div>
+        </div>
+        <div class="game-card reveal">
+          <div class="game-img-wrap"><a href="zaka.html" target="_blank"><img src="img/cfSv.png" alt="IQ Test"><div class="game-overlay"><span>العب الآن ▶</span></div></a></div>
+          <div class="game-info"><h6>IQ Test</h6><p>إختبار الذكاء</p></div>
+        </div>
+        <div class="game-card reveal">
+          <div class="game-img-wrap"><a href="ai.html" target="_blank"><img src="img/tylishypogt.png" alt="CUBE MOVE"><div class="game-overlay"><span>العب الآن ▶</span></div></a></div>
+          <div class="game-info"><h6>CUBE DASH</h6><p>تفادي المكعب</p></div>
+        </div>
+        <div class="game-card reveal">
+          <div class="game-img-wrap"><a href="xo.html" target="_blank"><img src="img/xo.png" alt="XO GAME"><div class="game-overlay"><span>العب الآن ▶</span></div></a></div>
+          <div class="game-info"><h6>XO GAME</h6><p>لعبة XO</p></div>
+        </div>
       </div>
-
-      <div class="mn">
-        <a href="ai.html" target="_blank"><img src="img/tylishypogt.png" alt=""></a>
-        <h6>CUBE MOVE</h6><p>تحريك مكعب</p>
-      </div>
-      <div class="mn">
-        <a href="xo.html" target="_blank"><img src="img/xo.png" alt=""></a>
-        <h6>XO GAME</h6><p>لعبة XO</p>
-      </div>
+    </div>
   </section>
 
-    <!-- ========== ABOUT ========== -->
-    <section class="mntg">
-      <h2 class="ti">About the channel | لمحة عن القناه</h2>
-      <div class="ch">
-        <article class="cha">
-          <div class="icon"><img src="img/Usntitled.png" alt=""></div>
-          <div class="info"><h3>MOGOGO</h3><p>ده اللقب بتاعي الخاص لو عايز تنادي عليا ناديني بـ موجو</p></div>
+  <section class="section-about" id="about">
+    <div class="section-container">
+      <div class="section-header reveal">
+        <span class="section-tag">About</span>
+        <h2 class="section-title">لمحة عن القناه 📺</h2>
+      </div>
+      <div class="about-grid">
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Usntitled.png" alt=""></div>
+          <h3>MOGOGO</h3><p>ناديني بـ موجو</p>
         </article>
-  
-        <article class="cha">
-          <div class="icon"><img src="img/Unstitled.png" alt=""></div>
-          <div class="info"><h3>mm3350493@gmail.com</h3><p>هذا حسابي الشخصي لو في اي مشاركات او استفسرات او إعلانات</p></div>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Unstitled.png" alt=""></div>
+          <h3>البريد</h3><p>mm3350493@gmail.com</p>
         </article>
-  
-        <article class="cha">
-          <div class="icon"><img src="img/Untitaaled.png" alt=""></div>
-          <div class="info"><h3>MOHAND WORLD</h3><p>تاريخ بداية القناه : 10/1/2022 .قناة تشكيلية وخاصتاً عن المواضيع</p></div>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Untitaaled.png" alt=""></div>
+          <h3>MOHAND WORLD</h3><p>بداية القناه: 10/1/2022</p>
         </article>
-  
-        <article class="cha">
-          <div class="icon"><img class="ad" src="img/Acartoonst.png" alt=""></div>
-          <div class="info"><h3>صورة القناه حالياً</h3><p>صورة القناة حالياً , إن شاء الله استمر بفضل ربنا , وبفضلكم,</p></div>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Acartoonst.png" alt=""></div>
+          <h3>صورة القناه</h3><p>إن شاء الله استمر بفضل ربنا</p>
         </article>
       </div>
-    </section>
+    </div>
+  </section>
 
-  <!-- ========== FOOTER ========== -->
-  <footer class="foot" id="foont">
-    <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <div class="links">
-        <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank">youtube</a>
-        <a href="https://discord.com/invite/rxneXG2PxS" target="_blank">discord</a>
+  <footer class="footer" id="foont">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="img/Acartoonst.png" alt="logo"><span>MOHAND WORLD</span>
       </div>
-      <p class="fop">Copyright © 2025 <span class="ssss">MOGOGO</span></p>
+      <div class="footer-links">
+        <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank">📺 YouTube</a>
+        <a href="https://discord.com/invite/rxneXG2PxS" target="_blank">💬 Discord</a>
+      </div>
+      <p class="footer-copy">Copyright © 2026 <span>MOGOGO</span> ❤️</p>
     </div>
   </footer>
 
-  <!-- ========== SCRIPTS ========== -->
-<script src="main.js"></script>
+  <button class="back-to-top" id="backToTop">↑</button>
+  <script src="main.js"></script>
 </body>
 </html>

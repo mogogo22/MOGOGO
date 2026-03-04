@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDIT IMG - MOHAND WORLD</title>
+  <link rel="icon" href="img/Acartoonst.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #060d1a;
+      color: #e8f0fe;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(6,13,26,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(42,157,244,0.15);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 40px; height: 40px; border-radius: 10px; border: 2px solid rgba(42,157,244,0.3); }
+    .brand span {
+      font-weight: 900; font-size: 16px;
+      background: linear-gradient(90deg, #2a9df4, #7c3aed);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      text-decoration: none; color: #b8d4f0; font-weight: 800; font-size: 14px;
+      padding: 8px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(42,157,244,0.15);
+      transition: all 0.25s;
+    }
+    .back-btn:hover { background: rgba(42,157,244,0.12); color: #fff; transform: translateX(3px); }
+
+    /* ===== HERO TITLE ===== */
+    .page-hero {
+      text-align: center; padding: 40px 20px 30px;
+      background: radial-gradient(ellipse at top, rgba(124,58,237,0.1) 0%, transparent 65%);
+    }
+    .page-hero h1 { font-size: 32px; font-weight: 900; color: #fff; }
+    .page-hero h1 span {
+      background: linear-gradient(90deg, #a855f7, #2a9df4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-hero p { color: #7db9e8; font-size: 14px; margin-top: 6px; }
+
+    /* ===== UPLOAD ZONE ===== */
+    .upload-zone {
+      max-width: 600px; margin: 0 auto 30px;
+      padding: 0 20px;
+    }
+    .upload-label {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 36px 20px; border-radius: 18px;
+      border: 2px dashed rgba(124,58,237,0.4);
+      background: rgba(124,58,237,0.05); cursor: pointer;
+      transition: all 0.3s; text-align: center;
+    }
+    .upload-label:hover {
+      border-color: rgba(124,58,237,0.8);
+      background: rgba(124,58,237,0.1);
+      transform: translateY(-2px);
+    }
+    .upload-label .upload-icon { font-size: 40px; }
+    .upload-label strong { font-size: 16px; font-weight: 800; color: #c084fc; }
+    .upload-label span { font-size: 13px; color: #5a7a9a; }
+    #uploadInput { display: none; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .editor-wrap {
+      display: none;
+      max-width: 1400px; margin: 0 auto;
+      padding: 0 20px 60px;
+      gap: 24px;
+      grid-template-columns: 1fr 360px;
+    }
+    .editor-wrap.active { display: grid; }
+
+    /* ===== CANVAS AREA ===== */
+    .canvas-area {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(42,157,244,0.1);
+      border-radius: 20px; padding: 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .canvas-container {
+      position: relative; display: flex;
+      align-items: center; justify-content: center;
+      background: repeating-conic-gradient(rgba(255,255,255,0.04) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;
+      border-radius: 14px; overflow: hidden; width: 100%;
+      min-height: 300px;
+    }
+    #mainCanvas {
+      max-width: 100%; max-height: 65vh;
+      border-radius: 10px; display: block;
+      transition: filter 0s;
+    }
+    #hiddenImg { display: none; }
+
+    /* Crop overlay */
+    #cropOverlay {
+      position: absolute; border: 2px dashed #a855f7;
+      background: rgba(168,85,247,0.1); display: none;
+      cursor: move; pointer-events: none;
+    }
+
+    /* Canvas actions bar */
+    .canvas-actions {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    }
+    .act-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); color: #b8d4f0;
+      font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .act-btn:hover { background: rgba(42,157,244,0.12); color: #fff; border-color: rgba(42,157,244,0.3); transform: translateY(-2px); }
+    .act-btn.danger:hover { background: rgba(255,60,60,0.12); color: #ff8a8a; border-color: rgba(255,60,60,0.3); }
+    .act-btn.success { background: rgba(34,197,94,0.1); color: #86efac; border-color: rgba(34,197,94,0.25); }
+    .act-btn.success:hover { background: rgba(34,197,94,0.2); }
+    .act-btn.purple { background: rgba(168,85,247,0.1); color: #c084fc; border-color: rgba(168,85,247,0.25); }
+    .act-btn.purple:hover { background: rgba(168,85,247,0.2); }
+
+    /* ===== SIDEBAR PANELS ===== */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    .panel {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px; overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.02); user-select: none;
+    }
+    .panel-head span { font-size: 14px; font-weight: 800; color: #c8dff8; }
+    .panel-head .arrow { color: #5a7a9a; transition: transform 0.3s; font-size: 12px; }
+    .panel-head.open .arrow { transform: rotate(180deg); }
+    .panel-body { padding: 16px 18px; display: none; }
+    .panel-body.open { display: block; }
+
+    /* ===== SLIDERS ===== */
+    .slider-row {
+      display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px;
+    }
+    .slider-row:last-child { margin-bottom: 0; }
+    .slider-label {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .slider-label label { font-size: 13px; font-weight: 700; color: #8ab4d4; }
+    .slider-label .val {
+      font-size: 12px; font-weight: 800; color: #a855f7;
+      background: rgba(168,85,247,0.1); padding: 2px 8px; border-radius: 6px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 5px;
+      border-radius: 10px; outline: none; cursor: pointer;
+      background: rgba(255,255,255,0.08);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #2a9df4);
+      box-shadow: 0 0 8px rgba(168,85,247,0.5); cursor: pointer;
+      transition: transform 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    /* ===== PRESETS (filters) ===== */
+    .presets-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .preset-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 10px 6px; border-radius: 12px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03);
+      transition: all 0.25s; font-family: 'Cairo', sans-serif;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      border-color: rgba(168,85,247,0.5); background: rgba(168,85,247,0.1);
+    }
+    .preset-thumb {
+      width: 48px; height: 48px; border-radius: 8px;
+      object-fit: cover; pointer-events: none;
+    }
+    .preset-name { font-size: 11px; font-weight: 800; color: #8ab4d4; }
+
+    /* ===== TRANSFORM BUTTONS ===== */
+    .transform-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .tr-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03); color: #8ab4d4; font-size: 13px; font-weight: 800;
+      font-family: 'Cairo', sans-serif; cursor: pointer; transition: all 0.25s;
+    }
+    .tr-btn:hover { background: rgba(42,157,244,0.1); color: #fff; border-color: rgba(42,157,244,0.3); }
+
+    /* ===== TEXT OVERLAY ===== */
+    .text-controls { display: flex; flex-direction: column; gap: 10px; }
+    .text-controls input[type="text"],
+    .text-controls select {
+      width: 100%; padding: 9px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-family: 'Cairo', sans-serif; font-size: 13px; outline: none;
+      transition: border-color 0.2s; direction: rtl;
+    }
+    .text-controls input[type="text"]:focus,
+    .text-controls select:focus { border-color: rgba(168,85,247,0.5); }
+    .text-controls select option { background: #0a1628; }
+    .color-row { display: flex; align-items: center; gap: 10px; }
+    .color-row label { font-size: 13px; color: #8ab4d4; font-weight: 700; }
+    input[type="color"] {
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      cursor: pointer; background: none; padding: 2px;
+    }
+
+    /* ===== DOWNLOAD / RESET ===== */
+    .bottom-actions { display: flex; flex-direction: column; gap: 10px; }
+    .dl-btn {
+      display: block; text-align: center; text-decoration: none;
+      padding: 13px; border-radius: 12px; font-weight: 900; font-size: 15px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: #fff; box-shadow: 0 8px 25px rgba(168,85,247,0.35);
+      transition: all 0.3s; font-family: 'Cairo', sans-serif; border: none; cursor: pointer;
+    }
+    .dl-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(168,85,247,0.5); }
+    .reset-btn {
+      display: block; width: 100%; text-align: center; padding: 11px; border-radius: 12px;
+      font-weight: 800; font-size: 14px; background: rgba(255,60,60,0.08);
+      color: #ff8a8a; border: 1px solid rgba(255,60,60,0.2); cursor: pointer;
+      font-family: 'Cairo', sans-serif; transition: all 0.3s;
+    }
+    .reset-btn:hover { background: rgba(255,60,60,0.15); }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 28px 20px; background: #030810;
+      border-top: 1px solid rgba(42,157,244,0.08);
+      text-align: center;
+    }
+    footer p { font-size: 13px; color: #4a6a8a; font-weight: 700; }
+    footer span { color: #a855f7; }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+      background: rgba(10,20,40,0.95); border: 1px solid rgba(168,85,247,0.3);
+      color: #c084fc; padding: 12px 20px; border-radius: 12px;
+      font-size: 14px; font-weight: 800; font-family: 'Cairo', sans-serif;
+      transform: translateY(20px) scale(0.95); opacity: 0;
+      transition: all 0.3s; pointer-events: none;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform: translateY(0) scale(1); opacity: 1; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .editor-wrap { grid-template-columns: 1fr; }
+      .sidebar { flex-direction: row; flex-wrap: wrap; }
+      .panel { flex: 1 1 280px; }
+    }
+    @media (max-width: 500px) {
+      .page-hero h1 { font-size: 24px; }
+      .presets-grid { grid-template-columns: repeat(3, 1fr); }
+      .sidebar { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <img src="img/Acartoonst.png" alt="logo">
+      <span>EDIT IMG</span>
+    </div>
+    <a href="index.html" class="back-btn">← الرجوع للقناة</a>
+  </header>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <h1>محرر <span>الصور</span> 🎨</h1>
+    <p>عدّل صورك باحترافية — فلاتر، تحويلات، نصوص، وأكتر</p>
+  </div>
+
+  <!-- UPLOAD ZONE -->
+  <div class="upload-zone">
+    <label class="upload-label" for="uploadInput">
+      <span class="upload-icon">🖼️</span>
+      <strong>اضغط لرفع صورة</strong>
+      <span>PNG, JPG, WEBP — أي حجم</span>
+    </label>
+    <input type="file" id="uploadInput" accept="image/*">
+  </div>
+
+  <!-- EDITOR -->
+  <div class="editor-wrap" id="editorWrap">
+
+    <!-- CANVAS -->
+    <div class="canvas-area">
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="mainCanvas"></canvas>
+        <img id="hiddenImg">
+        <div id="cropOverlay"></div>
+      </div>
+
+      <div class="canvas-actions">
+        <button class="act-btn" onclick="changeUpload()">📁 صورة جديدة</button>
+        <button class="act-btn purple" onclick="applyFlip('h')">↔️ قلب أفقي</button>
+        <button class="act-btn purple" onclick="applyFlip('v')">↕️ قلب رأسي</button>
+        <button class="act-btn" onclick="applyRotate(-90)">↺ تدوير يسار</button>
+        <button class="act-btn" onclick="applyRotate(90)">↻ تدوير يمين</button>
+        <button class="act-btn" onclick="applyTextOverlay()">✏️ إضافة نص</button>
+        <button class="act-btn danger" onclick="resetAll()">🔄 إعادة تعيين</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- PRESETS -->
+      <div class="panel">
+        <div class="panel-head open" onclick="togglePanel(this)">
+          <span>✨ فلاتر جاهزة</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="panel-body open">
+          <div class="presets-grid" id="presetsGrid">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ADJUSTMENTS -->
+      <div class="panel">
+        <div class="panel-head open" onclick="togglePanel(this)">
+          <span>🎛️ ضبط الصورة</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="panel-body open">
+          <div class="slider-row">
+            <div class="slider-label"><label>السطوع</label><span class="val" id="vBrightness">100%</span></div>
+            <input type="range" id="sBrightness" min="0" max="200" value="100">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>التباين</label><span class="val" id="vContrast">100%</span></div>
+            <input type="range" id="sContrast" min="0" max="200" value="100">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>التشبع</label><span class="val" id="vSaturate">100%</span></div>
+            <input type="range" id="sSaturate" min="0" max="200" value="100">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>الضوضاء (Sepia)</label><span class="val" id="vSepia">0%</span></div>
+            <input type="range" id="sSepia" min="0" max="100" value="0">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>تدوير الألوان</label><span class="val" id="vHue">0°</span></div>
+            <input type="range" id="sHue" min="0" max="360" value="0">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>الضبابية (Blur)</label><span class="val" id="vBlur">0px</span></div>
+            <input type="range" id="sBlur" min="0" max="20" value="0" step="0.5">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>التظليل (Vignette)</label><span class="val" id="vVignette">0%</span></div>
+            <input type="range" id="sVignette" min="0" max="100" value="0">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><label>الشفافية</label><span class="val" id="vOpacity">100%</span></div>
+            <input type="range" id="sOpacity" min="10" max="100" value="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXT OVERLAY -->
+      <div class="panel">
+        <div class="panel-head" onclick="togglePanel(this)">
+          <span>✏️ إضافة نص</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="panel-body">
+          <div class="text-controls">
+            <input type="text" id="textInput" placeholder="اكتب النص هنا...">
+            <div class="slider-row">
+              <div class="slider-label"><label>حجم الخط</label><span class="val" id="vFontSize">40px</span></div>
+              <input type="range" id="sFontSize" min="12" max="120" value="40">
+            </div>
+            <select id="fontFamily">
+              <option value="Cairo">Cairo</option>
+              <option value="Arial">Arial</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Impact">Impact</option>
+            </select>
+            <div class="color-row">
+              <label>لون النص</label>
+              <input type="color" id="textColor" value="#ffffff">
+              <label>الظل</label>
+              <input type="color" id="textShadowColor" value="#000000">
+            </div>
+            <div class="slider-row">
+              <div class="slider-label"><label>موضع X</label><span class="val" id="vTextX">50%</span></div>
+              <input type="range" id="sTextX" min="0" max="100" value="50">
+            </div>
+            <div class="slider-row">
+              <div class="slider-label"><label>موضع Y</label><span class="val" id="vTextY">90%</span></div>
+              <input type="range" id="sTextY" min="0" max="100" value="90">
+            </div>
+            <button class="act-btn purple" style="width:100%;justify-content:center" onclick="applyTextOverlay()">✏️ تطبيق النص</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CROP -->
+      <div class="panel">
+        <div class="panel-head" onclick="togglePanel(this)">
+          <span>✂️ قص الصورة</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:13px;color:#5a7a9a;margin-bottom:12px;">اختر نسبة القص:</p>
+          <div class="transform-grid">
+            <button class="tr-btn" onclick="cropAspect(1,1)">◻️ 1:1</button>
+            <button class="tr-btn" onclick="cropAspect(16,9)">📺 16:9</button>
+            <button class="tr-btn" onclick="cropAspect(4,3)">🖼️ 4:3</button>
+            <button class="tr-btn" onclick="cropAspect(9,16)">📱 9:16</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOWNLOAD -->
+      <div class="panel">
+        <div class="panel-head open" onclick="togglePanel(this)">
+          <span>💾 تحميل</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="panel-body open">
+          <div class="bottom-actions">
+            <select id="dlFormat" style="width:100%;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Cairo',sans-serif;font-size:13px;outline:none;">
+              <option value="png">PNG (جودة عالية)</option>
+              <option value="jpeg">JPEG (حجم أصغر)</option>
+              <option value="webp">WEBP (أحدث)</option>
+            </select>
+            <a class="dl-btn" id="dlBtn" download="mohand-edit">⬇️ تحميل الصورة</a>
+            <button class="reset-btn" onclick="resetAll()">🔄 إعادة تعيين الكل</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>Copyright © 2026 <span>MOGOGO</span> ❤️ — EDIT IMG Tool</p>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== STATE =====
+    const state = {
+      brightness: 100, contrast: 100, saturate: 100,
+      sepia: 0, hue: 0, blur: 0, vignette: 0, opacity: 100,
+      flipH: false, flipV: false, rotation: 0,
+      activePreset: null
+    };
+
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const hiddenImg = document.getElementById('hiddenImg');
+    const uploadInput = document.getElementById('uploadInput');
+    const editorWrap = document.getElementById('editorWrap');
+    const uploadZone = document.querySelector('.upload-zone');
+    let originalDataURL = null;
+
+    // ===== PRESETS =====
+    const presets = [
+      { name: 'عادي',    fn: () => ({ brightness:100, contrast:100, saturate:100, sepia:0, hue:0, blur:0 }) },
+      { name: 'نوستالجيا', fn: () => ({ brightness:110, contrast:80, saturate:50, sepia:60, hue:0, blur:0 }) },
+      { name: 'كلاسيك',  fn: () => ({ brightness:100, contrast:120, saturate:0, sepia:0, hue:0, blur:0 }) },
+      { name: 'ناعم',    fn: () => ({ brightness:115, contrast:85, saturate:90, sepia:10, hue:0, blur:0.8 }) },
+      { name: 'دافئ',    fn: () => ({ brightness:105, contrast:100, saturate:130, sepia:30, hue:15, blur:0 }) },
+      { name: 'بارد',    fn: () => ({ brightness:100, contrast:110, saturate:80, sepia:0, hue:200, blur:0 }) },
+      { name: 'فيلم',    fn: () => ({ brightness:95, contrast:130, saturate:70, sepia:20, hue:0, blur:0 }) },
+      { name: 'حيوي',    fn: () => ({ brightness:105, contrast:110, saturate:160, sepia:0, hue:0, blur:0 }) },
+      { name: 'مضبب',    fn: () => ({ brightness:110, contrast:90, saturate:100, sepia:0, hue:0, blur:3 }) },
+    ];
+
+    function buildPresets() {
+      const grid = document.getElementById('presetsGrid');
+      grid.innerHTML = '';
+      presets.forEach((p, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'preset-btn';
+        btn.dataset.index = i;
+        btn.innerHTML = `<span class="preset-name">${p.name}</span>`;
+        btn.onclick = () => applyPreset(i, btn);
+        grid.appendChild(btn);
+      });
+    }
+    buildPresets();
+
+    function applyPreset(i, btn) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const vals = presets[i].fn();
+      Object.assign(state, vals);
+      syncSliders();
+      redraw();
+      showToast(`✨ فلتر "${presets[i].name}" تم التطبيق`);
+    }
+
+    // ===== UPLOAD =====
+    uploadInput.addEventListener('change', loadImage);
+    function loadImage() {
+      if (!uploadInput.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        hiddenImg.onload = () => {
+          canvas.width = hiddenImg.naturalWidth;
+          canvas.height = hiddenImg.naturalHeight;
+          originalDataURL = e.target.result;
+          resetAll(false);
+          editorWrap.classList.add('active');
+          uploadZone.style.display = 'none';
+          redraw();
+          showToast('✅ تم رفع الصورة بنجاح!');
+        };
+        hiddenImg.src = e.target.result;
+      };
+      reader.readAsDataURL(uploadInput.files[0]);
+    }
+
+    function changeUpload() {
+      uploadInput.value = '';
+      uploadInput.click();
+    }
+
+    // ===== SLIDERS =====
+    const sliderMap = [
+      { id: 'sBrightness', valId: 'vBrightness', key: 'brightness', unit: '%' },
+      { id: 'sContrast',   valId: 'vContrast',   key: 'contrast',   unit: '%' },
+      { id: 'sSaturate',   valId: 'vSaturate',   key: 'saturate',   unit: '%' },
+      { id: 'sSepia',      valId: 'vSepia',      key: 'sepia',      unit: '%' },
+      { id: 'sHue',        valId: 'vHue',        key: 'hue',        unit: '°' },
+      { id: 'sBlur',       valId: 'vBlur',       key: 'blur',       unit: 'px' },
+      { id: 'sVignette',   valId: 'vVignette',   key: 'vignette',   unit: '%' },
+      { id: 'sOpacity',    valId: 'vOpacity',    key: 'opacity',    unit: '%' },
+    ];
+
+    sliderMap.forEach(s => {
+      const el = document.getElementById(s.id);
+      const vEl = document.getElementById(s.valId);
+      el.addEventListener('input', () => {
+        state[s.key] = parseFloat(el.value);
+        vEl.textContent = el.value + s.unit;
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        redraw();
+      });
+    });
+
+    // Font size slider
+    document.getElementById('sFontSize').addEventListener('input', function() {
+      document.getElementById('vFontSize').textContent = this.value + 'px';
+    });
+    document.getElementById('sTextX').addEventListener('input', function() {
+      document.getElementById('vTextX').textContent = this.value + '%';
+    });
+    document.getElementById('sTextY').addEventListener('input', function() {
+      document.getElementById('vTextY').textContent = this.value + '%';
+    });
+
+    function syncSliders() {
+      sliderMap.forEach(s => {
+        document.getElementById(s.id).value = state[s.key];
+        document.getElementById(s.valId).textContent = state[s.key] + s.unit;
+      });
+    }
+
+    // ===== DRAW =====
+    function redraw() {
+      if (!hiddenImg.src || !hiddenImg.naturalWidth) return;
+
+      // figure out dimensions after rotation
+      const isRotated90 = state.rotation % 180 !== 0;
+      const dw = isRotated90 ? hiddenImg.naturalHeight : hiddenImg.naturalWidth;
+      const dh = isRotated90 ? hiddenImg.naturalWidth  : hiddenImg.naturalHeight;
+      canvas.width  = dw;
+      canvas.height = dh;
+
+      ctx.save();
+
+      // opacity
+      ctx.globalAlpha = state.opacity / 100;
+
+      // CSS filter
+      ctx.filter = [
+        `brightness(${state.brightness}%)`,
+        `contrast(${state.contrast}%)`,
+        `saturate(${state.saturate}%)`,
+        `sepia(${state.sepia}%)`,
+        `hue-rotate(${state.hue}deg)`,
+        `blur(${state.blur}px)`,
+      ].join(' ');
+
+      // transforms
+      ctx.translate(dw / 2, dh / 2);
+      ctx.rotate((state.rotation * Math.PI) / 180);
+      ctx.scale(state.flipH ? -1 : 1, state.flipV ? -1 : 1);
+
+      const sw = hiddenImg.naturalWidth;
+      const sh = hiddenImg.naturalHeight;
+      ctx.drawImage(hiddenImg, -sw / 2, -sh / 2, sw, sh);
+
+      ctx.restore();
+
+      // vignette overlay
+      if (state.vignette > 0) {
+        const vg = ctx.createRadialGradient(
+          dw/2, dh/2, Math.min(dw,dh) * 0.3,
+          dw/2, dh/2, Math.max(dw,dh) * 0.75
+        );
+        vg.addColorStop(0, 'rgba(0,0,0,0)');
+        vg.addColorStop(1, `rgba(0,0,0,${state.vignette / 100})`);
+        ctx.fillStyle = vg;
+        ctx.fillRect(0, 0, dw, dh);
+      }
+
+      updateDownload();
+    }
+
+    // ===== FLIP =====
+    function applyFlip(dir) {
+      if (dir === 'h') state.flipH = !state.flipH;
+      else state.flipV = !state.flipV;
+      redraw();
+      showToast(dir === 'h' ? '↔️ قلب أفقي' : '↕️ قلب رأسي');
+    }
+
+    // ===== ROTATE =====
+    function applyRotate(deg) {
+      state.rotation = (state.rotation + deg + 360) % 360;
+      redraw();
+      showToast(`↻ تدوير ${Math.abs(deg)}°`);
+    }
+
+    // ===== CROP =====
+    function cropAspect(w, h) {
+      if (!canvas.width) return;
+      const srcW = canvas.width;
+      const srcH = canvas.height;
+      const targetRatio = w / h;
+      const srcRatio = srcW / srcH;
+      let cropW, cropH, offsetX = 0, offsetY = 0;
+
+      if (srcRatio > targetRatio) {
+        cropH = srcH; cropW = srcH * targetRatio;
+        offsetX = (srcW - cropW) / 2;
+      } else {
+        cropW = srcW; cropH = srcW / targetRatio;
+        offsetY = (srcH - cropH) / 2;
+      }
+
+      const temp = document.createElement('canvas');
+      temp.width = cropW; temp.height = cropH;
+      const tctx = temp.getContext('2d');
+      tctx.drawImage(canvas, offsetX, offsetY, cropW, cropH, 0, 0, cropW, cropH);
+
+      canvas.width = cropW; canvas.height = cropH;
+      ctx.drawImage(temp, 0, 0);
+
+      // update hidden img to cropped
+      hiddenImg.onload = null;
+      hiddenImg.src = canvas.toDataURL();
+      hiddenImg.onload = () => {
+        state.rotation = 0; state.flipH = false; state.flipV = false;
+        redraw();
+      };
+
+      showToast(`✂️ تم القص بنسبة ${w}:${h}`);
+    }
+
+    // ===== TEXT OVERLAY =====
+    function applyTextOverlay() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) { showToast('⚠️ اكتب نص الأول!'); return; }
+
+      redraw(); // draw clean first
+
+      const fontSize = parseInt(document.getElementById('sFontSize').value);
+      const fontFamily = document.getElementById('fontFamily').value;
+      const color = document.getElementById('textColor').value;
+      const shadowColor = document.getElementById('textShadowColor').value;
+      const xPct = parseInt(document.getElementById('sTextX').value) / 100;
+      const yPct = parseInt(document.getElementById('sTextY').value) / 100;
+
+      const x = canvas.width * xPct;
+      const y = canvas.height * yPct;
+
+      ctx.save();
+      ctx.font = `900 ${fontSize}px ${fontFamily}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // shadow
+      ctx.shadowColor = shadowColor;
+      ctx.shadowBlur = fontSize * 0.3;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+
+      updateDownload();
+      showToast('✏️ تم إضافة النص!');
+    }
+
+    // ===== RESET =====
+    function resetAll(notify = true) {
+      Object.assign(state, {
+        brightness:100, contrast:100, saturate:100,
+        sepia:0, hue:0, blur:0, vignette:0, opacity:100,
+        flipH:false, flipV:false, rotation:0, activePreset:null
+      });
+      syncSliders();
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+      if (originalDataURL) {
+        hiddenImg.src = originalDataURL;
+        hiddenImg.onload = () => {
+          canvas.width = hiddenImg.naturalWidth;
+          canvas.height = hiddenImg.naturalHeight;
+          redraw();
+        };
+      }
+      if (notify) showToast('🔄 تم إعادة التعيين');
+    }
+
+    // ===== DOWNLOAD =====
+    function updateDownload() {
+      const fmt = document.getElementById('dlFormat').value;
+      const mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' };
+      const dlBtn = document.getElementById('dlBtn');
+      dlBtn.href = canvas.toDataURL(mimeMap[fmt], 0.95);
+      dlBtn.download = `mohand-edit.${fmt}`;
+    }
+
+    document.getElementById('dlFormat').addEventListener('change', updateDownload);
+    document.getElementById('dlBtn').addEventListener('click', () => {
+      updateDownload();
+      showToast('⬇️ جاري التحميل...');
+    });
+
+    // ===== PANEL TOGGLE =====
+    function togglePanel(head) {
+      head.classList.toggle('open');
+      const body = head.nextElementSibling;
+      body.classList.toggle('open');
+    }
+
+    // ===== TOAST =====
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+  </script>
+</body>
+</html>
