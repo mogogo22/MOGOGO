@@ -603,6 +603,30 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Tajawal',sans-seri
   box-shadow:0 8px 28px rgba(0,0,0,.5);
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ─── SHOP ─── */
+.shop-item{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 6px;text-align:center;cursor:pointer;transition:all .22s;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.shop-item:hover:not(.owned){border-color:rgba(201,148,42,.45);background:rgba(201,148,42,.07);transform:translateY(-2px)}
+.shop-item.owned{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.05);cursor:default}
+.shop-item.owned::before{content:"✓ مضاف";position:absolute;top:4px;left:4px;font-size:7px;font-weight:900;color:#4ade80;background:rgba(74,222,130,.15);border-radius:4px;padding:1px 4px}
+.shop-item .si-e{font-size:30px;line-height:1}
+.shop-item .si-n{font-size:10px;font-weight:900;color:rgba(220,200,160,.9);line-height:1.2}
+.shop-item .si-s{font-size:7.5px;color:rgba(200,175,130,.55);line-height:1.4}
+.shop-item .si-p{font-size:11px;font-weight:900;color:var(--gold2);background:rgba(201,148,42,.12);border-radius:6px;padding:2px 8px;margin-top:1px}
+.shop-item .si-leg{font-size:7px;font-weight:900;color:#fbbf24;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 5px}
+@keyframes shopReveal{from{opacity:0;transform:scale(.7) rotateY(90deg)}to{opacity:1;transform:scale(1) rotateY(0)}}
+.shop-item.reveal{animation:shopReveal .45s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes buyPulse{0%,100%{box-shadow:0 0 0 rgba(201,148,42,0)}50%{box-shadow:0 0 30px rgba(201,148,42,.8),inset 0 0 15px rgba(201,148,42,.3)}}
+.shop-item.buying{animation:buyPulse .5s ease}
+.card.legendary .card-inner{border-color:rgba(251,191,36,.55);box-shadow:0 0 14px rgba(251,191,36,.3),inset 0 0 20px rgba(251,191,36,.07)}
+.t-legend .card-inner{background:linear-gradient(160deg,#1a0e00,#2d1900)}
+.t-legend .art-bg{background:radial-gradient(circle,#fbbf24,#92400e,#7c2d12)}
+.t-legend .mana-gem{background:linear-gradient(135deg,#92400e,#fbbf24);color:#000}
+.t-legend .type-badge{background:rgba(251,191,36,.25);color:#fde68a}
+.t-legend .cstat-val.atk{color:#fbbf24}
+#shopGrid::-webkit-scrollbar{width:4px}
+#shopGrid::-webkit-scrollbar-thumb{background:rgba(201,148,42,.3);border-radius:4px}
+
 </style>
 </head>
 <body>
@@ -684,6 +708,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Tajawal',sans-seri
   <div id="actionBar">
     <button id="playBtn" onclick="confirmPlay()" disabled>⚔ العب الكارت</button>
     <button id="passBtn" onclick="passTurn()" disabled>↩ تخطى الدور</button>
+    <button id="shopBtnBar" onclick="openShop()" style="padding:9px 16px;border-radius:25px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(139,92,246,.1));border:1px solid rgba(168,85,247,.4);color:#c084fc;transition:all .2s">🏪 متجر</button>
   </div>
 </div>
 
@@ -782,6 +807,22 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Tajawal',sans-seri
 })();
 
 /* ══════════════════════════════════════════════════════════════
+   AUDIO SYSTEM
+══════════════════════════════════════════════════════════════ */
+let _bgMusic=null, _audioReady=false;
+function initAudio(){
+  if(_audioReady) return; _audioReady=true;
+  _bgMusic=new Audio('m/classicgame.mp3');
+  _bgMusic.loop=true; _bgMusic.volume=0.28;
+  _bgMusic.play().catch(()=>{});
+}
+function playSFX_card(){
+  try{const s=new Audio('m/card.wav');s.volume=0.65;s.play().catch(()=>{});}catch(e){}
+}
+document.addEventListener('click',initAudio,{once:true});
+document.addEventListener('keydown',initAudio,{once:true});
+
+/* ══════════════════════════════════════════════════════════════
    CARD DATABASE — 22 unique monsters
 ══════════════════════════════════════════════════════════════ */
 const CARDS_DB = [
@@ -823,14 +864,40 @@ const CARDS_DB = [
   {id:'spider',   name:'عنكبوت الظلام',e:'🕷',t:'poison',atk:5,def:6,hp:14,mana:4, a:'تشل كارت العدو الأقوى دورًا',    fn:'paralyze'},
 ];
 
+// ─── LEGENDARY SHOP CARDS ───
+const SHOP_CARDS = [
+  {id:'omega',       name:'أوميجا الإله',    e:'⚜️',t:'legend',atk:14,def:10,mana:10,a:'يدمر كل كروت يد العدو',fn:'omega',      price:250},
+  {id:'soulReaper',  name:'حاصد الأرواح',   e:'💫',t:'legend',atk:12,def:7, mana:9, a:'يسرق 6HP ويجمّد العدو',fn:'reaper',     price:180},
+  {id:'archmage',    name:'أرش ماج السحر',   e:'🧿',t:'legend',atk:8, def:9, mana:8, a:'يعيد 8HP ويولّد +5 مانا',fn:'archmage',  price:150},
+  {id:'godKnight',   name:'فارس الآلهة',    e:'🛡️',t:'legend',atk:10,def:13,mana:8, a:'يمتص ضربتين كاملتين',fn:'godShield',   price:160},
+  {id:'thunderbird', name:'طائر الرعد',      e:'🌪️',t:'legend',atk:13,def:5, mana:9, a:'صاعقة -8HP + حرق دورين',fn:'thunderbird',price:170},
+  {id:'ancientDragon',name:'التنين القديم',  e:'🔱',t:'legend',atk:15,def:8, mana:10,a:'يهاجم 3 مرات بقوة النار',fn:'ancientDragon',price:300},
+  {id:'voidLord',    name:'سيد الفراغ',     e:'🌀',t:'legend',atk:9, def:6, mana:7, a:'يسرق + يضعّف + يجمّد',fn:'voidCombo',   price:130},
+  {id:'timeKeeper',  name:'حارس الزمن',     e:'⏳',t:'legend',atk:7, def:7, mana:7, a:'يعيد آخر كارت لعبتها',fn:'timeKeeper',  price:120},
+];
+
+// Persistence
+const SAVE_KEY='cwSave_v3';
+let saveData={points:0,ownedCards:[]};
+function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(r)saveData=JSON.parse(r);}catch(e){saveData={points:0,ownedCards:[]};}updatePtsUI();}
+function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(saveData));}catch(e){}updatePtsUI();}
+function addPoints(n){saveData.points+=n;writeSave();}
+function updatePtsUI(){
+  const el=document.getElementById('ptsDisplay');
+  const el2=document.getElementById('shopPtsDisplay');
+  if(el)el.textContent=saveData.points;
+  if(el2)el2.textContent=saveData.points;
+}
+
+
 /* ══════════════════════════════════════════════════════════════
    GAME STATE
 ══════════════════════════════════════════════════════════════ */
-let YOU={hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:[],discard:[]};
-let AI= {hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:[],discard:[]};
+let YOU={hp:30,maxHp:30,mana:4,maxMana:10,hand:[],deck:[],discard:[]};
+let AI= {hp:30,maxHp:30,mana:4,maxMana:10,hand:[],deck:[],discard:[]};
 let gameOn=false, playerTurn=true;
 let selectedCard=null, playedCard=null, aiPlayedCard=null;
-let turns=0, dmgDealt=0;
+let turns=0, dmgDealt=0, earnedPts=0;
 let aiPersonality=''; // aggressive / defensive / cunning / random
 let fx_youHeld=null; // raised atk
 let statusYou={burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
@@ -851,17 +918,18 @@ function buildDeck(){
 }
 
 function startGame(){
+  initAudio();
   hideScreen('startScreen'); hideScreen('endScreen');
   document.getElementById('resultBig').classList.remove('show');
   clearLog();
 
-  YOU={hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:buildDeck(),discard:[]};
-  AI= {hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:buildDeck(),discard:[]};
+  YOU={hp:30,maxHp:30,mana:4,maxMana:10,hand:[],deck:buildDeck(),discard:[]};
+  AI= {hp:30,maxHp:30,mana:4,maxMana:10,hand:[],deck:buildDeck(),discard:[]};
   statusYou={burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
   statusAI= {burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
 
   selectedCard=null; playedCard=null; aiPlayedCard=null;
-  playerTurn=true; gameOn=true; turns=0; dmgDealt=0; fx_youHeld=null;
+  playerTurn=true; gameOn=true; turns=0; dmgDealt=0; earnedPts=0; fx_youHeld=null;
 
   const perss=['aggressive','defensive','cunning','random'];
   aiPersonality=perss[Math.floor(Math.random()*perss.length)];
@@ -1013,6 +1081,7 @@ function selectCard(card, el){
     return;
   }
   selectedCard=card;
+  playSFX_card();
   el.classList.add('selected');
   renderSlot(card,'you');
   setBtns();
@@ -1029,6 +1098,7 @@ function confirmPlay(){
 
   const card=selectedCard;
   selectedCard=null;
+  playSFX_card();
   YOU.mana-=card.mana;
 
   // remove from hand
@@ -1170,8 +1240,8 @@ function aiTurn(){
 
 function endAITurn(){
   // mana regen
-  YOU.mana=Math.min(YOU.maxMana, YOU.mana+2);
-  AI.mana =Math.min(AI.maxMana,  AI.mana+2);
+  YOU.mana=Math.min(YOU.maxMana, YOU.mana+3);
+  AI.mana =Math.min(AI.maxMana,  AI.mana+3);
   updateHUD();
   playerTurn=true;
   selectedCard=null; playedCard=null; aiPlayedCard=null;
@@ -1182,8 +1252,8 @@ function endAITurn(){
 }
 
 function endTurn(){
-  YOU.mana=Math.min(YOU.maxMana,YOU.mana+2);
-  AI.mana=Math.min(AI.maxMana,AI.mana+2);
+  YOU.mana=Math.min(YOU.maxMana,YOU.mana+3);
+  AI.mana=Math.min(AI.maxMana,AI.mana+3);
   updateHUD();
   playerTurn=false; setBtns();
   document.getElementById('turnTag').textContent='العدو يفكر...';
@@ -1231,18 +1301,18 @@ function aiChooseCard(){
    ABILITIES
 ══════════════════════════════════════════════════════════════ */
 function applyAbility(card, who){
-  const myStatus = who==='you'?statusYou:statusAI;
-  const oppStatus= who==='you'?statusAI:statusYou;
+  const myS = who==='you'?statusYou:statusAI;
+  const oppS= who==='you'?statusAI:statusYou;
   const me=who==='you'?YOU:AI;
   const opp=who==='you'?AI:YOU;
 
   switch(card.fn){
     case 'burn':
-      oppStatus.burn=2;
+      oppS.burn=2;
       addLog(`🔥 ${card.name}: حرق العدو! (-2HP/دور)×2`,'spec'); break;
 
     case 'poison':
-      oppStatus.poison=3;
+      oppS.poison=3;
       addLog(`☠️ ${card.name}: سمّ! (-2HP/دور)×3`,'spec'); break;
 
     case 'heal':
@@ -1274,7 +1344,7 @@ function applyAbility(card, who){
       addLog(`🌩 صاعقة زيوس: -6HP مباشرة!`,'dmg'); break;
 
     case 'dragonBreath':
-      opp.hp-=4; oppStatus.burn=2; if(who==='you') dmgDealt+=4;
+      opp.hp-=4; oppS.burn=2; if(who==='you') dmgDealt+=4;
       updateHUD(); floatDmg(4,who==='you');
       addLog(`🐉 نفس التنين: -4HP + حرق×2`,'dmg'); break;
 
@@ -1294,29 +1364,29 @@ function applyAbility(card, who){
 
     case 'blizzard':
       opp.hand.forEach(c=>c.atk=Math.max(0,c.atk-2));
-      oppStatus.frozen=1;
+      oppS.frozen=1;
       renderAll();
       addLog(`❄️ عاصفة الجليد: كل كروت العدو -2 + تجميد دور`,'spec'); break;
 
     case 'freeze':
     case 'freeze2':
-      oppStatus.frozen=1;
+      oppS.frozen=1;
       addLog(`🧊 ${card.name}: جمّد كارت العدو دورًا!`,'spec'); break;
 
     case 'absorb':
-      myStatus.absorbed=true;
+      myS.absorbed=true;
       addLog(`🗿 ${card.name}: سيمتص الضربة القادمة كاملًا!`,'spec'); break;
 
     case 'weaken':
-      oppStatus.weakened=2;
+      oppS.weakened=2;
       addLog(`💜 ${card.name}: ضعّف العدو -3 هجوم لدورين`,'spec'); break;
 
     case 'slow':
-      oppStatus.weakened=2;
+      oppS.weakened=2;
       addLog(`🐌 ${card.name}: أبطأ العدو -2 هجوم لدورين`,'spec'); break;
 
     case 'paralyze':
-      oppStatus.frozen=1;
+      oppS.frozen=1;
       addLog(`🕷 ${card.name}: شلّ العدو دورًا`,'spec'); break;
 
     case 'manaBoost':
@@ -1342,8 +1412,38 @@ function applyAbility(card, who){
     }
 
     case 'nullify':
-      oppStatus.nullify=true;
-      addLog(`👼 ${card.name}: القدرة القادمة للعدو ستُبطل!`,'spec'); break;
+      oppS.nullify=true;
+      addLog(`👼 ${card.name}: القدرة القادمة ستُبطل!`,'spec'); break;
+    // ─── LEGENDARY ABILITIES ───
+    case 'omega':{
+      const d2=opp.hand.length; opp.hand=[]; opp.hp-=d2*2;
+      if(who==='you')dmgDealt+=d2*2;
+      renderAll();updateHUD();flashScreen('rgba(251,191,36,.45)');
+      addLog(`⚜️ أوميجا دمّر ${d2} كروت! -${d2*2}HP`,'dmg');break;}
+    case 'reaper':
+      opp.hp-=6;me.hp=Math.min(me.maxHp,me.hp+6);oppS.frozen=2;
+      if(who==='you')dmgDealt+=6;updateHUD();floatDmg(6,who==='you');
+      addLog(`💫 حاصد الأرواح: سرق 6HP + تجميد×2`,'dmg');break;
+    case 'archmage':
+      me.hp=Math.min(me.maxHp,me.hp+8);me.mana=Math.min(me.maxMana,me.mana+5);
+      updateHUD();addLog(`🧿 أرش ماج: +8HP +5 مانا`,'heal');break;
+    case 'godShield': myS.absorbed=(myS.absorbed||0)+2;addLog(`🛡️ فارس الآلهة: يمتص ضربتين`,'spec');break;
+    case 'thunderbird':
+      opp.hp-=8;oppS.burn=2;if(who==='you')dmgDealt+=8;
+      updateHUD();floatDmg(8,who==='you');flashScreen('rgba(255,255,100,.4)');
+      addLog(`🌪️ طائر الرعد: -8HP + حرق×2`,'dmg');break;
+    case 'ancientDragon':{
+      const d3=card.atk; let tot=0;
+      for(let i=0;i<3;i++){opp.hp-=d3;tot+=d3;}
+      if(who==='you')dmgDealt+=tot;updateHUD();floatDmg(tot,who==='you');
+      flashScreen('rgba(239,68,68,.4)');addLog(`🔱 التنين القديم: ${tot} ضرر (3 ضربات)!`,'dmg');break;}
+    case 'voidCombo':
+      if(opp.hand.length>0&&me.hand.length<6){const idx=Math.floor(Math.random()*opp.hand.length);const st=opp.hand.splice(idx,1)[0];me.hand.push(st);}
+      oppS.weakened=2;oppS.frozen=1;renderAll();
+      addLog(`🌀 سيد الفراغ: سرق+ضعّف+جمّد`,'spec');break;
+    case 'timeKeeper':
+      if(me.discard.length>0){const last=me.discard[me.discard.length-1];if(me.hand.length<6){me.hand.push(clone(last));renderAll();addLog(`⏳ أعاد "${last.name}" لليدك`,'spec');}break;}
+      addLog(`⏳ المقبرة فارغة`,'spec');break;
   }
 }
 
@@ -1383,13 +1483,22 @@ function endGame(won){
   // confetti / particles
   if(won){for(let i=0;i<20;i++) spawnConfetti();}
 
+  // Points
+  if(won){
+    earnedPts=30+Math.floor(dmgDealt/2)+Math.max(0,(15-turns)*2);
+    addPoints(earnedPts);
+    for(let i=0;i<22;i++) spawnConfetti();
+  } else {
+    earnedPts=8; addPoints(8);
+  }
+
   setTimeout(()=>{
     rb.classList.remove('show');
     document.getElementById('endEmoji').textContent=won?'🏆':'💀';
     document.getElementById('endTitle').textContent=won?'انتصرت!':'هُزمت!';
     document.getElementById('endSub').textContent=won
-      ?`دمّرت العدو الـ${aiPersonality} بمهارة ملحمية!`
-      :'العدو أثبت قوته هذه المرة. هل تجرب مجددًا؟';
+      ?`دمّرت العدو الـ${aiPersonLabel()} 💥 كسبت ${earnedPts} نقطة!`
+      :'العدو أثبت قوته. حاول مجددًا! (+8 💎 تعزية)';
     document.getElementById('aiBadge').textContent='🤖 '+aiPersonLabel();
     document.getElementById('rTurns').textContent=turns;
     document.getElementById('rDmg').textContent=dmgDealt;
@@ -1479,6 +1588,81 @@ function showToast(msg){
 }
 function showScreen(id){document.getElementById(id).classList.add('show');}
 function hideScreen(id){document.getElementById(id).classList.remove('show');}
+
+/* ══════════════════════════════════════════════════════════════
+   SHOP SYSTEM
+══════════════════════════════════════════════════════════════ */
+function openShop(){
+  updatePtsUI();
+  buildShopGrid();
+  showScreen('shopScreen');
+}
+function closeShop(){
+  hideScreen('shopScreen');
+}
+function buildShopGrid(){
+  const grid=document.getElementById('shopGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  SHOP_CARDS.forEach((sc,idx)=>{
+    const owned=saveData.ownedCards.includes(sc.id);
+    const item=document.createElement('div');
+    item.className='shop-item reveal'+(owned?' owned':'');
+    item.style.animationDelay=(idx*.07)+'s';
+    item.innerHTML=`
+      <span class="si-leg">👑 أسطوري</span>
+      <span class="si-e">${sc.e}</span>
+      <span class="si-n">${sc.name}</span>
+      <span class="si-s">⚔${sc.atk} 🛡${sc.def} 💧${sc.mana}</span>
+      <span class="si-s">${sc.a}</span>
+      ${owned?'<span class="si-s" style="color:#4ade80">✓ في مجموعتك</span>':'<span class="si-p">💎 '+sc.price+'</span>'}
+    `;
+    if(!owned) item.addEventListener('click',()=>buyCard(sc,item));
+    grid.appendChild(item);
+  });
+}
+function buyCard(sc, el){
+  if(saveData.ownedCards.includes(sc.id)){showToast('عندك الكارت دي!');return;}
+  if(saveData.points<sc.price){showToast(`💎 محتاج ${sc.price} نقطة — عندك ${saveData.points}`);return;}
+  el.classList.add('buying');
+  setTimeout(()=>{
+    el.classList.remove('buying');
+    saveData.points-=sc.price;
+    saveData.ownedCards.push(sc.id);
+    writeSave();
+    buildShopGrid();
+    for(let i=0;i<25;i++) spawnConfetti();
+    showToast(`🎉 اشتريت ${sc.name}! ستظهر في Deck جديد`);
+  },450);
+}
+
+// Add owned legendaries to deck build
+const _origBuildDeck = buildDeck;
+function buildDeck(){
+  const pool=shuffle([...CARDS_DB]);
+  const base=pool.slice(0,16).map(clone);
+  const legs=SHOP_CARDS.filter(sc=>saveData.ownedCards.includes(sc.id)).map(clone);
+  return shuffle([...base,...legs]);
+}
+
+// INIT
+loadSave();
+
 </script>
+
+<!-- SHOP SCREEN -->
+<div class="screen-overlay" id="shopScreen" style="z-index:110">
+  <div class="s-box" style="max-width:520px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gold2)">🏪 الكروت السحرية</div>
+      <div style="font-size:13px;font-weight:900;color:var(--gold2);background:rgba(201,148,42,.12);border:1px solid rgba(201,148,42,.3);border-radius:20px;padding:4px 14px">💎 <span id="shopPtsDisplay">0</span></div>
+    </div>
+    <div style="font-size:11px;color:rgba(200,180,130,.6);margin-bottom:12px;line-height:1.6">اشتري كروت أسطورية 👑 — تُضاف تلقائياً لـ deck في كل لعبة جديدة!</div>
+    <div id="shopGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;overflow-y:auto;max-height:320px;padding:2px"></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="s-btn sec" style="margin:0" onclick="closeShop()">← رجوع</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
