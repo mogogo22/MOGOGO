@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CUBE DASH - MOHAND WORLD</title>
+  <title>DASH - MOHAND WORLD</title>
   <link rel="icon" href="img/Acartoonst.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
@@ -143,7 +143,7 @@
 <body>
 <div id="flash"></div>
 <header>
-  <div class="brand"><img src="img/Acartoonst.png" alt="logo"><span>CUBE DASH</span></div>
+  <div class="brand"><img src="img/Acartoonst.png" alt="logo"><span>DASH</span></div>
   <a href="index.html" class="back-btn">← الرجوع للقناة</a>
 </header>
 <div id="hud">
@@ -168,7 +168,7 @@
   <div id="bossHpTrack"><div id="bossHpFill" style="width:100%"></div></div>
 </div>
 <div id="bossChat">
-  <div class="bcname">😈 &nbsp; البيج بوص يقول &nbsp; 😈</div>
+  <div class="bcname">😈 &nbsp; -البيج بوص- &nbsp; 😈</div>
   <div class="bcline" id="chatLine1"></div>
   <div class="bcline" id="chatLine2"></div>
 </div>
@@ -188,11 +188,11 @@
 <div class="screen active" id="startScreen">
   <div class="screen-bg"></div>
   <div class="screen-card">
-    <span class="screen-icon">🟣</span>
-    <h1 class="screen-title">CUBE <span>DASH</span></h1>
+    <span class="screen-icon">⚡</span>
+    <h1 class="screen-title">DA<span>SH</span></h1>
     <p class="screen-sub">تحرك، اطلق النار، تجنب الأعداء!<br>كل 5 Waves — البيج بوص يجيك 😈🔥<br>البوص بيكبر ويصعب كل مرة!</p>
     <div class="controls-grid">
-      <div class="ctrl-item"><div class="key">⬆️⬇️⬅️➡️ / WASD</div><div class="desc">تحريك</div></div>
+      <div class="ctrl-item"><div class="key">⬆️⬇️⬅️➡️ / W A S D</div><div class="desc">تحريك</div></div>
       <div class="ctrl-item"><div class="key">Space / Shift</div><div class="desc">داش ⚡</div></div>
       <div class="ctrl-item"><div class="key">F أو Click</div><div class="desc">إطلاق النار 💥</div></div>
       <div class="ctrl-item"><div class="key">❤️ ⚡ نادرين</div><div class="desc">هيل و5 طلقات</div></div>
@@ -233,70 +233,42 @@
 
 <script>
 // ================================================================
-//  AUDIO — simple HTMLAudio, initialized on first user interaction
+//  AUDIO — background music only (2 tracks)
 // ================================================================
-const SFX = {};
+let bgAudio = null;
+let bgAudioBoss = null;
 let audioReady = false;
 
 function initAudio() {
   if (audioReady) return;
   audioReady = true;
-  const files = {
-    bg:     'm/classicgame.wav',
-    bossbg: 'm/music.wav',
-    shot:   'm/shot.wav',
-    damage: 'm/damage.wav',
-    got:    'm/got.wav',
-    boom:   'm/boom.wav',
-  };
-  Object.entries(files).forEach(([k,v]) => {
-    try {
-      const a = new Audio(v);
-      a.preload = 'auto';
-      SFX[k] = a;
-    } catch(e) {}
-  });
-}
-
-const sfxLast = {};
-function playSFX(k) {
-  if (!audioReady || !SFX[k]) return;
-  const gaps = {shot:90, damage:280, got:110, boom:100};
-  const gap  = gaps[k] || 80;
-  const now  = performance.now();
-  if (sfxLast[k] && now - sfxLast[k] < gap) return;
-  sfxLast[k] = now;
-  try {
-    // Clone for overlapping sounds (shot fires fast)
-    const a = k==='shot' ? SFX[k].cloneNode() : SFX[k];
-    a.volume = k==='damage'?.72:k==='shot'?.38:k==='boom'?.7:.55;
-    if (k!=='shot') a.currentTime = 0;
-    const p = a.play();
-    if (p && p.catch) p.catch(()=>{});
-  } catch(e) {}
+  bgAudio     = new Audio('m/classicgame.mp3');
+  bgAudio.loop    = true;
+  bgAudio.volume  = 0.35;
+  bgAudioBoss = new Audio('m/music.mp3');
+  bgAudioBoss.loop   = true;
+  bgAudioBoss.volume = 0.45;
 }
 
 let bgKey = null;
 function playBg(k) {
-  if (!audioReady || !SFX[k]) return;
-  if (bgKey === k && !SFX[k].paused) return;
+  if (!audioReady) return;
+  if (bgKey === k) return;
   stopBg();
-  try {
-    const a = SFX[k];
-    a.loop = true;
-    a.volume = k==='bossbg' ? 0.40 : 0.26;
-    a.currentTime = 0;
-    const p = a.play();
-    if (p && p.catch) p.catch(()=>{});
-    bgKey = k;
-  } catch(e) {}
+  bgKey = k;
+  const a = k==='bossbg' ? bgAudioBoss : bgAudio;
+  a.currentTime = 0;
+  a.play().catch(()=>{});
 }
 function stopBg() {
-  if (bgKey && SFX[bgKey]) {
-    try { SFX[bgKey].pause(); SFX[bgKey].currentTime = 0; } catch(e){}
+  if (bgKey) {
+    const a = bgKey==='bossbg' ? bgAudioBoss : bgAudio;
+    try { a.pause(); a.currentTime = 0; } catch(e) {}
   }
   bgKey = null;
 }
+// stub — no sfx anymore
+function playSFX(){}
 
 // ================================================================
 //  STATE
@@ -326,7 +298,7 @@ let shOn=false,shT=0, slOn=false,slT=0, mgOn=false,mgT=0,
     spOn=false,spT=0, muOn=false,muT=0;
 let enemies=[], coins=[], pups=[], bullets=[], ebullets=[];
 let eTimer=0, cTimer=0, pTimer=0, scTimer=0, healTimer=0;
-const COIN_MAX = 20;
+const COIN_MAX = 15;
 
 let wSpawned=0, wTarget=10, wActive=false;
 
@@ -399,12 +371,12 @@ function movePlayer(dt){
   if (K['arrowright']||K['d']||K['ي']||K['_right'])  vx= 1;
   if (vx!==0&&vy!==0){vx*=0.707;vy*=0.707;}
 
-  const spd = 3.9 * (spOn?1.7:1);
+  const spd = 4.8 * (spOn?1.7:1);
 
   if (dashing && dashLeft>0) {
     dashLeft -= dt;
-    px += dashVx * 16 * dt;
-    py += dashVy * 16 * dt;
+    px += dashVx * 20 * dt;
+    py += dashVy * 20 * dt;
     if (Math.random()<0.65) mkGhost();
     if (dashLeft<=0) { dashing=false; PEL.style.filter=''; }
   } else {
@@ -696,7 +668,6 @@ function triggerBoss(){
   ebullets.forEach(b=>b.el.remove()); ebullets=[];
 
   GA.classList.add('boss-mode');
-  spawnEmbers();
   flashFX('rgba(239,68,68,.6)');
   playBg('bossbg');
 
@@ -715,18 +686,18 @@ function triggerBoss(){
   document.getElementById('bossHpFill').style.width='100%';
   document.getElementById('bossHpWrap').classList.add('show');
 
-  // Slide boss down from top
+  // Slide boss down from top — spawn embers AFTER slide to avoid lag spike
   const targetY=AH*0.1;
   const sl=setInterval(()=>{
     by+=7; BOSS.style.top=by+'px';
-    if(by>=targetY){ clearInterval(sl); showBossChat(); }
+    if(by>=targetY){ clearInterval(sl); spawnEmbers(); showBossChat(); }
   },14);
 }
 
 const BOSS_MSGS=[
   ['انت الي اكلت الشاورما بتاعتي ياض ؟ 🌯😤','عايزك تكتب وصيتك النهاردة... 💀'],
-  ['جيت تاني يا حيوان؟؟ 😡🔥','المرة دي مش هيبقاش في رحمة! 💀💀'],
-  ['ظننت إني خلصت منك؟ 😤','هاديكك علقة مش هتنساها! 👊💥'],
+  ['جيت تاني يا حيوان؟؟ 😡🔥','المرة دي مش هيبقى في رحمة! 💀💀'],
+  ['إفتكرت إني خلصت منك؟ 😤','هديك علقة مش هتنساها! 👊💥'],
   ['أنا أقوى من أي وقت فاتت! 😈🔥','استعد لمواجهة مصيرك... ☠️'],
 ];
 
@@ -766,10 +737,11 @@ function typeMsg(el,txt,spd,cursor,done){
 }
 
 function spawnEmbers(){
-  for(let i=0;i<28;i++){
+  // Keep count low (10) to avoid DOM lag spike
+  for(let i=0;i<10;i++){
     const p=document.createElement('div'); p.className='bp';
-    const sz=4+Math.random()*10;
-    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*AW}px;bottom:${Math.random()*AH}px;background:rgba(${195+Math.floor(Math.random()*60)},${Math.floor(Math.random()*18)},10,.8);animation-duration:${2+Math.random()*5}s;animation-delay:${Math.random()*3}s`;
+    const sz=5+Math.random()*9;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*AW}px;bottom:${Math.random()*AH}px;background:rgba(${195+Math.floor(Math.random()*60)},${Math.floor(Math.random()*18)},10,.8);animation-duration:${2.5+Math.random()*4}s;animation-delay:${Math.random()*2}s`;
     GA.appendChild(p);
   }
 }
@@ -886,10 +858,10 @@ const PUT=[
   {type:'shield',em:'🛡️',cls:'pu-shield',lbl:'شيلد',    col:'#2a9df4',dur:300,w:22},
   {type:'slow',  em:'🐌',cls:'pu-slow',  lbl:'تبطيء',  col:'#a855f7',dur:260,w:20},
   {type:'magnet',em:'🧲',cls:'pu-magnet',lbl:'مغناطيس',col:'#f59e0b',dur:290,w:18},
-  {type:'bomb',  em:'💣',cls:'pu-bomb',  lbl:'قنبلة',  col:'#ef4444',dur:0,  w:12},
-  {type:'speed', em:'🟢',cls:'pu-speed', lbl:'سرعة',   col:'#22c55e',dur:300,w:16},
-  {type:'heal',  em:'❤️',cls:'pu-heal',  lbl:'هيل',    col:'#ef4444',dur:0,  w:2},  // rare
-  {type:'multi', em:'⚡',cls:'pu-multi', lbl:'5 طلقات',col:'#f59e0b',dur:600,w:2},  // rare
+  {type:'bomb',  em:'💣',cls:'pu-bomb',  lbl:'قنبلة',  col:'#ef4444',dur:0,  w:14},
+  {type:'speed', em:'🟢',cls:'pu-speed', lbl:'سرعة',   col:'#22c55e',dur:300,w:18},
+  {type:'heal',  em:'❤️',cls:'pu-heal',  lbl:'هيل',    col:'#ef4444',dur:0,  w:10},
+  {type:'multi', em:'⚡',cls:'pu-multi', lbl:'5 طلقات',col:'#f59e0b',dur:600,w:10},
 ];
 const PW=PUT.reduce((s,p)=>s+p.w,0);
 function randPU(){let r=Math.random()*PW;for(const p of PUT){r-=p.w;if(r<=0)return p;}return PUT[0];}

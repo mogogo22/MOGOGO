@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cards Wars — حرب الكروت</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   ROOT VARIABLES & RESET
+══════════════════════════════════════ */
+:root{
+  --bg0:#050309;
+  --bg1:#0c0816;
+  --bg2:#130d20;
+  --gold:#c9942a;
+  --gold2:#e8b94f;
+  --gold3:#f5d070;
+  --red:#be2525;
+  --red2:#e03030;
+  --green:#1a7a40;
+  --card-w:118px;
+  --card-h:172px;
+  --r:14px;
+  --shadow-gold:0 0 22px rgba(201,148,42,.5);
+  --shadow-red:0 0 22px rgba(190,37,37,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Tajawal',sans-serif;background:var(--bg0);color:#e0d4b8;touch-action:none}
+
+/* ══════════════════════════════════════
+   ANIMATED BACKGROUND
+══════════════════════════════════════ */
+#bgLayer{position:fixed;inset:0;z-index:0;overflow:hidden}
+#bgLayer canvas{position:absolute;inset:0;width:100%;height:100%}
+.vignette{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 90% 90% at 50% 50%, transparent 30%, rgba(5,3,9,.92) 100%);
+}
+.grid-overlay{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(201,148,42,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,148,42,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+
+/* ══════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════ */
+#game{
+  position:relative;z-index:2;
+  width:100vw;height:100vh;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── TOP BAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 18px;
+  background:linear-gradient(180deg,rgba(5,3,9,.98) 0%,rgba(5,3,9,.75) 100%);
+  border-bottom:1px solid rgba(201,148,42,.18);
+  height:58px;flex-shrink:0;
+  position:relative;z-index:10;
+}
+.logo{
+  font-family:'Cinzel Decorative',serif;
+  font-size:15px;color:var(--gold2);
+  text-shadow:0 0 18px rgba(232,185,79,.45);
+  letter-spacing:1.5px;
+  flex-shrink:0;
+}
+
+/* HP PANELS */
+.hp-panel{
+  display:flex;flex-direction:column;align-items:center;
+  gap:3px;min-width:135px;
+}
+.hp-row{display:flex;align-items:center;gap:7px}
+.hp-avatar{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;border:2px solid rgba(201,148,42,.3);
+  background:rgba(0,0,0,.4);flex-shrink:0;
+}
+.hp-name{font-size:11px;font-weight:700;letter-spacing:.5px}
+.hp-name.you{color:#4ade80}
+.hp-name.ai{color:#f87171}
+.hp-track{
+  width:118px;height:9px;background:rgba(0,0,0,.6);
+  border-radius:6px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+}
+.hp-fill{height:100%;border-radius:6px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+.hp-fill.you{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.hp-fill.ai {background:linear-gradient(90deg,#b91c1c,#ef4444)}
+.hp-num{font-size:18px;font-weight:900;line-height:1;min-width:28px;text-align:center}
+.hp-num.you{color:#4ade80}
+.hp-num.ai{color:#f87171}
+
+/* MANA */
+.mana-row{display:flex;gap:3px;align-items:center;justify-content:center;margin-top:1px}
+.mana-pip{
+  width:11px;height:11px;border-radius:50%;
+  border:1.5px solid rgba(96,165,250,.4);
+  background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+  box-shadow:0 0 5px rgba(59,130,246,.35);
+  transition:all .3s;
+}
+.mana-pip.empty{background:rgba(15,25,60,.5);border-color:rgba(96,165,250,.1);box-shadow:none}
+
+/* ── FIELD ── */
+#field{
+  flex:1;display:grid;
+  grid-template-rows:1fr auto 1fr;
+  overflow:hidden;position:relative;
+  padding:4px 10px;
+}
+
+/* enemy zone */
+#enemyZone{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;
+  padding-bottom:4px;gap:5px;
+  position:relative;
+}
+.zone-label{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;
+  color:rgba(201,148,42,.35);text-transform:uppercase;
+}
+#enemyHand{
+  display:flex;gap:6px;justify-content:center;
+  flex-wrap:nowrap;overflow:visible;
+}
+
+/* battle row */
+#battleRow{
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;min-height:208px;position:relative;
+}
+.battle-slot{
+  width:var(--card-w);height:var(--card-h);
+  border-radius:var(--r);
+  border:2px dashed rgba(201,148,42,.15);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;transition:border-color .3s;
+}
+.battle-slot.active-p{border-color:rgba(74,222,128,.4);box-shadow:0 0 18px rgba(74,222,128,.12)}
+.battle-slot.active-e{border-color:rgba(248,113,113,.4);box-shadow:0 0 18px rgba(248,113,113,.12)}
+.slot-hint{font-size:10px;color:rgba(201,148,42,.2);text-align:center;line-height:1.5}
+
+/* vs center */
+#center{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;min-width:90px;
+}
+.vs-ring{
+  width:54px;height:54px;border-radius:50%;
+  border:2px solid rgba(201,148,42,.3);
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.5);
+  box-shadow:inset 0 0 15px rgba(0,0,0,.5), 0 0 15px rgba(201,148,42,.1);
+  position:relative;
+}
+.vs-ring::before{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  border:1px solid rgba(201,148,42,.1);
+  animation:rotRing 8s linear infinite;
+}
+@keyframes rotRing{to{transform:rotate(360deg)}}
+.vs-txt{
+  font-family:'Cinzel Decorative',serif;font-size:16px;
+  color:var(--gold2);text-shadow:0 0 12px rgba(232,185,79,.5);
+}
+#turnTag{
+  font-size:10px;font-weight:700;padding:4px 13px;border-radius:20px;
+  background:rgba(0,0,0,.55);border:1px solid rgba(201,148,42,.2);
+  color:rgba(201,148,42,.8);letter-spacing:.5px;text-align:center;
+  white-space:nowrap;
+}
+.deck-counts{
+  display:flex;gap:8px;font-size:9px;
+  color:rgba(200,180,130,.4);font-weight:700;
+}
+
+/* player zone */
+#playerZone{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding-top:4px;gap:5px;
+}
+#playerHand{
+  display:flex;gap:6px;justify-content:center;
+  flex-wrap:nowrap;overflow:visible;
+}
+
+/* ── ACTION BAR ── */
+#actionBar{
+  display:flex;gap:10px;justify-content:center;align-items:center;
+  padding:7px 14px 9px;flex-shrink:0;
+  background:linear-gradient(0deg,rgba(5,3,9,.98) 0%,rgba(5,3,9,.7) 100%);
+  border-top:1px solid rgba(201,148,42,.12);
+}
+#playBtn{
+  padding:9px 30px;border-radius:25px;border:none;cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;color:#0a0006;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  box-shadow:0 5px 20px rgba(201,148,42,.35);
+  transition:all .22s;letter-spacing:.3px;
+}
+#playBtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,148,42,.55)}
+#playBtn:disabled{opacity:.3;cursor:default;transform:none;box-shadow:none}
+#passBtn{
+  padding:9px 18px;border-radius:25px;cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  color:rgba(200,180,130,.65);transition:all .2s;
+}
+#passBtn:hover:not(:disabled){background:rgba(255,255,255,.08);color:rgba(201,148,42,.9)}
+#passBtn:disabled{opacity:.3;cursor:default}
+
+/* ══════════════════════════════════════
+   CARD STYLES
+══════════════════════════════════════ */
+.card{
+  width:var(--card-w);height:var(--card-h);
+  border-radius:var(--r);
+  position:relative;cursor:pointer;flex-shrink:0;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
+  transform-origin:bottom center;
+  user-select:none;
+}
+.card-inner{
+  width:100%;height:100%;border-radius:var(--r);
+  border:1.5px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;background:var(--bg1);
+}
+.card:hover:not(.no-hover) { transform:translateY(-16px) scale(1.04); }
+.card:hover:not(.no-hover) .card-inner { border-color:rgba(201,148,42,.55);box-shadow:0 12px 30px rgba(0,0,0,.7), var(--shadow-gold); }
+.card.selected { transform:translateY(-24px) scale(1.07); }
+.card.selected .card-inner { border-color:var(--gold2);box-shadow:0 16px 40px rgba(0,0,0,.8), 0 0 28px rgba(232,185,79,.6); }
+
+/* face down (enemy cards) */
+.card.facedown .card-inner{
+  background:linear-gradient(150deg,#100820,#1c0d38);
+  border-color:rgba(120,80,200,.25);
+}
+.card.facedown .card-front{display:none}
+.card.facedown::after{
+  content:'⚔';font-size:36px;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  opacity:.2;
+}
+.card.facedown::before{
+  content:'';position:absolute;inset:8px;
+  border-radius:8px;
+  border:1px solid rgba(120,80,200,.15);
+  background:repeating-linear-gradient(
+    45deg,rgba(120,80,200,.04),rgba(120,80,200,.04) 2px,
+    transparent 2px,transparent 8px
+  );
+}
+
+/* CARD SECTIONS */
+.card-top{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 7px;
+}
+.mana-gem{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+  border:1px solid rgba(147,197,253,.4);
+  box-shadow:0 0 7px rgba(59,130,246,.4);
+}
+.type-badge{
+  font-size:7px;font-weight:700;padding:2px 5px;border-radius:4px;
+  letter-spacing:.4px;text-transform:uppercase;
+}
+.card-art{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  font-size:44px;position:relative;overflow:hidden;
+  min-height:64px;
+}
+.art-bg{position:absolute;inset:0;opacity:.15;border-radius:0}
+.card-name{
+  font-size:10px;font-weight:900;text-align:center;
+  padding:2px 5px;line-height:1.3;background:rgba(0,0,0,.5);
+  letter-spacing:.3px;
+}
+.card-stats{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.cstat{display:flex;flex-direction:column;align-items:center;padding:3px 2px}
+.cstat+.cstat{border-right:1px solid rgba(255,255,255,.07)}
+.cstat-val{font-size:12px;font-weight:900;line-height:1}
+.cstat-lbl{font-size:7px;color:rgba(200,180,130,.4);margin-top:1px;font-weight:700}
+.card-abil{
+  font-size:7.5px;text-align:center;padding:3px 4px 5px;
+  color:rgba(200,175,130,.65);line-height:1.35;
+  border-top:1px solid rgba(255,255,255,.05);
+  background:rgba(0,0,0,.35);
+}
+.card-hp-bar{
+  position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:rgba(0,0,0,.5);
+}
+.card-hp-fill{height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);transition:width .4s}
+
+/* card themes */
+.t-fire .card-inner{background:linear-gradient(160deg,#120300,#2d0800)}
+.t-fire .art-bg{background:radial-gradient(circle,#ef4444,#7f1d1d)}
+.t-fire .mana-gem{background:linear-gradient(135deg,#7f1d1d,#ef4444)}
+.t-fire .type-badge{background:rgba(239,68,68,.2);color:#fca5a5}
+.t-fire .cstat-val.atk{color:#f87171}
+
+.t-water .card-inner{background:linear-gradient(160deg,#000e1a,#001e35)}
+.t-water .art-bg{background:radial-gradient(circle,#0ea5e9,#0c4a6e)}
+.t-water .mana-gem{background:linear-gradient(135deg,#0c4a6e,#0ea5e9)}
+.t-water .type-badge{background:rgba(14,165,233,.2);color:#7dd3fc}
+.t-water .cstat-val.atk{color:#38bdf8}
+
+.t-earth .card-inner{background:linear-gradient(160deg,#060f00,#0e1f00)}
+.t-earth .art-bg{background:radial-gradient(circle,#84cc16,#365314)}
+.t-earth .mana-gem{background:linear-gradient(135deg,#365314,#65a30d)}
+.t-earth .type-badge{background:rgba(132,204,22,.2);color:#bef264}
+.t-earth .cstat-val.atk{color:#a3e635}
+
+.t-dark .card-inner{background:linear-gradient(160deg,#06000e,#120026)}
+.t-dark .art-bg{background:radial-gradient(circle,#a855f7,#3b0764)}
+.t-dark .mana-gem{background:linear-gradient(135deg,#3b0764,#a855f7)}
+.t-dark .type-badge{background:rgba(168,85,247,.2);color:#d8b4fe}
+.t-dark .cstat-val.atk{color:#c084fc}
+
+.t-light .card-inner{background:linear-gradient(160deg,#100e00,#201a00)}
+.t-light .art-bg{background:radial-gradient(circle,#fbbf24,#92400e)}
+.t-light .mana-gem{background:linear-gradient(135deg,#78350f,#fbbf24);color:#000}
+.t-light .type-badge{background:rgba(251,191,36,.18);color:#fde68a}
+.t-light .cstat-val.atk{color:#fbbf24}
+
+.t-ice .card-inner{background:linear-gradient(160deg,#000e1a,#00203a)}
+.t-ice .art-bg{background:radial-gradient(circle,#bae6fd,#0369a1)}
+.t-ice .mana-gem{background:linear-gradient(135deg,#0369a1,#bae6fd);color:#000}
+.t-ice .type-badge{background:rgba(186,230,253,.15);color:#bae6fd}
+.t-ice .cstat-val.atk{color:#7dd3fc}
+
+.t-poison .card-inner{background:linear-gradient(160deg,#040e06,#071a08)}
+.t-poison .art-bg{background:radial-gradient(circle,#4ade80,#14532d)}
+.t-poison .mana-gem{background:linear-gradient(135deg,#14532d,#22c55e)}
+.t-poison .type-badge{background:rgba(74,222,128,.18);color:#86efac}
+.t-poison .cstat-val.atk{color:#4ade80}
+
+/* ══════════════════════════════════════
+   BATTLE ANIMATIONS
+══════════════════════════════════════ */
+@keyframes dealIn{
+  from{opacity:0;transform:translateY(-30px) scale(.8)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes dealInUp{
+  from{opacity:0;transform:translateY(30px) scale(.8)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes cardPlay{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.15) translateY(-12px)}
+  100%{transform:scale(1.03) translateY(-6px)}
+}
+@keyframes cardShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}
+  40%{transform:translateX(7px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+@keyframes glow-pulse{
+  0%,100%{box-shadow:0 0 10px rgba(201,148,42,.2)}
+  50%{box-shadow:0 0 25px rgba(201,148,42,.6)}
+}
+.deal-in-e{animation:dealIn .35s cubic-bezier(.34,1.56,.64,1) both}
+.deal-in-p{animation:dealInUp .35s cubic-bezier(.34,1.56,.64,1) both}
+.card-played{animation:cardPlay .45s ease forwards}
+.card-shake{animation:cardShake .4s ease}
+.card-glow{animation:glow-pulse .8s ease infinite}
+
+/* ══════════════════════════════════════
+   EFFECT LAYER
+══════════════════════════════════════ */
+#fx{position:fixed;inset:0;z-index:50;pointer-events:none;overflow:hidden}
+
+/* damage float */
+.dmg-num{
+  position:absolute;
+  font-family:'Cinzel Decorative',serif;font-weight:900;
+  text-shadow:0 2px 10px rgba(0,0,0,.9);
+  animation:dmgUp 1.3s ease forwards;pointer-events:none;
+  will-change:transform,opacity;
+}
+@keyframes dmgUp{
+  0%{opacity:1;transform:translateY(0) scale(.8)}
+  20%{transform:translateY(-30px) scale(1.4)}
+  80%{opacity:1}
+  100%{opacity:0;transform:translateY(-90px) scale(.9)}
+}
+/* clash burst */
+.clash-ring{
+  position:absolute;border-radius:50%;
+  border:3px solid;
+  animation:clashExpand .6s ease forwards;
+  pointer-events:none;
+}
+@keyframes clashExpand{
+  0%{width:20px;height:20px;opacity:1;transform:translate(-50%,-50%)}
+  100%{width:200px;height:200px;opacity:0;transform:translate(-50%,-50%)}
+}
+/* screen flash */
+.screen-flash{
+  position:fixed;inset:0;pointer-events:none;
+  animation:flashFade .4s ease forwards;
+}
+@keyframes flashFade{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+/* particle burst */
+.burst-p{
+  position:absolute;border-radius:50%;
+  animation:burstFly var(--dur,.6s) ease forwards;
+  pointer-events:none;will-change:transform,opacity;
+}
+@keyframes burstFly{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--tx,0px),var(--ty,0px)) scale(0)}
+}
+/* floating text */
+.float-msg{
+  position:fixed;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel Decorative',serif;font-size:18px;font-weight:700;
+  text-shadow:0 0 20px currentColor;
+  animation:floatMsg 2s ease forwards;z-index:60;pointer-events:none;
+}
+@keyframes floatMsg{
+  0%{opacity:0;transform:translateX(-50%) scale(.7) translateY(20px)}
+  20%{opacity:1;transform:translateX(-50%) scale(1.1) translateY(-10px)}
+  70%{opacity:1;transform:translateX(-50%) scale(1) translateY(-20px)}
+  100%{opacity:0;transform:translateX(-50%) scale(.9) translateY(-50px)}
+}
+
+/* ══════════════════════════════════════
+   BATTLE LOG
+══════════════════════════════════════ */
+#log{
+  position:fixed;left:10px;top:68px;
+  width:190px;z-index:30;
+  display:flex;flex-direction:column;gap:3px;
+  pointer-events:none;
+}
+.log-line{
+  font-size:10.5px;font-weight:600;line-height:1.4;
+  padding:4px 9px;border-radius:7px;
+  background:rgba(5,3,9,.88);
+  border-right:3px solid;
+  animation:logSlide .3s ease;
+  max-width:100%;word-break:break-word;
+}
+@keyframes logSlide{from{opacity:0;transform:translateX(-15px)}to{opacity:1;transform:translateX(0)}}
+.log-line.normal{border-color:rgba(201,148,42,.45);color:rgba(220,200,160,.85)}
+.log-line.dmg   {border-color:#ef4444;color:#fca5a5}
+.log-line.heal  {border-color:#4ade80;color:#86efac}
+.log-line.spec  {border-color:#c084fc;color:#ddd6fe}
+.log-line.sep   {border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.2);font-size:9px}
+
+/* ══════════════════════════════════════
+   AI THINKING INDICATOR
+══════════════════════════════════════ */
+#thinkBubble{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:45;display:none;
+  background:rgba(5,3,9,.94);border:1px solid rgba(201,148,42,.3);
+  border-radius:50px;padding:9px 22px;
+  font-size:12px;font-weight:700;color:rgba(201,148,42,.85);
+  box-shadow:0 8px 30px rgba(0,0,0,.6);
+}
+#thinkBubble.show{display:flex;align-items:center;gap:8px}
+.think-dots span{
+  display:inline-block;animation:dotPulse 1s ease-in-out infinite;
+  font-size:16px;color:var(--gold2);
+}
+.think-dots span:nth-child(2){animation-delay:.2s}
+.think-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+
+/* ══════════════════════════════════════
+   STATUS ICONS ON CARDS
+══════════════════════════════════════ */
+.status-icons{
+  position:absolute;top:4px;left:4px;
+  display:flex;flex-wrap:wrap;gap:2px;z-index:5;
+}
+.s-icon{
+  width:15px;height:15px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;background:rgba(0,0,0,.7);
+  border:1px solid rgba(255,255,255,.15);
+}
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen-overlay{
+  position:fixed;inset:0;z-index:100;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(5,3,9,.94);backdrop-filter:blur(16px);
+  padding:16px;
+}
+.screen-overlay.show{display:flex}
+.s-box{
+  background:linear-gradient(155deg,#0c0816,#160d28);
+  border:1px solid rgba(201,148,42,.28);
+  border-radius:22px;padding:34px 30px;
+  max-width:460px;width:100%;text-align:center;
+  box-shadow:0 0 80px rgba(201,148,42,.07),0 30px 80px rgba(0,0,0,.6);
+  animation:boxIn .55s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes boxIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.s-icon-big{font-size:68px;display:block;margin-bottom:14px;animation:iconFloat 3s ease-in-out infinite}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.s-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:26px;color:var(--gold2);
+  text-shadow:0 0 28px rgba(232,185,79,.45);
+  margin-bottom:7px;
+}
+.s-sub{
+  font-size:13px;color:rgba(200,180,130,.65);
+  line-height:1.75;margin-bottom:22px;
+}
+.s-sub b{color:var(--gold3)}
+.s-btn{
+  width:100%;padding:13px;border-radius:14px;border:none;cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:15px;font-weight:900;color:#0a0006;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  box-shadow:0 6px 24px rgba(201,148,42,.35);
+  transition:all .25s;margin-bottom:8px;letter-spacing:.3px;
+}
+.s-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(201,148,42,.55)}
+.s-btn.sec{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:rgba(200,180,130,.7);font-size:13px;
+  box-shadow:none;
+}
+.s-btn.sec:hover{background:rgba(255,255,255,.09);color:var(--gold3);box-shadow:none}
+.result-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:20px;
+}
+.r-cell{
+  background:rgba(0,0,0,.35);border-radius:12px;
+  padding:11px 6px;border:1px solid rgba(255,255,255,.07);
+}
+.r-cell .rv{font-size:20px;font-weight:900;color:var(--gold2)}
+.r-cell .rl{font-size:9px;color:rgba(200,180,130,.5);font-weight:700;margin-top:2px}
+.rules-list{
+  text-align:right;font-size:11.5px;color:rgba(200,180,130,.6);
+  line-height:1.9;margin:12px 0 20px;
+  padding-right:10px;
+}
+.rules-list li{list-style:none;padding-right:6px}
+.rules-list li::before{content:'⚔ ';color:rgba(201,148,42,.5)}
+.ai-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);
+  color:#d8b4fe;border-radius:20px;padding:4px 12px;
+  font-size:11px;font-weight:700;margin-bottom:14px;
+}
+
+/* result flash */
+#resultBig{
+  position:fixed;inset:0;z-index:90;
+  display:none;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+#resultBig.show{display:flex}
+#resultBig .rt{
+  font-family:'Cinzel Decorative',serif;font-size:58px;font-weight:900;
+  text-shadow:0 0 60px currentColor;
+  animation:bigPop 1.2s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes bigPop{
+  0%{transform:scale(0) rotate(-20deg);opacity:0}
+  60%{transform:scale(1.15) rotate(3deg)}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+
+/* toast */
+#toast{
+  position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(8px);
+  z-index:80;background:rgba(5,3,9,.95);
+  border:1px solid rgba(201,148,42,.3);color:rgba(220,200,160,.9);
+  padding:8px 20px;border-radius:25px;font-size:12px;font-weight:700;
+  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<!-- Background -->
+<div id="bgLayer"><canvas id="bgCanvas"></canvas></div>
+<div class="vignette"></div>
+<div class="grid-overlay"></div>
+
+<div id="game">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="hp-panel">
+      <div class="hp-row">
+        <div class="hp-avatar">🤖</div>
+        <div>
+          <div class="hp-name ai">الذكاء الاصطناعي</div>
+          <div class="hp-row" style="gap:5px;margin-top:2px">
+            <div class="hp-track"><div class="hp-fill ai" id="aiHpFill" style="width:100%"></div></div>
+            <div class="hp-num ai" id="aiHpNum">30</div>
+          </div>
+        </div>
+      </div>
+      <div class="mana-row" id="aiManaRow"></div>
+    </div>
+
+    <div class="logo">⚔ Cards Wars</div>
+
+    <div class="hp-panel">
+      <div class="hp-row">
+        <div>
+          <div class="hp-name you" style="text-align:left">أنت</div>
+          <div class="hp-row" style="gap:5px;margin-top:2px;flex-direction:row-reverse">
+            <div class="hp-num you" id="youHpNum">30</div>
+            <div class="hp-track"><div class="hp-fill you" id="youHpFill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="hp-avatar">🧙</div>
+      </div>
+      <div class="mana-row" id="youManaRow"></div>
+    </div>
+  </div>
+
+  <!-- FIELD -->
+  <div id="field">
+    <!-- Enemy area -->
+    <div id="enemyZone">
+      <div class="zone-label">يد العدو</div>
+      <div id="enemyHand"></div>
+    </div>
+
+    <!-- Battle row -->
+    <div id="battleRow">
+      <div class="battle-slot" id="enemySlot">
+        <div class="slot-hint">كارت<br>العدو</div>
+      </div>
+
+      <div id="center">
+        <div class="vs-ring"><span class="vs-txt">VS</span></div>
+        <div id="turnTag">دورك!</div>
+        <div class="deck-counts">
+          <span>🂠 <span id="aiDeckN">0</span></span>
+          <span>🂠 <span id="youDeckN">0</span></span>
+        </div>
+      </div>
+
+      <div class="battle-slot" id="playerSlot">
+        <div class="slot-hint">اختر<br>كارت</div>
+      </div>
+    </div>
+
+    <!-- Player area -->
+    <div id="playerZone">
+      <div id="playerHand"></div>
+      <div class="zone-label">يدك</div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div id="actionBar">
+    <button id="playBtn" onclick="confirmPlay()" disabled>⚔ العب الكارت</button>
+    <button id="passBtn" onclick="passTurn()" disabled>↩ تخطى الدور</button>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="log"></div>
+<!-- THINKING -->
+<div id="thinkBubble">
+  <span>🤔</span>
+  <span>يفكر</span>
+  <span class="think-dots"><span>•</span><span>•</span><span>•</span></span>
+</div>
+<!-- FX LAYER -->
+<div id="fx"></div>
+<!-- RESULT BIG -->
+<div id="resultBig"><div class="rt" id="resultBigTxt"></div></div>
+<!-- TOAST -->
+<div id="toast" id="toast"></div>
+
+<!-- START SCREEN -->
+<div class="screen-overlay show" id="startScreen">
+  <div class="s-box">
+    <span class="s-icon-big">🃏</span>
+    <div class="s-title">Cards Wars</div>
+    <div class="s-sub">
+      حرب الكروت — العب ضد الذكاء الاصطناعي!<br>
+      استدعِ وحوشك وادمّر عدوك بـ<b>قدرات سرية</b>.<br>
+      <b>أخفِض HP العدو لـ 0</b> قبل أن يفعل هو نفسه.
+    </div>
+    <ul class="rules-list">
+      <li>كل كارت لها هجوم ⚔ ودفاع 🛡 ومانا تكلفة 💧</li>
+      <li>كل دور تسحب كارت وتختار ما تلعبه</li>
+      <li>الدفاع يقلل الضرر الوارد — الكروت القوية تكلف مانا أكثر</li>
+      <li>كل كارت لها قدرة خاصة تنفجر عند اللعب ✨</li>
+      <li>المانا يتجدد +2 كل دور — وفّر للكروت الكبيرة!</li>
+    </ul>
+    <button class="s-btn" onclick="startGame()">⚔ ابدأ المعركة!</button>
+    <a href="index.html" style="display:block;margin-top:6px;color:rgba(200,180,130,.4);font-size:11px;text-decoration:none">← رجوع للقناة</a>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div class="screen-overlay" id="endScreen">
+  <div class="s-box">
+    <span class="s-icon-big" id="endEmoji">🏆</span>
+    <div class="s-title" id="endTitle">انتصرت!</div>
+    <div class="s-sub" id="endSub">هزمت عدوك في معركة ملحمية</div>
+    <div class="ai-badge" id="aiBadge">🤖 عدو مهاجم</div>
+    <div class="result-grid">
+      <div class="r-cell"><div class="rv" id="rTurns">0</div><div class="rl">أدوار</div></div>
+      <div class="r-cell"><div class="rv" id="rDmg">0</div><div class="rl">ضرر أعطيته</div></div>
+      <div class="r-cell"><div class="rv" id="rHp">0</div><div class="rl">HP متبقي</div></div>
+    </div>
+    <button class="s-btn" onclick="startGame()">🔄 جولة جديدة</button>
+    <button class="s-btn sec" onclick="showScreen('startScreen');hideScreen('endScreen')">📖 الشاشة الرئيسية</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ANIMATED BACKGROUND
+══════════════════════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('bgCanvas');
+  const cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  for(let i=0;i<70;i++) pts.push({
+    x:Math.random()*1920,y:Math.random()*1080,
+    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+    r:Math.random()*1.2+.3,
+    h:30+Math.random()*30,s:50+Math.random()*30,l:35+Math.random()*25
+  });
+  function draw(){
+    cx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=`hsla(${p.h},${p.s}%,${p.l}%,.55)`;
+      cx.fill();
+    });
+    // faint connections
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+      if(d<90){
+        cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);
+        cx.strokeStyle=`rgba(201,148,42,${(.08*(1-d/90)).toFixed(3)})`;
+        cx.lineWidth=.5;cx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   CARD DATABASE — 22 unique monsters
+══════════════════════════════════════════════════════════════ */
+const CARDS_DB = [
+  // ─── FIRE ───
+  {id:'ifrit',    name:'إفريت النار',  e:'🔥',t:'fire', atk:7,def:3,hp:14,mana:4, a:'يحرق العدو 🔥 (-2HP/دور)×2',       fn:'burn'},
+  {id:'phoenix',  name:'طائر العنقاء', e:'🦅',t:'fire', atk:5,def:4,hp:16,mana:5, a:'يتجدد — يشفي 6HP',                  fn:'revive'},
+  {id:'magmaLord',name:'لورد الحمم',   e:'🌋',t:'fire', atk:9,def:2,hp:12,mana:6, a:'ضرر مباشر +4 إضافي',                fn:'directDmg'},
+  {id:'salamander',name:'سلمندر',      e:'🦎',t:'fire', atk:6,def:5,hp:13,mana:4, a:'يرفع هجوم كروتك +2 لدور',          fn:'raisedAtk'},
+
+  // ─── WATER ───
+  {id:'leviathan',name:'ليفياثان',     e:'🐋',t:'water',atk:4,def:9,hp:18,mana:6, a:'يشفي 4HP لصاحبه',                  fn:'heal'},
+  {id:'siren',    name:'حورية السحر',  e:'🧜',t:'water',atk:6,def:4,hp:14,mana:4, a:'تسرق كارت من يد العدو',             fn:'steal'},
+  {id:'tsunami',  name:'موجة العملاقة',e:'🌊',t:'water',atk:5,def:3,hp:12,mana:4, a:'تضرب كل كروت العدو -1 هجوم',       fn:'splash'},
+  {id:'kraken',   name:'الكراكن',      e:'🐙',t:'water',atk:8,def:6,hp:16,mana:7, a:'يمسك كارت العدو — يجمّده دورًا',  fn:'freeze'},
+
+  // ─── EARTH ───
+  {id:'golem',    name:'جولم الصخر',   e:'🗿',t:'earth',atk:3,def:11,hp:20,mana:5, a:'يمتص الضربة التالية كاملًا',      fn:'absorb'},
+  {id:'treefolk', name:'روح الشجرة',   e:'🌳',t:'earth',atk:4,def:6,hp:16,mana:5, a:'يولّد مانا +3 لك',                fn:'manaBoost'},
+  {id:'behemoth', name:'البهيموث',     e:'🦏',t:'earth',atk:8,def:5,hp:15,mana:7, a:'يهاجم مرتين في نفس الدور',         fn:'doubleAtk'},
+
+  // ─── DARK ───
+  {id:'shadow',   name:'لورد الظلام',  e:'👤',t:'dark', atk:7,def:4,hp:14,mana:5, a:'يضعّف هجوم العدو -3 لدورين',      fn:'weaken'},
+  {id:'vampire',  name:'الفامبير',     e:'🧛',t:'dark', atk:6,def:3,hp:15,mana:4, a:'يسرق 3HP من العدو',               fn:'drain'},
+  {id:'lich',     name:'الليش الكهل', e:'💀',t:'dark', atk:5,def:5,hp:14,mana:5, a:'يستحضر زومبي من المقبرة',          fn:'summon'},
+  {id:'dragon',   name:'التنين الأسود',e:'🐉',t:'dark', atk:11,def:6,hp:16,mana:8, a:'يحرق ويسمّم معًا (-4HP فوري)',  fn:'dragonBreath'},
+
+  // ─── LIGHT ───
+  {id:'paladin',  name:'فارس النور',   e:'⚡',t:'light',atk:6,def:7,hp:17,mana:5, a:'يشفي 5HP ويصعّد دفاعه +3',        fn:'holyShield'},
+  {id:'angel',    name:'الملاك المحارب',e:'👼',t:'light',atk:5,def:5,hp:15,mana:4, a:'يبطل قدرة العدو القادمة',         fn:'nullify'},
+  {id:'zeus',     name:'زيوس الصاعقة', e:'🌩',t:'light',atk:10,def:3,hp:12,mana:7, a:'صاعقة سماوية -6HP مباشرة',       fn:'lightning'},
+
+  // ─── ICE ───
+  {id:'frostGiant',name:'عملاق الجليد',e:'🧊',t:'ice',  atk:5,def:8,hp:17,mana:5, a:'يجمّد كارت العدو النشط دورًا',   fn:'freeze2'},
+  {id:'yeti',     name:'الييتي',       e:'🏔',t:'ice',  atk:7,def:5,hp:15,mana:5, a:'يبطّئ العدو (-2 هجوم لدورين)',    fn:'slow'},
+  {id:'blizzard', name:'عاصفة الجليد', e:'❄️',t:'ice',  atk:6,def:4,hp:13,mana:6, a:'تجمّد كل يد العدو (-2 هجوم)',    fn:'blizzard'},
+
+  // ─── POISON ───
+  {id:'hydra',    name:'الهيدرا',      e:'🐍',t:'poison',atk:6,def:5,hp:16,mana:6, a:'تسمّم العدو (-2HP/دور)×3',        fn:'poison'},
+  {id:'spider',   name:'عنكبوت الظلام',e:'🕷',t:'poison',atk:5,def:6,hp:14,mana:4, a:'تشل كارت العدو الأقوى دورًا',    fn:'paralyze'},
+];
+
+/* ══════════════════════════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════════════════════════ */
+let YOU={hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:[],discard:[]};
+let AI= {hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:[],discard:[]};
+let gameOn=false, playerTurn=true;
+let selectedCard=null, playedCard=null, aiPlayedCard=null;
+let turns=0, dmgDealt=0;
+let aiPersonality=''; // aggressive / defensive / cunning / random
+let fx_youHeld=null; // raised atk
+let statusYou={burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
+let statusAI= {burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
+
+const TYPE_LABELS={fire:'🔥 نار',water:'💧 ماء',earth:'🌿 أرض',dark:'🌑 ظلام',light:'☀️ نور',ice:'❄️ جليد',poison:'☠️ سم'};
+
+/* ══════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════ */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function clone(c){return JSON.parse(JSON.stringify(c));}
+
+function buildDeck(){
+  const pool=shuffle([...CARDS_DB]);
+  // pick 18 random unique cards
+  return pool.slice(0,18).map(clone);
+}
+
+function startGame(){
+  hideScreen('startScreen'); hideScreen('endScreen');
+  document.getElementById('resultBig').classList.remove('show');
+  clearLog();
+
+  YOU={hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:buildDeck(),discard:[]};
+  AI= {hp:30,maxHp:30,mana:6,maxMana:6,hand:[],deck:buildDeck(),discard:[]};
+  statusYou={burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
+  statusAI= {burn:0,poison:0,frozen:0,weakened:0,absorbed:false,nullify:false};
+
+  selectedCard=null; playedCard=null; aiPlayedCard=null;
+  playerTurn=true; gameOn=true; turns=0; dmgDealt=0; fx_youHeld=null;
+
+  const perss=['aggressive','defensive','cunning','random'];
+  aiPersonality=perss[Math.floor(Math.random()*perss.length)];
+
+  // Draw 4 cards each
+  for(let i=0;i<4;i++){drawCard(YOU);drawCard(AI);}
+
+  renderAll();
+  updateHUD();
+  setBtns();
+  addLog('⚔ بدأت المعركة!','spec');
+  addLog(`🤖 عدوك: ${aiPersonLabel()}`,'spec');
+  showToast(`يقابلك: ${aiPersonLabel()}`);
+}
+
+function aiPersonLabel(){
+  return {aggressive:'مهاجم شرس 💥',defensive:'دفاعي محصّن 🛡',cunning:'ماكر خبيث 🧠',random:'عشوائي مجنون 🎲'}[aiPersonality]||'مجهول';
+}
+
+function drawCard(who){
+  if(who.deck.length===0){
+    if(who.discard.length===0) return false;
+    who.deck=shuffle([...who.discard]); who.discard=[];
+    addLog('🔀 تم خلط المقبرة مجدداً','normal');
+  }
+  if(who.hand.length>=6) return false;
+  who.hand.push(who.deck.pop());
+  return true;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════════════ */
+function renderAll(){
+  renderHand(YOU, document.getElementById('playerHand'), true);
+  renderHand(AI,  document.getElementById('enemyHand'),  false);
+  updateDeckNums();
+}
+
+function renderHand(who, container, isPlayer){
+  container.innerHTML='';
+  who.hand.forEach((card,i)=>{
+    const el=makeCard(card,isPlayer,true);
+    el.style.animationDelay=(i*.06)+'s';
+    el.classList.add(isPlayer?'deal-in-p':'deal-in-e');
+    if(isPlayer){
+      el.addEventListener('click',()=>selectCard(card,el));
+    }
+    container.appendChild(el);
+  });
+}
+
+function makeCard(card, isPlayer, inHand){
+  const div=document.createElement('div');
+  div.className=`card t-${card.t}${!isPlayer&&inHand?' facedown no-hover':''}`;
+  div.dataset.cid=card.id;
+
+  if(!isPlayer&&inHand){return div;} // face-down, no content
+
+  const frozen=(isPlayer?statusYou:statusAI).frozen>0;
+  const frStyle=frozen?'filter:saturate(.3) brightness(.7) hue-rotate(160deg)':'';
+
+  div.innerHTML=`
+  <div class="card-inner" style="${frStyle}">
+    <div class="card-top">
+      <div class="mana-gem">${card.mana}</div>
+      <div class="type-badge">${TYPE_LABELS[card.t]||card.t}</div>
+    </div>
+    <div class="card-art">
+      <div class="art-bg"></div>
+      <span>${card.e}</span>
+    </div>
+    <div class="card-name">${card.name}</div>
+    <div class="card-stats">
+      <div class="cstat"><span class="cstat-val atk">⚔ ${card.atk}</span><span class="cstat-lbl">هجوم</span></div>
+      <div class="cstat"><span class="cstat-val def">🛡 ${card.def}</span><span class="cstat-lbl">دفاع</span></div>
+    </div>
+    <div class="card-abil">${card.a}</div>
+  </div>
+  ${frozen?'<div class="status-icons"><div class="s-icon">🧊</div></div>':''}`;
+
+  return div;
+}
+
+function makeBattleCard(card, isPlayer){
+  const el=makeCard(card,true,false);
+  el.classList.add('no-hover');
+  return el;
+}
+
+function renderSlot(card, who){
+  const slotId=who==='you'?'playerSlot':'enemySlot';
+  const slot=document.getElementById(slotId);
+  slot.innerHTML='';
+  if(!card){
+    slot.className='battle-slot';
+    slot.innerHTML=`<div class="slot-hint">${who==='you'?'اختر<br>كارت':'كارت<br>العدو'}</div>`;
+    return;
+  }
+  slot.className=`battle-slot ${who==='you'?'active-p':'active-e'}`;
+  slot.appendChild(makeBattleCard(card,who==='you'));
+}
+
+function updateHUD(){
+  // HP
+  const yp=Math.max(0,YOU.hp/YOU.maxHp*100);
+  const ap=Math.max(0,AI.hp/AI.maxHp*100);
+  document.getElementById('youHpFill').style.width=yp+'%';
+  document.getElementById('aiHpFill').style.width=ap+'%';
+  document.getElementById('youHpNum').textContent=Math.max(0,YOU.hp);
+  document.getElementById('aiHpNum').textContent=Math.max(0,AI.hp);
+  // color danger
+  document.getElementById('youHpFill').style.background=
+    yp<25?'linear-gradient(90deg,#b91c1c,#ef4444)':'linear-gradient(90deg,#16a34a,#4ade80)';
+  // Mana
+  renderManaRow('youManaRow', YOU.mana, YOU.maxMana);
+  renderManaRow('aiManaRow',  AI.mana,  AI.maxMana);
+}
+function renderManaRow(id, cur, max){
+  const row=document.getElementById(id);
+  row.innerHTML='';
+  for(let i=0;i<max;i++){
+    const p=document.createElement('div');
+    p.className='mana-pip'+(i>=cur?' empty':'');
+    row.appendChild(p);
+  }
+}
+function updateDeckNums(){
+  document.getElementById('youDeckN').textContent=YOU.deck.length;
+  document.getElementById('aiDeckN').textContent=AI.deck.length;
+}
+function setBtns(){
+  const canPlay=playerTurn&&gameOn&&selectedCard!==null&&YOU.mana>=selectedCard.mana&&statusYou.frozen===0;
+  document.getElementById('playBtn').disabled=!canPlay;
+  document.getElementById('passBtn').disabled=!playerTurn||!gameOn;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARD SELECTION
+══════════════════════════════════════════════════════════════ */
+function selectCard(card, el){
+  if(!playerTurn||!gameOn) return;
+  // toggle off
+  document.querySelectorAll('#playerHand .card').forEach(c=>c.classList.remove('selected'));
+  if(selectedCard&&selectedCard.id===card.id){
+    selectedCard=null;
+    renderSlot(null,'you');
+    setBtns();
+    return;
+  }
+  selectedCard=card;
+  el.classList.add('selected');
+  renderSlot(card,'you');
+  setBtns();
+  if(YOU.mana<card.mana) showToast('💧 مانا غير كافية! وفّر أكثر.');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PLAYER PLAYS
+══════════════════════════════════════════════════════════════ */
+function confirmPlay(){
+  if(!selectedCard||!playerTurn||!gameOn) return;
+  if(YOU.mana<selectedCard.mana){showToast('💧 مانا غير كافية!');return;}
+  if(statusYou.frozen>0){showToast('🧊 أنت مجمّد هذا الدور!');return;}
+
+  const card=selectedCard;
+  selectedCard=null;
+  YOU.mana-=card.mana;
+
+  // remove from hand
+  YOU.hand=YOU.hand.filter(c=>c.id!==card.id);
+  YOU.discard.push(card);
+  playedCard=card;
+
+  renderHand(YOU,document.getElementById('playerHand'),true);
+  renderSlot(card,'you');
+  setBtns();
+
+  addLog(`⚔ لعبت <b>${card.name}</b> ${card.e}`,'normal');
+  doPlayerAttack(card);
+}
+
+function passTurn(){
+  if(!playerTurn||!gameOn) return;
+  drawCard(YOU);
+  renderHand(YOU,document.getElementById('playerHand'),true);
+  addLog('↩ تخطيت — سحبت كارت','normal');
+  endTurn();
+}
+
+function doPlayerAttack(card){
+  playerTurn=false; setBtns();
+  document.getElementById('turnTag').textContent='...تحسب النتيجة';
+
+  setTimeout(()=>{
+    // 1. apply your ability
+    if(!statusAI.nullify) applyAbility(card,'you');
+    else { statusAI.nullify=false; addLog('👼 العدو أبطل قدرتك!','spec'); }
+
+    // 2. combat dmg
+    const atkVal=(card.atk + (fx_youHeld||0)) - (statusYou.weakened>0?3:0);
+    const rawDmg=Math.max(0,atkVal);
+
+    if(statusAI.absorbed){
+      statusAI.absorbed=false;
+      addLog('🗿 الجولم امتص ضربتك كاملًا!','spec');
+      clashFX(window.innerWidth*.35, window.innerHeight*.5, '#888');
+    } else if(rawDmg>0){
+      // def reduces — use opponent's played card def / 2
+      const defBonus=aiPlayedCard?Math.floor(aiPlayedCard.def/2):0;
+      const finalDmg=Math.max(1,rawDmg-defBonus);
+      AI.hp-=finalDmg; dmgDealt+=finalDmg;
+      clashFX(window.innerWidth*.35, window.innerHeight*.5, '#ef4444');
+      floatDmg(finalDmg, true);
+      addLog(`💥 ضربت العدو ${finalDmg} ضرر${defBonus>0?` (دفاع العدو -${defBonus})`:''}`, 'dmg');
+      shakeEl(document.getElementById('aiHpFill').parentElement);
+    }
+
+    // 3. burn/poison on AI
+    tickDots(AI, statusAI, 'العدو');
+
+    fx_youHeld=null;
+    updateHUD();
+    if(checkEnd()) return;
+
+    // draw your card
+    drawCard(YOU);
+    renderHand(YOU,document.getElementById('playerHand'),true);
+    turns++;
+    setTimeout(()=>aiTurn(),800);
+  },550);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AI TURN
+══════════════════════════════════════════════════════════════ */
+function aiTurn(){
+  document.getElementById('turnTag').textContent='العدو يفكر...';
+  document.getElementById('thinkBubble').classList.add('show');
+
+  // reduce frozen
+  if(statusAI.frozen>0) statusAI.frozen--;
+  if(statusYou.frozen>0) statusYou.frozen--;
+  if(statusAI.weakened>0) statusAI.weakened--;
+
+  const thinkMs=700+Math.random()*1500;
+  setTimeout(()=>{
+    document.getElementById('thinkBubble').classList.remove('show');
+    if(!gameOn) return;
+
+    if(AI.hand.length===0){drawCard(AI);}
+    const choice=aiChooseCard();
+
+    if(!choice||AI.mana<choice.mana){
+      // AI passes or can't play
+      drawCard(AI);
+      renderHand(AI,document.getElementById('enemyHand'),false);
+      addLog(choice?'🤖 المانا قليلة — العدو يتخطى':'🤖 العدو ليس لديه كروت ملائمة','normal');
+      endAITurn();
+      return;
+    }
+
+    AI.mana-=choice.mana;
+    AI.hand=AI.hand.filter(c=>c.id!==choice.id);
+    AI.discard.push(choice);
+    aiPlayedCard=choice;
+
+    renderHand(AI,document.getElementById('enemyHand'),false);
+    renderSlot(choice,'ai');
+    addLog(`🤖 العدو لعب <b>${choice.name}</b> ${choice.e}`,'normal');
+    updateHUD();
+
+    setTimeout(()=>{
+      // AI ability
+      if(!statusYou.nullify) applyAbility(choice,'ai');
+      else { statusYou.nullify=false; addLog('👼 ملاكك أبطل قدرة العدو!','spec'); }
+
+      // AI combat
+      const atkVal=choice.atk - (statusAI.weakened>0?3:0);
+      const rawDmg=Math.max(0,atkVal);
+
+      if(statusYou.absorbed){
+        statusYou.absorbed=false;
+        addLog('🗿 جولمك امتص الضربة!','spec');
+        clashFX(window.innerWidth*.65,window.innerHeight*.5,'#888');
+      } else if(rawDmg>0){
+        const defBonus=playedCard?Math.floor(playedCard.def/2):0;
+        const finalDmg=Math.max(1,rawDmg-defBonus);
+        YOU.hp-=finalDmg;
+        clashFX(window.innerWidth*.65,window.innerHeight*.5,'#3b82f6');
+        floatDmg(finalDmg,false);
+        addLog(`💔 أصابك العدو ${finalDmg} ضرر${defBonus>0?` (دفاعك -${defBonus})`:''}`, 'dmg');
+        shakeEl(document.getElementById('youHpFill').parentElement);
+      }
+
+      tickDots(YOU,statusYou,'أنت');
+      updateHUD();
+      if(checkEnd()) return;
+
+      drawCard(AI);
+      renderHand(AI,document.getElementById('enemyHand'),false);
+      endAITurn();
+    },600);
+  },thinkMs);
+}
+
+function endAITurn(){
+  // mana regen
+  YOU.mana=Math.min(YOU.maxMana, YOU.mana+2);
+  AI.mana =Math.min(AI.maxMana,  AI.mana+2);
+  updateHUD();
+  playerTurn=true;
+  selectedCard=null; playedCard=null; aiPlayedCard=null;
+  renderSlot(null,'you'); renderSlot(null,'ai');
+  document.getElementById('turnTag').textContent='دورك!';
+  setBtns();
+  addLog('──────────────','sep');
+}
+
+function endTurn(){
+  YOU.mana=Math.min(YOU.maxMana,YOU.mana+2);
+  AI.mana=Math.min(AI.maxMana,AI.mana+2);
+  updateHUD();
+  playerTurn=false; setBtns();
+  document.getElementById('turnTag').textContent='العدو يفكر...';
+  setTimeout(()=>aiTurn(),500);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AI STRATEGY
+══════════════════════════════════════════════════════════════ */
+function aiChooseCard(){
+  const playable=AI.hand.filter(c=>c.mana<=AI.mana&&(statusAI.frozen===0||true));
+  if(!playable.length) return null;
+
+  switch(aiPersonality){
+    case 'aggressive':
+      // highest attack
+      return playable.sort((a,b)=>b.atk-a.atk)[0];
+
+    case 'defensive':
+      // if low HP, prioritize heal/absorb
+      if(AI.hp<12){
+        const saver=playable.find(c=>['heal','holyShield','absorb','revive'].includes(c.fn));
+        if(saver) return saver;
+      }
+      return playable.sort((a,b)=>b.def-a.def)[0];
+
+    case 'cunning':
+      // kill shot?
+      if(YOU.hp<=8){return playable.sort((a,b)=>b.atk-a.atk)[0];}
+      // need heal?
+      if(AI.hp<10){
+        const h=playable.find(c=>['heal','holyShield','drain','revive'].includes(c.fn));
+        if(h) return h;
+      }
+      // go for strongest card (mana-cost)
+      return playable.sort((a,b)=>b.mana-a.mana)[0];
+
+    case 'random':
+    default:
+      return playable[Math.floor(Math.random()*playable.length)];
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ABILITIES
+══════════════════════════════════════════════════════════════ */
+function applyAbility(card, who){
+  const myStatus = who==='you'?statusYou:statusAI;
+  const oppStatus= who==='you'?statusAI:statusYou;
+  const me=who==='you'?YOU:AI;
+  const opp=who==='you'?AI:YOU;
+
+  switch(card.fn){
+    case 'burn':
+      oppStatus.burn=2;
+      addLog(`🔥 ${card.name}: حرق العدو! (-2HP/دور)×2`,'spec'); break;
+
+    case 'poison':
+      oppStatus.poison=3;
+      addLog(`☠️ ${card.name}: سمّ! (-2HP/دور)×3`,'spec'); break;
+
+    case 'heal':
+      me.hp=Math.min(me.maxHp,me.hp+4);
+      updateHUD(); addLog(`❤️ ${card.name}: +4HP`,'heal'); break;
+
+    case 'holyShield':
+      me.hp=Math.min(me.maxHp,me.hp+5);
+      updateHUD(); addLog(`✨ ${card.name}: +5HP + درع!'`,'heal'); break;
+
+    case 'revive':
+      me.hp=Math.min(me.maxHp,me.hp+6);
+      updateHUD(); addLog(`🦅 ${card.name}: تجدّد +6HP`,'heal'); break;
+
+    case 'drain':
+      opp.hp-=3; me.hp=Math.min(me.maxHp,me.hp+3);
+      if(who==='you') dmgDealt+=3;
+      updateHUD(); addLog(`🧛 ${card.name}: سرق 3HP من العدو`,'spec'); break;
+
+    case 'directDmg':
+      opp.hp-=4; if(who==='you') dmgDealt+=4;
+      updateHUD(); floatDmg(4,who==='you');
+      addLog(`🌋 ${card.name}: ضرر مباشر -4HP!`,'dmg'); break;
+
+    case 'lightning':
+      opp.hp-=6; if(who==='you') dmgDealt+=6;
+      updateHUD(); floatDmg(6,who==='you');
+      flashScreen('rgba(255,255,150,.35)');
+      addLog(`🌩 صاعقة زيوس: -6HP مباشرة!`,'dmg'); break;
+
+    case 'dragonBreath':
+      opp.hp-=4; oppStatus.burn=2; if(who==='you') dmgDealt+=4;
+      updateHUD(); floatDmg(4,who==='you');
+      addLog(`🐉 نفس التنين: -4HP + حرق×2`,'dmg'); break;
+
+    case 'steal':
+      if(opp.hand.length>0&&me.hand.length<6){
+        const idx=Math.floor(Math.random()*opp.hand.length);
+        const stolen=opp.hand.splice(idx,1)[0];
+        me.hand.push(stolen);
+        renderAll();
+        addLog(`🧜 ${card.name}: سرقت "${stolen.name}"!`,'spec');
+      } break;
+
+    case 'splash':
+      opp.hand.forEach(c=>c.atk=Math.max(0,c.atk-1));
+      renderAll();
+      addLog(`🌊 ${card.name}: كل كروت العدو -1 هجوم`,'spec'); break;
+
+    case 'blizzard':
+      opp.hand.forEach(c=>c.atk=Math.max(0,c.atk-2));
+      oppStatus.frozen=1;
+      renderAll();
+      addLog(`❄️ عاصفة الجليد: كل كروت العدو -2 + تجميد دور`,'spec'); break;
+
+    case 'freeze':
+    case 'freeze2':
+      oppStatus.frozen=1;
+      addLog(`🧊 ${card.name}: جمّد كارت العدو دورًا!`,'spec'); break;
+
+    case 'absorb':
+      myStatus.absorbed=true;
+      addLog(`🗿 ${card.name}: سيمتص الضربة القادمة كاملًا!`,'spec'); break;
+
+    case 'weaken':
+      oppStatus.weakened=2;
+      addLog(`💜 ${card.name}: ضعّف العدو -3 هجوم لدورين`,'spec'); break;
+
+    case 'slow':
+      oppStatus.weakened=2;
+      addLog(`🐌 ${card.name}: أبطأ العدو -2 هجوم لدورين`,'spec'); break;
+
+    case 'paralyze':
+      oppStatus.frozen=1;
+      addLog(`🕷 ${card.name}: شلّ العدو دورًا`,'spec'); break;
+
+    case 'manaBoost':
+      me.mana=Math.min(me.maxMana,me.mana+3);
+      updateHUD();
+      addLog(`🌳 ${card.name}: +3 مانا لك!`,'spec'); break;
+
+    case 'doubleAtk': {
+      const atkV=Math.max(0,card.atk-(myStatus.weakened>0?3:0));
+      opp.hp-=atkV; if(who==='you') dmgDealt+=atkV;
+      updateHUD(); floatDmg(atkV,who==='you');
+      addLog(`💥 ${card.name}: هجمة ثانية! -${atkV}HP إضافي`,'dmg'); break;
+    }
+
+    case 'raisedAtk':
+      if(who==='you') fx_youHeld=2;
+      addLog(`🦎 ${card.name}: رفع هجوم الدور +2`,'spec'); break;
+
+    case 'summon': {
+      const z={id:'zombie_'+Date.now(),name:'زومبي',e:'🧟',t:'dark',atk:4,def:3,hp:8,mana:2,a:'ضرر عادي',fn:'none'};
+      if(me.hand.length<6){me.hand.push(z);renderAll();}
+      addLog(`💀 ${card.name}: استحضر زومبي!`,'spec'); break;
+    }
+
+    case 'nullify':
+      oppStatus.nullify=true;
+      addLog(`👼 ${card.name}: القدرة القادمة للعدو ستُبطل!`,'spec'); break;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STATUS DOTS (burn/poison)
+══════════════════════════════════════════════════════════════ */
+function tickDots(who, status, label){
+  if(status.burn>0){
+    who.hp-=2; status.burn--;
+    addLog(`🔥 حرق ${label}: -2HP (${status.burn} دور متبقي)`,'dmg');
+  }
+  if(status.poison>0){
+    who.hp-=2; status.poison--;
+    addLog(`☠️ سم ${label}: -2HP (${status.poison} أدوار متبقية)`,'dmg');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GAME OVER
+══════════════════════════════════════════════════════════════ */
+function checkEnd(){
+  if(YOU.hp<=0){YOU.hp=0;updateHUD();setTimeout(()=>endGame(false),500);return true;}
+  if(AI.hp<=0){AI.hp=0;updateHUD();setTimeout(()=>endGame(true),500);return true;}
+  return false;
+}
+
+function endGame(won){
+  gameOn=false; setBtns();
+
+  // result flash
+  const rb=document.getElementById('resultBig');
+  const rt=document.getElementById('resultBigTxt');
+  rt.textContent=won?'🏆 انتصرت!':'💀 هُزمت!';
+  rt.style.color=won?'#c9942a':'#ef4444';
+  rb.classList.add('show');
+
+  // confetti / particles
+  if(won){for(let i=0;i<20;i++) spawnConfetti();}
+
+  setTimeout(()=>{
+    rb.classList.remove('show');
+    document.getElementById('endEmoji').textContent=won?'🏆':'💀';
+    document.getElementById('endTitle').textContent=won?'انتصرت!':'هُزمت!';
+    document.getElementById('endSub').textContent=won
+      ?`دمّرت العدو الـ${aiPersonality} بمهارة ملحمية!`
+      :'العدو أثبت قوته هذه المرة. هل تجرب مجددًا؟';
+    document.getElementById('aiBadge').textContent='🤖 '+aiPersonLabel();
+    document.getElementById('rTurns').textContent=turns;
+    document.getElementById('rDmg').textContent=dmgDealt;
+    document.getElementById('rHp').textContent=Math.max(0,YOU.hp);
+    showScreen('endScreen');
+  },2200);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VISUAL EFFECTS
+══════════════════════════════════════════════════════════════ */
+function clashFX(x,y,color){
+  const r=document.createElement('div');
+  r.className='clash-ring';
+  r.style.cssText=`left:${x}px;top:${y}px;border-color:${color};opacity:.9`;
+  document.getElementById('fx').appendChild(r);
+  setTimeout(()=>r.remove(),650);
+  // particles
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div');
+    p.className='burst-p';
+    const ang=Math.random()*Math.PI*2, dist=30+Math.random()*60;
+    p.style.cssText=`left:${x}px;top:${y}px;width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;background:${color};--tx:${Math.cos(ang)*dist}px;--ty:${Math.sin(ang)*dist}px;--dur:${.4+Math.random()*.4}s`;
+    document.getElementById('fx').appendChild(p);
+    setTimeout(()=>p.remove(),700);
+  }
+}
+
+function floatDmg(dmg,isEnemy){
+  if(dmg<=0) return;
+  const el=document.createElement('div');
+  el.className='dmg-num';
+  el.textContent=`-${dmg}`;
+  el.style.fontSize=(16+dmg*1.5)+'px';
+  el.style.color=isEnemy?'#f87171':'#60a5fa';
+  el.style.left=(isEnemy?28:62)+'%';
+  el.style.top='48%';
+  document.getElementById('fx').appendChild(el);
+  setTimeout(()=>el.remove(),1400);
+}
+
+function flashScreen(color){
+  const f=document.createElement('div');
+  f.className='screen-flash';
+  f.style.background=color;
+  document.getElementById('fx').appendChild(f);
+  setTimeout(()=>f.remove(),450);
+}
+
+function spawnConfetti(){
+  const p=document.createElement('div');
+  p.className='burst-p';
+  const x=Math.random()*innerWidth, y=innerHeight;
+  const ang=-Math.PI*.5+(Math.random()-.5)*1.2;
+  const dist=200+Math.random()*300;
+  const colors=['#c9942a','#f5d070','#ef4444','#4ade80','#60a5fa','#c084fc'];
+  p.style.cssText=`left:${x}px;top:${y}px;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()<.5?'50%':'2px'};--tx:${Math.cos(ang)*dist}px;--ty:${Math.sin(ang)*dist}px;--dur:${1+Math.random()*.8}s`;
+  document.getElementById('fx').appendChild(p);
+  setTimeout(()=>p.remove(),1900);
+}
+
+function shakeEl(el){
+  el.classList.add('card-shake');
+  setTimeout(()=>el.classList.remove('card-shake'),450);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LOG
+══════════════════════════════════════════════════════════════ */
+function addLog(msg,type){
+  const log=document.getElementById('log');
+  const d=document.createElement('div');
+  d.className=`log-line ${type||'normal'}`;
+  d.innerHTML=msg;
+  log.insertBefore(d,log.firstChild);
+  while(log.children.length>9) log.removeChild(log.lastChild);
+}
+function clearLog(){document.getElementById('log').innerHTML='';}
+
+/* ══════════════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════════════ */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2400);
+}
+function showScreen(id){document.getElementById(id).classList.add('show');}
+function hideScreen(id){document.getElementById(id).classList.remove('show');}
+</script>
+</body>
+</html>
