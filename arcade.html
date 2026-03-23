@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="arcade/me.png" type="image/png">
+<title>ARCADE</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════ */
+:root{
+  --px:#00ffff;--pm:#ff00ff;--py:#ffff00;--pg:#00ff88;--pr:#ff3344;
+  --bg:#0a0a1a;--bg2:#0f0f2e;--bg3:#1a1a3e;
+  --panel:rgba(10,10,40,.92);--border:rgba(0,255,255,.35);
+  --text:#e0e8ff;--sub:#7888c0;
+  --font:'Press Start 2P',monospace;--font2:'Cairo',sans-serif;
+  --scanline:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);overflow:hidden;font-family:var(--font);image-rendering:pixelated}
+/* ── PORTRAIT LOCK ── */
+#rotateWarn{display:none;position:fixed;inset:0;z-index:9998;background:#060010;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:30px}
+#rotateWarn .ri{font-size:72px;animation:rotSpin 2s ease-in-out infinite}
+@keyframes rotSpin{0%,40%,100%{transform:rotate(0deg)}70%{transform:rotate(90deg)}}
+@media(orientation:portrait) and (max-width:900px){
+  #rotateWarn{display:flex}
+  .screen,.screen.active{display:none!important}
+}
+img{image-rendering:pixelated;image-rendering:crisp-edges}
+
+/* ═══════════════════════════════════════
+   CRT SCANLINE OVERLAY
+═══════════════════════════════════════ */
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background:var(--scanline);opacity:.35}
+
+/* ═══════════════════════════════════════
+   PIXEL UTILITIES
+═══════════════════════════════════════ */
+.px-border{border:3px solid var(--px);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--px),inset 0 0 0 2px rgba(0,255,255,.1)}
+.px-border-m{border:3px solid var(--pm);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--pm),inset 0 0 0 2px rgba(255,0,255,.1)}
+.px-border-y{border:3px solid var(--py);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--py),inset 0 0 0 2px rgba(255,255,0,.1)}
+.px-glow{text-shadow:0 0 8px var(--px),0 0 20px var(--px),0 0 40px rgba(0,255,255,.3)}
+.px-glow-m{text-shadow:0 0 8px var(--pm),0 0 20px var(--pm)}
+.px-glow-y{text-shadow:0 0 8px var(--py),0 0 20px var(--py)}
+.neon-line{position:relative}
+.neon-line::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--px);box-shadow:0 0 8px var(--px),0 0 16px var(--px)}
+
+/* ═══════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════ */
+.screen{position:fixed;inset:0;z-index:10;display:none}
+.screen.active{display:block}
+
+/* ═══════════════════════════════════════
+   ████ TITLE SCREEN ████
+═══════════════════════════════════════ */
+#titleScreen{background:#000}
+#titleBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9}
+.title-crt{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.7) 100%),var(--scanline)}
+/* LEFT MENU PANEL */
+#titleMenu{
+  position:absolute;left:0;top:0;bottom:0;width:280px;
+  background:linear-gradient(90deg,rgba(0,0,20,.98) 70%,transparent);
+  display:flex;flex-direction:column;justify-content:center;padding:40px 24px;
+  z-index:5;
+}
+.title-logo{margin-bottom:48px}
+.logo-top{font-size:11px;color:var(--px);letter-spacing:4px;display:block;margin-bottom:6px;animation:blink 1.2s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.logo-main{font-size:22px;color:#fff;display:block;line-height:1.3;text-shadow:0 0 20px var(--px),0 0 40px rgba(0,255,255,.5)}
+.logo-sub{font-size:8px;color:var(--pm);display:block;margin-top:8px;letter-spacing:2px}
+
+/* PIXEL BUTTONS */
+.px-btn{
+  display:block;width:100%;padding:14px 16px;margin-bottom:12px;
+  font-family:var(--font);font-size:10px;color:#fff;
+  background:rgba(0,255,255,.08);
+  border:2px solid rgba(0,255,255,.4);
+  cursor:pointer;text-align:right;
+  position:relative;overflow:hidden;
+  transition:all .05s;letter-spacing:1px;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.px-btn::before{
+  content:'▶';position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--px);font-size:8px;opacity:0;transition:opacity .1s,right .1s;
+}
+.px-btn:hover{background:rgba(0,255,255,.18);border-color:var(--px);color:var(--px);transform:translateX(4px)}
+.px-btn:hover::before{opacity:1;right:10px}
+.px-btn:active{transform:translateX(2px) scale(.98);background:rgba(0,255,255,.3)}
+.px-btn.active-btn{background:rgba(0,255,255,.25);border-color:var(--px);color:var(--px)}
+
+/* CURSOR BLINK on title */
+.cursor-blink{animation:blink 1s step-end infinite}
+
+/* INSERT COIN anim */
+#insertCoin{
+  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  font-size:8px;color:var(--py);letter-spacing:2px;
+  animation:blink 1.5s step-end infinite;white-space:nowrap;
+}
+
+/* VERSION */
+#versionTag{position:absolute;bottom:10px;right:16px;font-size:6px;color:rgba(255,255,255,.2)}
+
+/* ═══════════════════════════════════════
+   NAME ENTRY SCREEN
+═══════════════════════════════════════ */
+#nameScreen{
+  background:rgba(0,0,0,.97);
+  display:none;align-items:center;justify-content:center;z-index:50;
+}
+#nameScreen.active{display:flex}
+.name-box{
+  padding:40px 36px;text-align:center;
+  background:var(--bg2);
+  border:3px solid var(--px);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--px),0 0 40px rgba(0,255,255,.2),inset 0 0 20px rgba(0,255,255,.04);
+  animation:scaleIn .3s cubic-bezier(.34,1.56,.64,1);
+  max-width:480px;width:90%;
+}
+@keyframes scaleIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.name-title{font-size:11px;color:var(--px);margin-bottom:8px;letter-spacing:2px}
+.name-sub{font-size:7px;color:var(--sub);margin-bottom:32px;line-height:1.8;font-family:var(--font2)}
+.px-input{
+  width:100%;padding:12px 16px;
+  font-family:var(--font);font-size:11px;color:var(--px);
+  background:rgba(0,0,0,.8);
+  border:2px solid var(--px);outline:none;
+  text-align:center;margin-bottom:24px;
+  caret-color:var(--px);
+  box-shadow:0 0 12px rgba(0,255,255,.2),inset 0 0 8px rgba(0,255,255,.05);
+}
+.px-input::placeholder{color:rgba(0,255,255,.3)}
+
+/* ═══════════════════════════════════════
+   TRANSITION OVERLAY
+═══════════════════════════════════════ */
+#transOverlay{
+  position:fixed;inset:0;z-index:800;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:#000;opacity:0;pointer-events:none;
+  transition:opacity .3s;
+}
+#transOverlay.show{opacity:1;pointer-events:all}
+.trans-text{font-size:10px;color:var(--px);margin-top:16px;animation:blink .6s step-end infinite}
+.pixel-loader{display:flex;gap:6px}
+.pl-dot{width:10px;height:10px;background:var(--px)}
+.pl-dot:nth-child(1){animation:plPulse .8s ease infinite}
+.pl-dot:nth-child(2){animation:plPulse .8s ease .15s infinite}
+.pl-dot:nth-child(3){animation:plPulse .8s ease .3s infinite}
+@keyframes plPulse{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
+
+/* ═══════════════════════════════════════
+   ████ MAIN GAME SCREEN ████
+═══════════════════════════════════════ */
+#gameScreen{display:none}
+#gameScreen.active{display:block}
+/* ── NEON ABYSS STYLE BACKGROUND ── */
+#gameScreen{
+  background:
+    /* ceiling light strips */
+    repeating-linear-gradient(90deg,transparent,transparent 18%,rgba(180,100,255,.04) 18%,rgba(180,100,255,.04) 18.2%),
+    /* floor reflection glow */
+    radial-gradient(ellipse 80% 25% at 50% 100%,rgba(100,0,200,.18),transparent 70%),
+    /* depth fog */
+    radial-gradient(ellipse 60% 50% at 50% 40%,rgba(40,0,80,.0),rgba(10,0,30,.9) 85%),
+    /* base color */
+    linear-gradient(180deg,#0a0015 0%,#0d0020 35%,#12002a 60%,#180030 100%);
+}
+#gameBg{display:none}
+#gameScreen .crt-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55) 100%)}
+
+/* ── TOP HUD BAR ── */
+#topHud{
+  position:absolute;top:0;left:0;right:0;z-index:20;
+  height:56px;
+  background:linear-gradient(180deg,rgba(0,0,10,.96) 0%,rgba(0,0,10,.82) 100%);
+  border-bottom:2px solid rgba(0,255,255,.25);
+  display:flex;align-items:center;padding:0 16px;gap:8px;
+  box-shadow:0 2px 20px rgba(0,0,0,.5);
+}
+/* Money display */
+#moneyDisp{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(0,255,255,.07);
+  border:2px solid rgba(0,255,255,.25);
+  padding:5px 12px;border-radius:2px;
+  cursor:default;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+}
+#moneyDisp img{width:18px;height:18px;image-rendering:pixelated}
+#moneyVal{font-size:9px;color:var(--py);font-family:var(--font)}
+/* HUD ICON BUTTONS */
+.hud-icon-btn{
+  width:44px;height:44px;
+  background:rgba(255,255,255,.06);
+  border:2px solid rgba(255,255,255,.12);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:3px;
+  transition:all .1s;position:relative;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+}
+.hud-icon-btn img{width:22px;height:22px;image-rendering:pixelated}
+.hud-icon-btn:hover{background:rgba(0,255,255,.18);border-color:var(--px);transform:translateY(-2px)}
+.hud-icon-btn:active{transform:scale(.92)}
+.hud-icon-btn.active{border-color:var(--px);background:rgba(0,255,255,.2);box-shadow:0 0 10px rgba(0,255,255,.3)}
+/* day display */
+#dayDisp{
+  margin-right:auto;margin-left:8px;
+  font-size:7px;color:var(--sub);font-family:var(--font);text-align:center;
+}
+#dayNum{color:var(--py);font-size:9px;display:block;margin-bottom:2px}
+/* Open/Close button */
+#openBtn{
+  padding:7px 14px;font-family:var(--font);font-size:8px;cursor:pointer;
+  border:2px solid #00ff88;background:rgba(0,255,136,.12);color:#00ff88;
+  transition:all .1s;white-space:nowrap;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+}
+#openBtn:hover{background:rgba(0,255,136,.28)}
+#openBtn.closed{border-color:var(--pr);background:rgba(255,51,68,.12);color:var(--pr)}
+/* Profile pic */
+#profilePic{width:40px;height:40px;border:2px solid rgba(255,0,255,.4);cursor:pointer;object-fit:cover;image-rendering:pixelated;transition:border-color .2s}
+#profilePic:hover{border-color:var(--pm)}
+
+/* ── GAME FLOOR ── */
+#gameFloor{
+  position:absolute;bottom:0;left:0;right:0;top:56px;
+  z-index:2;overflow:hidden;
+}
+/* ══ 2.5D ROOM — wall + floor with hard separation ══ */
+#gameFloor::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    /* FLOOR — tile pattern (checker-like) */
+    repeating-conic-gradient(rgba(40,10,80,.35) 0% 25%, rgba(20,5,45,.35) 0% 50%)
+      0 55% / 60px 40px,
+    /* FLOOR base color */
+    linear-gradient(180deg, #1a0840 55%, #0f0530 75%, #0a0320 100%),
+    /* WALL base color */
+    linear-gradient(180deg, #08001a 0%, #0f0028 40%, #16003a 54%, #1a0840 55%);
+}
+/* Grid lines + floor/wall edge */
+#gameFloor::after{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    /* BRIGHT floor line (hard wall/floor separation) */
+    linear-gradient(180deg,
+      transparent 0%,
+      transparent calc(54% - 2px),
+      rgba(160,60,255,.9) calc(54% - 2px),
+      rgba(220,120,255,1) 54%,
+      rgba(160,60,255,.9) calc(54% + 2px),
+      transparent calc(54% + 2px)
+    ),
+    /* Horizontal floor grid lines (perspective spacing) */
+    repeating-linear-gradient(180deg,
+      transparent 54%,
+      transparent calc(54% + 8px),
+      rgba(140,50,255,.18) calc(54% + 8px),
+      rgba(140,50,255,.18) calc(54% + 9px),
+      transparent calc(54% + 9px),
+      transparent calc(54% + 22px),
+      rgba(120,40,200,.12) calc(54% + 22px),
+      rgba(120,40,200,.12) calc(54% + 23px),
+      transparent calc(54% + 23px),
+      transparent calc(54% + 44px),
+      rgba(100,30,180,.07) calc(54% + 44px),
+      rgba(100,30,180,.07) calc(54% + 45px)
+    );
+  box-shadow:inset 0 0 80px rgba(100,0,200,.15);
+}
+/* Ceiling neon light bar */
+#ceilingLight{
+  position:absolute;top:0;left:0;right:0;height:3px;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent 5%,rgba(180,80,255,.6) 20%,rgba(220,120,255,.9) 50%,rgba(180,80,255,.6) 80%,transparent 95%);
+  box-shadow:0 0 20px rgba(200,80,255,.4),0 0 60px rgba(200,80,255,.15);
+}
+/* Back wall neon trim */
+#wallTrim{
+  position:absolute;z-index:3;pointer-events:none;
+  left:0;right:0;
+  top:30%;height:2px;
+  background:linear-gradient(90deg,transparent 5%,rgba(100,0,200,.4) 20%,rgba(160,40,255,.6) 50%,rgba(100,0,200,.4) 80%,transparent 95%);
+  box-shadow:0 0 8px rgba(140,0,255,.3);
+}
+/* Left & right walls */
+#wallLeft,#wallRight{
+  position:absolute;top:0;bottom:0;width:22%;z-index:3;pointer-events:none;
+}
+#wallLeft{
+  left:0;
+  background:linear-gradient(90deg,rgba(6,0,18,.97) 0%,rgba(8,0,22,.9) 60%,transparent 100%);
+  border-right:1px solid rgba(120,40,255,.15);
+}
+#wallRight{
+  right:0;
+  background:linear-gradient(270deg,rgba(6,0,18,.97) 0%,rgba(8,0,22,.9) 60%,transparent 100%);
+  border-left:1px solid rgba(120,40,255,.15);
+}
+/* Neon signs on walls */
+.wall-sign{
+  position:absolute;
+  width:60px;height:80px;
+  border:2px solid rgba(255,40,80,.5);
+  background:rgba(180,10,30,.15);
+  box-shadow:0 0 12px rgba(255,40,80,.3),inset 0 0 8px rgba(255,40,80,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  animation:signFlicker 4s ease-in-out infinite;
+}
+@keyframes signFlicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.4}94%{opacity:1}97%{opacity:.7}98%{opacity:1}}
+/* Floor glow under machines */
+.machine-glow{
+  position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:80%;height:10px;
+  background:radial-gradient(ellipse,rgba(120,40,255,.4),transparent 70%);
+  pointer-events:none;z-index:1;
+}
+/* Scanlines */
+#scanlines{
+  position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);
+  opacity:.5;
+}
+/* Depth fog at top of floor */
+#depthFog{
+  position:absolute;top:38%;left:0;right:0;height:16%;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,rgba(8,0,20,.7) 0%,transparent 100%);
+}
+
+/* ARCADE MACHINES on floor */
+.arcade-machine{
+  position:absolute;bottom:80px;
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;transition:filter .15s;
+  z-index:5;
+}
+.arcade-machine img{
+  width:90px;height:auto;image-rendering:pixelated;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));
+}
+.arcade-machine:hover img{filter:drop-shadow(0 4px 16px rgba(0,255,255,.5)) brightness(1.1)}
+.arcade-label{
+  font-size:7px;color:var(--px);background:rgba(0,0,20,.88);
+  border:1px solid rgba(0,255,255,.35);padding:3px 7px;
+  margin-top:4px;white-space:nowrap;font-family:var(--font2);font-weight:700;
+}
+.arcade-glow{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:40px;height:60%;
+  background:radial-gradient(ellipse,rgba(0,255,255,.2),transparent 70%);
+  pointer-events:none;
+}
+/* machine being played indicator */
+.arcade-machine.playing .arcade-label{color:var(--pg);border-color:var(--pg);animation:blink .7s step-end infinite}
+.coin-pop{
+  position:absolute;font-family:var(--font);font-size:7px;color:var(--py);
+  pointer-events:none;z-index:50;
+  animation:coinFloat 1.5s ease forwards;
+}
+@keyframes coinFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(.7)}}
+
+/* ── CUSTOMER SPRITES ── */
+.customer{
+  position:absolute;z-index:6;
+  display:flex;flex-direction:column;align-items:center;
+  transform-origin:bottom center;
+}
+.cus-sprite{
+  /* Sprite sheet: 3 cols × 4 rows */
+  width:108px;height:146px;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  background-size:300% 400%;
+  display:inline-block;
+  flex-shrink:0;
+}
+/* WALK RIGHT — row 1, natural (sprite sheet faces right) */
+.cus-walk-right{animation:cusWalkR .5s steps(1) infinite}
+@keyframes cusWalkR{
+  0%  {background-position:0%   33%;transform:none}
+  34% {background-position:50%  33%;transform:none}
+  67% {background-position:100% 33%;transform:none}
+}
+/* WALK LEFT — row 1, mirrored */
+.cus-walk-left{animation:cusWalkL .5s steps(1) infinite}
+@keyframes cusWalkL{
+  0%  {background-position:0%   33%;transform:scaleX(-1)}
+  34% {background-position:50%  33%;transform:scaleX(-1)}
+  67% {background-position:100% 33%;transform:scaleX(-1)}
+}
+/* WALK TOWARD camera (front face) — row 0 (0%) */
+.cus-walk-down{animation:cusWalkD .5s steps(1) infinite}
+@keyframes cusWalkD{
+  0%  {background-position:0%   0%;transform:none}
+  34% {background-position:50%  0%;transform:none}
+  67% {background-position:100% 0%;transform:none}
+}
+/* WALK AWAY camera (back view) — row 3 (100%) */
+.cus-walk-up{animation:cusWalkU .5s steps(1) infinite}
+@keyframes cusWalkU{
+  0%  {background-position:0%   100%;transform:none}
+  34% {background-position:50%  100%;transform:none}
+  67% {background-position:100% 100%;transform:none}
+}
+/* IDLE at machine — back of head row 3 (100%) */
+.cus-idle{
+  background-position:50% 100%;
+  animation:cusIdleBob .75s ease-in-out infinite;
+}
+@keyframes cusIdleBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* shadow under customer */
+.cus-shadow{
+  width:36px;height:6px;
+  background:radial-gradient(ellipse,rgba(0,0,0,.5),transparent 70%);
+  margin-top:-2px;
+}
+
+/* ── FLOOR DECORATION ── */
+.floor-reflection{
+  position:absolute;bottom:60px;left:0;right:0;height:60px;
+  background:linear-gradient(0deg,rgba(0,255,255,.04) 0%,transparent 100%);
+  pointer-events:none;z-index:3;
+}
+
+/* ═══════════════════════════════════════
+   ████ OVERLAYS (SHOP/STAT/SETTINGS/NEWS) ████
+═══════════════════════════════════════ */
+.overlay{
+  position:fixed;inset:0;z-index:100;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+}
+.overlay.active{display:flex}
+.overlay-panel{
+  position:relative;width:90%;max-width:720px;max-height:88vh;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.overlay-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;image-rendering:pixelated}
+.overlay-crt{position:absolute;inset:0;z-index:1;background:var(--scanline);opacity:.4;pointer-events:none}
+.overlay-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;
+  max-height:92vh;overflow:hidden;
+  background:rgba(0,0,15,.78);
+  border:3px solid var(--border);
+  box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--border),0 0 30px rgba(0,255,255,.15);
+}
+.overlay-header{
+  padding:16px 20px 12px;
+  border-bottom:2px solid rgba(0,255,255,.2);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,20,.6);
+}
+.overlay-title{font-size:11px;color:var(--px);letter-spacing:2px}
+.overlay-close{
+  font-family:var(--font);font-size:9px;color:var(--pr);
+  background:rgba(255,51,68,.1);border:2px solid rgba(255,51,68,.4);
+  cursor:pointer;padding:5px 10px;transition:all .1s;
+}
+.overlay-close:hover{background:rgba(255,51,68,.3)}
+.overlay-body{flex:1;overflow-y:scroll;overflow-x:hidden;padding:20px;scrollbar-width:thin;scrollbar-color:var(--px) var(--bg);-webkit-overflow-scrolling:touch}
+.overlay-body::-webkit-scrollbar{width:6px}
+.overlay-body::-webkit-scrollbar-thumb{background:var(--px);border-radius:3px}
+.overlay-body::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+
+/* ── SHOP ── */
+.shop-section-title{
+  font-size:7px;color:var(--pm);margin-bottom:12px;
+  padding-bottom:6px;border-bottom:2px solid rgba(255,0,255,.2);
+  letter-spacing:2px;
+}
+.machines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:600px){.machines-grid{grid-template-columns:repeat(2,1fr)}}
+.machine-card{
+  background:rgba(0,0,20,.8);
+  border:2px solid rgba(0,255,255,.18);
+  padding:14px 10px;text-align:center;cursor:pointer;
+  transition:all .15s;position:relative;overflow:hidden;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.machine-card:hover:not(.owned):not(.locked){border-color:var(--px);background:rgba(0,255,255,.08);transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,255,255,.2)}
+.machine-card.owned{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.05)}
+.machine-card.locked{opacity:.5;cursor:default}
+.machine-card img{width:60px;height:auto;image-rendering:pixelated;margin-bottom:8px}
+.machine-name{font-size:6px;color:var(--text);margin-bottom:4px;letter-spacing:1px;display:block}
+.machine-game{color:var(--sub);margin-bottom:6px;display:block;font-family:var(--font2);font-size:11px;font-weight:700}
+.machine-price{font-size:7px;color:var(--py);margin-bottom:6px;display:block}
+.machine-earn{font-size:5px;color:var(--pg);display:block;margin-bottom:8px}
+.machine-badge{
+  position:absolute;top:5px;right:5px;
+  font-size:5px;padding:2px 5px;font-family:var(--font);
+}
+.badge-owned{background:rgba(0,255,136,.2);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
+.badge-locked{background:rgba(255,51,68,.2);color:var(--pr);border:1px solid rgba(255,51,68,.3)}
+.badge-new{background:rgba(255,255,0,.2);color:var(--py);border:1px solid rgba(255,255,0,.4);animation:blink .8s step-end infinite}
+.machine-buy-btn{
+  width:100%;padding:6px;font-family:var(--font);font-size:6px;cursor:pointer;
+  background:rgba(0,255,255,.12);border:2px solid var(--px);color:var(--px);
+  transition:all .12s;
+  clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px));
+}
+.machine-buy-btn:hover{background:rgba(0,255,255,.28)}
+.machine-buy-btn:disabled{opacity:.35;cursor:default;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.3)}
+.machine-owned-label{font-size:6px;color:var(--pg);letter-spacing:1px;padding:5px}
+
+/* ── STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.stat-card{
+  background:rgba(0,0,20,.8);border:2px solid rgba(0,255,255,.18);
+  padding:16px 12px;text-align:center;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+}
+.stat-label{font-size:6px;color:var(--sub);letter-spacing:1px;display:block;margin-bottom:8px}
+.stat-value{font-size:14px;color:var(--px);display:block;margin-bottom:4px}
+.stat-unit{font-size:5px;color:var(--pm)}
+.player-profile-stat{
+  display:flex;align-items:center;gap:16px;
+  background:rgba(0,0,30,.8);border:2px solid rgba(255,0,255,.3);
+  padding:16px 20px;margin-bottom:20px;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.pps-img{width:56px;height:56px;border:2px solid rgba(255,0,255,.4);object-fit:cover;image-rendering:pixelated}
+.pps-info{}
+.pps-name{font-size:10px;color:var(--pm);display:block;margin-bottom:6px}
+.pps-title{font-size:7px;color:var(--py);display:block;margin-bottom:4px}
+.pps-day{font-size:6px;color:var(--sub)}
+/* Fame bar */
+.fame-section{margin-bottom:20px}
+.fame-label{font-size:7px;color:var(--py);margin-bottom:8px;display:block;letter-spacing:1px}
+.fame-bar-track{height:14px;background:rgba(0,0,0,.6);border:2px solid rgba(255,255,0,.3);position:relative}
+.fame-bar-fill{height:100%;background:linear-gradient(90deg,var(--pm),var(--py));transition:width .5s ease;position:relative}
+.fame-bar-fill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.15) 4px,rgba(255,255,255,.15) 8px)}
+.fame-pct{font-size:6px;color:var(--text);position:absolute;right:6px;top:50%;transform:translateY(-50%)}
+
+/* ── SETTINGS ── */
+.settings-section{margin-bottom:24px}
+.settings-title{font-size:7px;color:var(--px);margin-bottom:12px;letter-spacing:2px;display:block}
+.setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 12px;background:rgba(0,0,20,.6);border:1px solid rgba(0,255,255,.12)}
+.setting-label{font-size:7px;color:var(--text);display:flex;flex-direction:column;gap:3px}
+.setting-label span{font-size:6px;color:var(--sub);font-family:var(--font2)}
+/* slider */
+.px-slider{-webkit-appearance:none;width:120px;height:8px;background:rgba(0,0,0,.6);border:2px solid rgba(0,255,255,.3);outline:none;cursor:pointer}
+.px-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:18px;background:var(--px);cursor:pointer;clip-path:polygon(2px 0,100% 0,100% 100%,0 100%,0 2px)}
+/* language toggle */
+.lang-toggle{display:flex;gap:0}
+.lang-btn{padding:6px 12px;font-family:var(--font);font-size:7px;cursor:pointer;border:2px solid rgba(0,255,255,.3);background:rgba(0,0,0,.5);color:var(--sub);transition:all .1s}
+.lang-btn.active{background:rgba(0,255,255,.2);color:var(--px);border-color:var(--px)}
+/* rename */
+.rename-row{padding:12px;background:rgba(0,0,20,.6);border:1px solid rgba(255,255,0,.2);margin-bottom:10px}
+.rename-cost{font-size:6px;color:var(--py);margin-bottom:8px;display:block}
+.rename-input{width:100%;padding:8px;font-family:var(--font);font-size:9px;color:var(--px);background:rgba(0,0,0,.8);border:2px solid rgba(0,255,255,.3);outline:none;margin-bottom:8px;caret-color:var(--px)}
+/* danger zone */
+.danger-zone{padding:14px;background:rgba(255,51,68,.05);border:2px solid rgba(255,51,68,.3)}
+.danger-title{font-size:7px;color:var(--pr);margin-bottom:8px;display:block;letter-spacing:1px}
+.danger-btn{
+  width:100%;padding:10px;font-family:var(--font);font-size:7px;cursor:pointer;
+  background:rgba(255,51,68,.15);border:2px solid var(--pr);color:var(--pr);
+  transition:all .12s;
+}
+.danger-btn:hover{background:rgba(255,51,68,.35)}
+
+/* ── NEWS ── */
+.news-date-header{font-size:6px;color:var(--pm);margin-bottom:14px;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.news-date-header::after{content:'';flex:1;height:1px;background:rgba(255,0,255,.2)}
+.news-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px;margin-bottom:8px;
+  background:rgba(0,0,20,.7);border:1px solid rgba(0,255,255,.12);
+  border-right:3px solid var(--px);
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.news-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.news-content{}
+.news-headline{font-size:8px;color:var(--text);display:block;margin-bottom:4px;line-height:1.5;font-family:var(--font)}
+.news-body{font-size:12px;color:var(--sub);display:block;line-height:1.7;font-family:var(--font2);font-weight:700}
+.news-time{font-size:5px;color:rgba(255,255,255,.25);display:block;margin-top:4px}
+.news-item.urgent{border-right-color:var(--py)}
+.news-item.urgent .news-headline{color:var(--py)}
+.news-item.rare{border-right-color:var(--pm)}
+
+/* ═══════════════════════════════════════
+   CONFIRM DIALOG
+═══════════════════════════════════════ */
+#confirmDialog{
+  position:fixed;inset:0;z-index:500;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.88);
+}
+#confirmDialog.active{display:flex}
+.confirm-box{
+  padding:36px 32px;text-align:center;
+  background:var(--bg2);
+  border:3px solid var(--pr);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--pr),0 0 40px rgba(255,51,68,.2);
+  max-width:420px;width:90%;animation:scaleIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+.confirm-icon{font-size:40px;display:block;margin-bottom:12px}
+.confirm-title{font-size:9px;color:var(--pr);margin-bottom:8px;letter-spacing:1px}
+.confirm-msg{font-size:8px;color:var(--sub);margin-bottom:28px;line-height:2;font-family:var(--font2)}
+.confirm-btns{display:flex;gap:12px;justify-content:center}
+.confirm-yes{
+  padding:10px 22px;font-family:var(--font);font-size:8px;cursor:pointer;
+  background:rgba(255,51,68,.2);border:2px solid var(--pr);color:var(--pr);
+}
+.confirm-yes:hover{background:rgba(255,51,68,.4)}
+.confirm-no{
+  padding:10px 22px;font-family:var(--font);font-size:8px;cursor:pointer;
+  background:rgba(0,255,255,.1);border:2px solid var(--px);color:var(--px);
+}
+.confirm-no:hover{background:rgba(0,255,255,.25)}
+
+/* ═══════════════════════════════════════
+   SETTINGS TITLE SCREEN OVERLAY
+═══════════════════════════════════════ */
+#titleSettings{
+  position:fixed;inset:0;z-index:200;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.92);
+}
+#titleSettings.active{display:flex}
+
+/* ═══════════════════════════════════════
+   ORDER ANIMATION
+═══════════════════════════════════════ */
+#orderAnim{
+  position:fixed;inset:0;z-index:300;
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+  background:rgba(0,0,0,.9);
+}
+#orderAnim.active{display:flex}
+.order-box{
+  padding:28px 36px;text-align:center;
+  background:var(--bg2);border:3px solid var(--py);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--py),0 0 40px rgba(255,255,0,.15);
+  animation:scaleIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+.order-title{font-size:10px;color:var(--py);margin-bottom:16px;letter-spacing:2px}
+.order-progress{
+  width:280px;height:16px;
+  background:rgba(0,0,0,.6);border:2px solid rgba(255,255,0,.3);
+  overflow:hidden;margin:0 auto 12px;
+}
+.order-fill{height:100%;background:linear-gradient(90deg,var(--pm),var(--py));width:0;transition:width .1s linear}
+.order-status{font-size:7px;color:var(--sub);animation:blink .8s step-end infinite}
+
+/* ═══════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:600;
+  font-family:var(--font);font-size:7px;color:var(--px);
+  background:rgba(0,0,20,.97);border:2px solid var(--px);
+  padding:10px 20px;
+  box-shadow:0 0 16px rgba(0,255,255,.3);
+  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+}
+#toast.show{opacity:1}
+
+/* ═══════════════════════════════════════
+   CREDITS
+═══════════════════════════════════════ */
+#creditsOverlay{
+  position:fixed;inset:0;z-index:200;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.95);
+}
+#creditsOverlay.active{display:flex}
+.credits-box{
+  padding:40px;text-align:center;
+  background:var(--bg2);border:3px solid var(--pm);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--pm),0 0 40px rgba(255,0,255,.15);
+  max-width:440px;animation:scaleIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.credits-title{font-size:10px;color:var(--pm);margin-bottom:24px;letter-spacing:3px}
+.credits-item{margin-bottom:16px}
+.credits-role{font-size:6px;color:var(--sub);display:block;margin-bottom:5px;letter-spacing:2px}
+.credits-name{font-size:13px;color:var(--py);display:block;text-shadow:0 0 10px var(--py),0 0 20px rgba(255,255,0,.5)}
+.credits-divider{width:40px;height:2px;background:var(--pm);margin:16px auto;opacity:.4}
+
+/* ═══════════════════════════════════════
+   PIXEL DECORATIONS
+═══════════════════════════════════════ */
+.px-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.px-star{position:absolute;width:2px;height:2px;background:#fff;animation:starTwink var(--d) step-end infinite var(--dl)}
+@keyframes starTwink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ── OPEN SIGN ── */
+#openSign{
+  position:absolute;top:70px;right:20px;z-index:10;
+  font-family:var(--font);font-size:7px;padding:7px 14px;
+  border:2px solid var(--pg);background:rgba(0,255,136,.12);color:var(--pg);
+  animation:signGlow 1.5s ease-in-out infinite;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+}
+#openSign.closed{border-color:var(--pr);background:rgba(255,51,68,.12);color:var(--pr);animation:none}
+@keyframes signGlow{0%,100%{box-shadow:0 0 8px rgba(0,255,136,.4)}50%{box-shadow:0 0 18px rgba(0,255,136,.8),0 0 30px rgba(0,255,136,.3)}}
+</style>
+</head>
+<body>
+
+<!-- ROTATE WARNING -->
+<div id="rotateWarn">
+  <div class="ri">📱</div>
+  <div style="font-family:var(--font2);font-size:18px;font-weight:900;color:var(--px)">اقلب الجهاز أفقياً</div>
+  <div style="font-family:var(--font);font-size:8px;color:var(--sub);letter-spacing:2px">ROTATE DEVICE TO PLAY</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TITLE SCREEN
+══════════════════════════════════════ -->
+<div class="screen active" id="titleScreen">
+  <img id="titleBg" src="arcade/Pback.gif" alt="">
+  <div class="title-crt"></div>
+
+  <!-- Pixel stars bg decoration -->
+  <div class="px-stars" id="starsLayer"></div>
+
+  <!-- LEFT MENU -->
+  <div id="titleMenu">
+    <div class="title-logo">
+      <span class="logo-top">◄ MOHAND WORLD ►</span>
+      <span class="logo-main">ARCADE</span>
+      <span class="logo-sub">PIXEL EDITION v1.0</span>
+    </div>
+
+    <button class="px-btn" id="btnStart" onclick="handleStart()">
+      ► START GAME
+    </button>
+    <button class="px-btn" id="btnSettings" onclick="showTitleSettings()" style="border-color:rgba(255,0,255,.4);color:var(--pm);background:rgba(255,0,255,.06)">
+      ◈ SETTINGS
+    </button>
+    <button class="px-btn" id="btnCredits" onclick="showCredits()" style="border-color:rgba(255,255,0,.35);color:var(--py);background:rgba(255,255,0,.05)">
+      ★ CREDITS
+    </button>
+  </div>
+
+  <div id="insertCoin">— INSERT COIN —</div>
+  <div id="versionTag">MOHAND WORLD © 2026</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NAME ENTRY
+══════════════════════════════════════ -->
+<div class="screen" id="nameScreen">
+  <div style="position:absolute;inset:0;background:rgba(0,0,20,.97)"></div>
+  <div style="position:relative;z-index:2;width:90%;max-width:460px;margin:auto;margin-top:20vh">
+    <div class="name-box">
+      <div class="name-title">► ENTER YOUR NAME ◄</div>
+      <div class="name-sub">ادخل اسمك عشان نبدأ المغامرة!</div>
+      <input class="px-input" id="playerNameInput" type="text" maxlength="16" placeholder="PLAYER_01" autocomplete="off" spellcheck="false">
+      <button class="px-btn" onclick="confirmName()" style="width:100%;text-align:center;font-size:9px;padding:14px">
+        ▶ CONFIRM
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TRANSITION OVERLAY
+══════════════════════════════════════ -->
+<div id="transOverlay">
+  <div class="pixel-loader">
+    <div class="pl-dot"></div><div class="pl-dot"></div><div class="pl-dot"></div>
+  </div>
+  <div class="trans-text" id="transText">LOADING...</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN GAME SCREEN
+══════════════════════════════════════ -->
+<div class="screen" id="gameScreen">
+  <!-- CSS background - no image needed -->
+  <div class="crt-overlay"></div>
+
+  <!-- TOP HUD -->
+  <div id="topHud">
+    <!-- Money -->
+    <div id="moneyDisp">
+      <img src="arcade/coin.png" alt="$">
+      <span id="moneyVal">$75.00</span>
+    </div>
+    <!-- Day -->
+    <div id="dayDisp">
+      <span id="dayNum">DAY 1</span>
+      <span id="dayTime">00:00</span>
+    </div>
+    <!-- Icons: Shop, Stats, Settings, News, Profile -->
+    <div style="display:flex;gap:6px;margin-right:auto">
+      <div class="hud-icon-btn" id="btnShop" onclick="openOverlay('shopOverlay')" title="Shop">
+        <img src="arcade/shop.png" alt="shop">
+      </div>
+      <div class="hud-icon-btn" id="btnStat" onclick="openOverlay('statOverlay')" title="Stats">
+        <img src="arcade/stat.png" alt="stats">
+      </div>
+      <div class="hud-icon-btn" id="btnSettingsG" onclick="openOverlay('settingsOverlay')" title="Settings">
+        <img src="arcade/setting.png" alt="settings">
+      </div>
+      <div class="hud-icon-btn" id="btnNews" onclick="openOverlay('newsOverlay')" title="News">
+        <img src="arcade/news.png" alt="news">
+        <div id="newsBadge" style="position:absolute;top:3px;left:3px;width:8px;height:8px;background:var(--pr);display:none;animation:blink .6s step-end infinite"></div>
+      </div>
+    </div>
+    <!-- Open/Close toggle -->
+    <button id="openBtn" onclick="toggleOpen()">OPEN ▶</button>
+    <!-- Profile -->
+    <img src="arcade/me.png" id="profilePic" alt="profile" onclick="openOverlay('statOverlay')">
+  </div>
+
+  <!-- GAME FLOOR -->
+  <div id="gameFloor">
+    <div id="ceilingLight"></div>
+    <div id="wallTrim"></div>
+    <div id="wallLeft">
+      <div class="wall-sign" style="top:15%;left:15%">🎮</div>
+      <div class="wall-sign" style="top:50%;left:20%;width:45px;height:55px;font-size:14px;animation-delay:1.3s">👾</div>
+    </div>
+    <div id="wallRight">
+      <div class="wall-sign" style="top:15%;right:15%">🕹️</div>
+      <div class="wall-sign" style="top:50%;right:20%;width:45px;height:55px;font-size:14px;animation-delay:2.1s">⚡</div>
+    </div>
+    <div id="depthFog"></div>
+    <div id="scanlines"></div>
+    <div id="openSign">◉ OPEN</div>
+    <!-- Machines and customers injected by JS -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SHOP OVERLAY
+══════════════════════════════════════ -->
+<div class="overlay" id="shopOverlay">
+  <div class="overlay-panel" style="max-height:92vh;height:92vh">
+    <img class="overlay-bg" src="arcade/Bshop.png" alt="">
+    <div class="overlay-crt"></div>
+    <div class="overlay-content">
+      <div class="overlay-header">
+        <div class="overlay-title">🕹️ ARCADE SHOP</div>
+        <div style="font-size:7px;color:var(--py);font-family:var(--font)">💰 <span id="shopMoneyVal">$0</span></div>
+        <button class="overlay-close" onclick="closeOverlay('shopOverlay')">✕ CLOSE</button>
+      </div>
+      <div class="overlay-body" id="shopBody"><!-- JS renders --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     STATS OVERLAY
+══════════════════════════════════════ -->
+<div class="overlay" id="statOverlay">
+  <div class="overlay-panel">
+    <img class="overlay-bg" src="arcade/Bstat.png" alt="">
+    <div class="overlay-crt"></div>
+    <div class="overlay-content">
+      <div class="overlay-header">
+        <div class="overlay-title">📊 STATISTICS</div>
+        <button class="overlay-close" onclick="closeOverlay('statOverlay')">✕ CLOSE</button>
+      </div>
+      <div class="overlay-body" id="statBody"><!-- JS renders --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SETTINGS OVERLAY (in-game)
+══════════════════════════════════════ -->
+<div class="overlay" id="settingsOverlay">
+  <div class="overlay-panel">
+    <img class="overlay-bg" src="arcade/Bsetting.png" alt="">
+    <div class="overlay-crt"></div>
+    <div class="overlay-content">
+      <div class="overlay-header">
+        <div class="overlay-title">⚙️ SETTINGS</div>
+        <button class="overlay-close" onclick="closeOverlay('settingsOverlay')">✕ CLOSE</button>
+      </div>
+      <div class="overlay-body" id="settingsBody"><!-- JS renders --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NEWS OVERLAY
+══════════════════════════════════════ -->
+<div class="overlay" id="newsOverlay">
+  <div class="overlay-panel">
+    <img class="overlay-bg" src="arcade/Bnews.png" alt="">
+    <div class="overlay-crt"></div>
+    <div class="overlay-content">
+      <div class="overlay-header">
+        <div class="overlay-title">📰 ARCADE NEWS</div>
+        <div style="font-size:6px;color:var(--sub)">DAY <span id="newsDay">1</span></div>
+        <button class="overlay-close" onclick="closeOverlay('newsOverlay')">✕ CLOSE</button>
+      </div>
+      <div class="overlay-body" id="newsBody"><!-- JS renders --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TITLE SETTINGS OVERLAY
+══════════════════════════════════════ -->
+<div id="titleSettings">
+  <div class="overlay-panel" style="max-width:500px">
+    <div class="overlay-content" style="border-color:rgba(255,0,255,.5)">
+      <div class="overlay-header" style="border-color:rgba(255,0,255,.3)">
+        <div class="overlay-title" style="color:var(--pm)">⚙️ SETTINGS</div>
+        <button class="overlay-close" onclick="closeTitleSettings()">✕</button>
+      </div>
+      <div class="overlay-body" id="titleSettingsBody"><!-- JS renders --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CREDITS
+══════════════════════════════════════ -->
+<div id="creditsOverlay">
+  <div class="credits-box">
+    <div class="credits-title">◄ CREDITS ►</div>
+    <div class="credits-item">
+      <span class="credits-role">GAME DESIGN & DEVELOPMENT</span>
+      <span class="credits-name">MOHAND</span>
+    </div>
+    <div class="credits-divider"></div>
+    <div class="credits-item">
+      <span class="credits-role">A.K.A.</span>
+      <span class="credits-name" style="color:var(--pm);text-shadow:0 0 10px var(--pm)">MOGOGO</span>
+    </div>
+    <div class="credits-divider"></div>
+    <div class="credits-item">
+      <span class="credits-role">BUILT WITH ♥ FOR</span>
+      <span class="credits-name" style="font-size:9px;color:var(--px)">MOHAND WORLD</span>
+    </div>
+    <div style="margin-top:24px">
+      <button class="px-btn" onclick="closeCredits()" style="text-align:center;font-size:8px">◄ BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER ANIMATION -->
+<div id="orderAnim">
+  <div class="order-box">
+    <div class="order-title">📦 ORDER INCOMING!</div>
+    <div class="order-progress"><div class="order-fill" id="orderFill"></div></div>
+    <div class="order-status" id="orderStatus">PROCESSING...</div>
+  </div>
+</div>
+
+<!-- SELL/SWAP MACHINE DIALOG -->
+<div id="sellSwapDialog" style="position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85)">
+  <div style="padding:28px 28px;background:#0f0f2e;border:3px solid var(--py);box-shadow:0 0 0 3px #0f0f2e,0 0 0 5px var(--py);max-width:400px;width:90%;text-align:center;animation:scaleIn .25s cubic-bezier(.34,1.56,.64,1)">
+    <div style="font-size:9px;color:var(--py);margin-bottom:6px;letter-spacing:2px">🕹️ <span id="ssDialogName">MACHINE</span></div>
+    <div style="font-size:6px;color:var(--sub);margin-bottom:18px" id="ssDialogInfo">INFO</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="sellCurrentMachine()" style="padding:10px;font-family:var(--font);font-size:7px;cursor:pointer;background:rgba(255,51,68,.15);border:2px solid var(--pr);color:var(--pr)">
+        💸 <span id="ssSellLabel">SELL FOR $0</span>
+      </button>
+      <div style="font-size:6px;color:var(--sub);margin:2px 0">— أو اسحب لتغيير المكان —</div>
+      <div id="swapSlotsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px"></div>
+      <button onclick="closeSellSwap()" style="padding:8px;font-family:var(--font);font-size:7px;cursor:pointer;background:rgba(0,255,255,.08);border:2px solid rgba(0,255,255,.3);color:var(--px)">✕ CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAUSE MENU -->
+<div id="pauseMenu" style="position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.82);backdrop-filter:blur(5px)">
+  <div style="padding:32px 28px;background:#0f0f2e;border:3px solid var(--px);box-shadow:0 0 0 3px #0f0f2e,0 0 0 5px var(--px),0 0 40px rgba(0,255,255,.15);max-width:320px;width:90%;text-align:center;animation:scaleIn .2s cubic-bezier(.34,1.56,.64,1)">
+    <div style="font-size:10px;color:var(--px);margin-bottom:6px;letter-spacing:3px">⏸ PAUSED</div>
+    <div style="font-size:8px;color:var(--sub);margin-bottom:24px;font-family:var(--font2)">اللعبة مؤقفة</div>
+    <button onclick="resumeGame()" style="display:block;width:100%;padding:12px;font-family:var(--font);font-size:9px;cursor:pointer;background:rgba(0,255,255,.12);border:2px solid var(--px);color:var(--px);margin-bottom:10px;transition:all .1s">▶ RESUME</button>
+    <button onclick="goToMainMenu()" style="display:block;width:100%;padding:12px;font-family:var(--font);font-size:9px;cursor:pointer;background:rgba(255,51,68,.1);border:2px solid var(--pr);color:var(--pr);transition:all .1s">⏏ MAIN MENU</button>
+  </div>
+</div>
+
+<!-- STORY DIALOG -->
+<div id="storyDialog" style="position:fixed;bottom:0;left:0;right:0;z-index:700;display:none;padding:16px;pointer-events:none">
+  <div id="storyBox" style="max-width:700px;margin:0 auto;background:rgba(4,0,15,.97);border:2px solid rgba(160,60,255,.5);padding:18px 20px;position:relative;pointer-events:all;
+    box-shadow:0 0 0 1px rgba(4,0,15,1),0 0 0 3px rgba(160,60,255,.4),0 -4px 40px rgba(120,0,255,.2);
+    clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))">
+    <div style="display:flex;align-items:flex-start;gap:14px">
+      <div style="flex-shrink:0">
+        <img src="arcade/me.png" id="storyAvatar" style="width:52px;height:52px;image-rendering:pixelated;border:2px solid rgba(160,60,255,.5);object-fit:cover">
+        <div id="storyName" style="font-family:var(--font);font-size:6px;color:#c084fc;text-align:center;margin-top:4px;letter-spacing:1px">YOU</div>
+      </div>
+      <div style="flex:1">
+        <div id="storyText" style="font-family:var(--font2);font-size:14px;font-weight:700;color:#e8d8ff;line-height:1.7;min-height:40px"></div>
+        <div style="margin-top:10px;display:flex;justify-content:flex-end">
+          <button onclick="advanceStory()" id="storyBtn" style="font-family:var(--font);font-size:7px;color:#c084fc;background:rgba(160,60,255,.12);border:2px solid rgba(160,60,255,.4);padding:6px 16px;cursor:pointer;letter-spacing:1px">
+            NEXT ▶
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- typing cursor -->
+    <span id="storyCursor" style="display:inline-block;width:2px;height:14px;background:#c084fc;margin-right:2px;vertical-align:middle;animation:blink .5s step-end infinite"></span>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div id="confirmDialog">
+  <div class="confirm-box">
+    <span class="confirm-icon">⚠️</span>
+    <div class="confirm-title">RESET GAME?</div>
+    <div class="confirm-msg" id="confirmMsg">كل تقدمك هيتمسح نهائياً!<br>مش هترجع تاني... متأكد؟</div>
+    <div class="confirm-btns">
+      <button class="confirm-yes" id="confirmYes">⚠ CONFIRM</button>
+      <button class="confirm-no" onclick="closeConfirm()">✕ CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ARCADE TYCOON — COMPLETE GAME LOGIC
+   by Mohand / Mogogo
+═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────
+   SAVE / LOAD
+────────────────────────────────────── */
+const SAVE_KEY = 'arcadeTycoon_v2';
+function loadSave(){try{return JSON.parse(localStorage.getItem(SAVE_KEY))||null;}catch{return null;}}
+function doSave(){
+  const data={
+    playerName:playerName,
+    money:money,
+    day:day,
+    isOpen:isOpen,
+    ownedMachines:ownedMachines.map(o=>({id:o.id,slot:o.slot,instId:o.instId||o.id+'_0'})),
+    settings:Object.assign({},settings),
+    stats:Object.assign({},stats),
+    newsRead:[...newsRead],
+    unreadNews:unreadNews,
+    lang:lang,
+    lastSave:Date.now(),
+    version:2,
+  };
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+  }catch(e){console.warn('Save failed:',e);}
+}
+function resetSave(){
+  try{localStorage.removeItem(SAVE_KEY);}catch{}
+  location.reload();
+}
+
+/* ──────────────────────────────────────
+   AUDIO ENGINE
+────────────────────────────────────── */
+const AUDIO={};
+let audioCtx=null;
+const settings={musicVol:80,sfxVol:80,fxVol:80,lang:'ar'};
+let lang='ar';
+
+function getAudio(src,vol=1,loop=false){
+  if(!AUDIO[src]){
+    const a=new Audio(src);
+    a.preload='auto';
+    AUDIO[src]=a;
+  }
+  const a=AUDIO[src];
+  a.volume=vol;
+  a.loop=loop;
+  return a;
+}
+
+function playBGM(track){
+  stopBGM();
+  const a=getAudio(track,settings.musicVol/100,true);
+  a.currentTime=0;
+  a.play().catch(()=>{});
+  currentBGM=a;
+}
+let currentBGM=null;
+function stopBGM(){if(currentBGM){try{currentBGM.pause();}catch{}currentBGM=null;}}
+
+function playSFX(src,volOverride){
+  const vol=(volOverride!==undefined?volOverride:settings.sfxVol)/100;
+  if(vol<=0)return;
+  const a=new Audio(src);
+  a.volume=Math.min(1,vol);
+  a.play().catch(()=>{});
+}
+
+function playClick(){playSFX('arcade/click.wav',settings.sfxVol);}
+
+// Play random play sound (play1/2/3) at 30% vol
+let lastPlaySnd=0;
+function playCustomerSound(){
+  const now=Date.now();
+  if(now-lastPlaySnd<1200)return; // debounce
+  lastPlaySnd=now;
+  const r=1+Math.floor(Math.random()*3);
+  playSFX('arcade/play'+r+'.wav',30);
+}
+
+let audioUnlocked=false;
+function unlockAudio(){
+  if(audioUnlocked)return;
+  audioUnlocked=true;
+  // Start menu music
+  playBGM('arcade/MBUI.mp3');
+}
+document.addEventListener('click',unlockAudio,{once:true});
+document.addEventListener('touchstart',unlockAudio,{once:true});
+
+function applyVolumes(){
+  if(currentBGM)currentBGM.volume=settings.musicVol/100;
+}
+
+/* ──────────────────────────────────────
+   ARCADE MACHINE DEFINITIONS
+────────────────────────────────────── */
+const MACHINES=[
+  // TIER 1 — arc1-5 (max 3 each)
+  {id:'arc1',  img:'arcade/arc1.png',  name:'PIXEL BLASTER', game:'PIXEL WARS',    price:75,   earn:[6,15],  tier:1, unlockDay:1,  max:3},
+  {id:'arc2',  img:'arcade/arc2.png',  name:'TURBO FIGHTER', game:'STREET BRAWL',  price:120,  earn:[8,18],  tier:1, unlockDay:1,  max:3},
+  {id:'arc3',  img:'arcade/arc3.png',  name:'SPACE RAIDER',  game:'GALAXY ATTACK', price:160,  earn:[10,22], tier:1, unlockDay:3,  max:3},
+  {id:'arc4',  img:'arcade/arc4.png',  name:'NEON RUNNER',   game:'CYBER DASH',    price:200,  earn:[13,26], tier:1, unlockDay:5,  max:3},
+  {id:'arc5',  img:'arcade/arc5.png',  name:'DINO QUEST',    game:'PREHISTORIC',   price:250,  earn:[16,32], tier:1, unlockDay:7,  max:3},
+  // TIER 2 — arcide1-5 (max 3 each)
+  {id:'arcide1',img:'arcade/arcide1.png',name:'THUNDER KICK',game:'BATTLE ARENA',  price:350,  earn:[28,55], tier:2, unlockDay:10, max:3},
+  {id:'arcide2',img:'arcade/arcide2.png',name:'MAGIC CASTLE',game:'WIZARD QUEST',  price:500,  earn:[35,68], tier:2, unlockDay:12, max:3},
+  {id:'arcide3',img:'arcade/arcide3.png',name:'MECH WARRIOR',game:'ROBO RUMBLE',   price:650,  earn:[42,80], tier:2, unlockDay:15, max:3},
+  {id:'arcide4',img:'arcade/arcide4.png',name:'OCEAN DEEP',  game:'AQUA STRIKE',   price:800,  earn:[50,95], tier:2, unlockDay:18, max:3},
+  {id:'arcide5',img:'arcade/arcide5.png',name:'DARK LEGEND', game:'SHADOW REALM',  price:1000, earn:[65,115],tier:2, unlockDay:22, max:3},
+  // TIER 3 — arcides1-5 (max 2 each — rare)
+  {id:'arcides1',img:'arcade/arcides1.png',name:'KATANA ZERO',  game:'BLADE MASTER', price:1500, earn:[65,110],tier:3, unlockDay:30, max:2},
+  {id:'arcides2',img:'arcade/arcides2.png',name:'NEON ABYSS',   game:'ABYSS DIVE',   price:2000, earn:[80,130],tier:3, unlockDay:35, max:2},
+  {id:'arcides3',img:'arcade/arcides3.png',name:'CELESTE PRO',  game:'MOUNTAIN RUN', price:3000, earn:[100,160],tier:3,unlockDay:42, max:2},
+  {id:'arcides4',img:'arcade/arcides4.png',name:'PIXEL LEGEND', game:'EPIC QUEST',   price:4500, earn:[130,200],tier:3,unlockDay:50, max:2},
+  {id:'arcides5',img:'arcade/arcides5.png',name:'THE GODMACHINE',game:'ULTIMATE',    price:6000, earn:[170,260],tier:3,unlockDay:60, max:1},
+];
+
+/* ──────────────────────────────────────
+   MACHINE FLOOR POSITIONS
+   (percentage of floor width/height)
+────────────────────────────────────── */
+// Perspective lanes — machines sit ON the floor line (46% from bottom)
+const MACHINE_SLOTS=[
+  {x:10, bottomPct:0.46, scale:1.1, laneX:10},
+  {x:21, bottomPct:0.46, scale:1.1, laneX:21},
+  {x:31, bottomPct:0.46, scale:1.1, laneX:31},
+  {x:42, bottomPct:0.46, scale:1.1, laneX:42},
+  {x:53, bottomPct:0.46, scale:1.1, laneX:53},
+  {x:63, bottomPct:0.46, scale:1.1, laneX:63},
+  {x:73, bottomPct:0.46, scale:1.1, laneX:73},
+  {x:83, bottomPct:0.46, scale:1.1, laneX:83},
+];
+
+/* ──────────────────────────────────────
+   GAME STATE
+────────────────────────────────────── */
+let playerName='PLAYER_01';
+let money=75;
+let day=1;
+let isOpen=false;
+let ownedMachines=[]; // [{id, slot}] — slot is 0-7 index
+let stats={
+  totalEarned:0,totalCustomers:0,totalDays:0,
+  totalPlays:0,totalSpent:0,playtime:0,startDate:Date.now(),
+};
+let newsRead=[];
+let unreadNews=0;
+let customers=[];
+let gameTimerInterval=null;
+let daySeconds=0;
+const DAY_DURATION_SECONDS=180; // 3 real minutes = 1 game day
+let customerSpawnInterval=null;
+let autoSaveInterval=null;
+
+/* ──────────────────────────────────────
+   NEWS DATA
+────────────────────────────────────── */
+function t(ar,en){return lang==='ar'?ar:en;}
+
+const NEWS_EVENTS=[
+  {day:1,  type:'info',   icon:'🎮', headline_ar:'افتتاح أركيد جديد!',     headline_en:'New Arcade Opens!',     body_ar:'مبروك! فتحت أول أركيد في الحي. الناس فضولية وعايزة تشوف.',            body_en:'Congrats! Your first arcade opened. People are curious to see it!'},
+  {day:2,  type:'info',   icon:'👥', headline_ar:'الناس بدأت تتكلم',        headline_en:'Word Is Spreading',      body_ar:'بعض الناس في الحي سمعوا عن أركيدك الجديد!',                          body_en:'People in the area have heard about your new arcade!'},
+  {day:3,  type:'urgent', icon:'⚡', headline_ar:'عرض خاص على الأركيد!',    headline_en:'Special Machine Deal!',  body_ar:'لفترة محدودة: الماكينات الجديدة بسعر أقل! اشتري دلوقتي.',              body_en:'Limited time: New machines are cheaper! Buy now.'},
+  {day:5,  type:'info',   icon:'📈', headline_ar:'الزبائن بيزيدوا',          headline_en:'Customer Surge',         body_ar:'لاحظنا زيادة في الزوار لأركيدك. الاستمرار ضروري!',                    body_en:'We noticed increased visitors at your arcade. Keep it up!'},
+  {day:7,  type:'rare',   icon:'🌟', headline_ar:'أسبوع كامل! مبروك!',      headline_en:'One Week! Congrats!',    body_ar:'أكملت أسبوع كامل من التشغيل! الناس بدأت تحبك.',                      body_en:'You completed a full week! People are starting to love your place.'},
+  {day:10, type:'info',   icon:'🏆', headline_ar:'أركيدك بدأ يتعرف',        headline_en:'Getting Recognition',   body_ar:'اسم أركيدك انتشر في المنطقة! الزبائن بيجو من بعيد.',                  body_en:'Your arcade name is spreading in the area! Customers come from far.'},
+  {day:12, type:'urgent', icon:'🎯', headline_ar:'تير 2 متاح الآن!',         headline_en:'Tier 2 Unlocked!',       body_ar:'وصلت للمستوى الكافي! ماكينات تير 2 متاحة في الشوب.',                 body_en:'You reached the required level! Tier 2 machines are now available.'},
+  {day:15, type:'info',   icon:'📰', headline_ar:'مقال في الجريدة المحلية!', headline_en:'Local Paper Article!',  body_ar:'جريدة الحي كتبت مقال عن أركيدك الناجح! الشهرة بتزيد.',              body_en:'The local newspaper wrote about your successful arcade!'},
+  {day:20, type:'rare',   icon:'💎', headline_ar:'أكثر مكان زيارة في الحي!', headline_en:'Most Visited Spot!',    body_ar:'تبريك! أركيدك بقى أكتر مكان بيتزار في الحي دا!',                     body_en:'Congrats! Your arcade became the most visited spot in the area!'},
+  {day:22, type:'urgent', icon:'🔥', headline_ar:'منافس جديد في المنطقة!',   headline_en:'New Competition!',       body_ar:'فتح أركيد تاني قريب منك! لازم تطور نفسك وتشتري ماكينات أحسن.',       body_en:'A new arcade opened nearby! You need to upgrade to stay competitive.'},
+  {day:30, type:'rare',   icon:'👑', headline_ar:'ماكينات نادرة وصلت!',      headline_en:'Rare Machines Arrived!', body_ar:'وصلت ماكينات تير 3 النادرة للشوب! دي الكبيرة.',                      body_en:'Tier 3 rare machines arrived in the shop! These are the big ones.'},
+  {day:40, type:'rare',   icon:'🌍', headline_ar:'شهرة دولية!',              headline_en:'World Famous!',          body_ar:'انتشر اسم أركيدك دولياً! الزبائن من كل مكان.',                       body_en:'Your arcade became internationally famous! Customers from everywhere.'},
+  {day:50, type:'urgent', icon:'💰', headline_ar:'صفقة العمر!',              headline_en:'Deal of the Century!',   body_ar:'عرض ضخم جداً لشراء أركيدك! هل ستبيع؟',                              body_en:'A huge offer to buy your arcade! Will you sell?'},
+  {day:60, type:'rare',   icon:'🎊', headline_ar:'LEGENDARY STATUS!',         headline_en:'LEGENDARY STATUS!',      body_ar:'أركيدك وصل لمستوى أسطوري! معجزة حقيقية.',                           body_en:'Your arcade reached legendary status! A true miracle.'},
+];
+
+// Random daily tips/events
+const RANDOM_NEWS=[
+  {type:'info',   icon:'☕', headline_ar:'يوم هادي',             headline_en:'Quiet Day',         body_ar:'الزبائن مشغولين النهارده. العادي.',                body_en:'Customers are busy today. Normal day.'},
+  {type:'urgent', icon:'🌧️', headline_ar:'طقس سيئ!',            headline_en:'Bad Weather!',       body_ar:'مطر شديد! الزبائن قلوا بشكل ملحوظ.',              body_en:'Heavy rain! Noticably fewer customers today.'},
+  {type:'info',   icon:'🎉', headline_ar:'إجازة وطنية!',         headline_en:'Public Holiday!',    body_ar:'إجازة وطنية! الزبائن بيجو أكتر من المعتاد.',      body_en:'Public holiday! More customers than usual.'},
+  {type:'rare',   icon:'🎲', headline_ar:'زبون مميز زارك!',      headline_en:'VIP Customer!',      body_ar:'زبون مشهور زار أركيدك! الكلام انتشر.',            body_en:'A famous person visited your arcade! Word spread.'},
+  {type:'info',   icon:'🔧', headline_ar:'صيانة دورية',          headline_en:'Regular Maintenance', body_ar:'تأكد من صيانة ماكيناتك بانتظام.',                 body_en:'Make sure to maintain your machines regularly.'},
+  {type:'urgent', icon:'💸', headline_ar:'انخفاض في الإيرادات!', headline_en:'Revenue Drop!',      body_ar:'إيراداتك نقصت اليوم! هاجس زبائن أكتر.',          body_en:'Revenue dropped today! Consider attracting more customers.'},
+  {type:'info',   icon:'📱', headline_ar:'مراجعات ممتازة!',      headline_en:'Great Reviews!',     body_ar:'الناس بتكتب تقييمات رائعة عن أركيدك على النت.', body_en:'People are writing great reviews about your arcade online.'},
+];
+
+/* ──────────────────────────────────────
+   CUSTOMER SYSTEM
+────────────────────────────────────── */
+const CUSTOMER_SPRITES=[
+  'arcade/cus1.png','arcade/cus2.png','arcade/cus3.png',
+  'arcade/cus4.png','arcade/cus5.png'
+];
+// Preload all sprites
+CUSTOMER_SPRITES.forEach(s=>{const i=new Image();i.src=s;});
+let custIdCounter=0;
+
+function getMaxCustomers(){
+  // Exactly 1 customer per machine slot
+  return ownedMachines.length;
+}
+
+function spawnCustomer(){
+  if(!isOpen||ownedMachines.length===0)return;
+  const floor=document.getElementById('gameFloor');
+  if(!floor)return;
+  const floorW=floor.offsetWidth;
+  const floorH=floor.offsetHeight;
+  if(customers.length>=getMaxCustomers())return;
+
+  const freeMachines=ownedMachines.filter(o=>!customers.some(c=>c.machineSlot===o.slot));
+  if(freeMachines.length===0)return;
+  const targetOwned=freeMachines[Math.floor(Math.random()*freeMachines.length)];
+  const targetMachineId=targetOwned.id;
+  const targetMachineSlot=targetOwned.slot;
+  const mDef=MACHINES.find(m=>m.id===targetMachineId);
+  if(!mDef)return;
+
+  // Get machine X from slot definition
+  const slotDef=MACHINE_SLOTS[targetMachineSlot]||MACHINE_SLOTS[0];
+  const machCenterX=Math.round(slotDef.laneX/100*floorW);
+
+  const custId=++custIdCounter;
+  const spriteImg=CUSTOMER_SPRITES[Math.floor(Math.random()*CUSTOMER_SPRITES.length)];
+
+  // 2.5D depth constants
+  const NEAR_SCALE=1.45;
+  const FAR_SCALE=0.70;
+  const NEAR_BOT=Math.round(floorH*0.04);
+  const FAR_BOT=Math.round(floorH*0.46); // customer lands ON the floor line
+  const STEPS=45;
+
+  const el=document.createElement('div');
+  el.className='customer';
+  el.id='cust_'+custId;
+  el.style.cssText='position:absolute;transform-origin:bottom center';
+  floor.appendChild(el);
+  el.innerHTML=`<div class="cus-sprite cus-walk-up" style="background-image:url('${spriteImg}')"></div><div class="cus-shadow"></div>`;
+
+  const cust={id:custId,el,machineId:targetMachineId,machineSlot:targetMachineSlot,mDef,phase:'walking',spriteImg};
+  customers.push(cust);
+
+  function setAnim(cls){
+    const s=el.querySelector('.cus-sprite');if(!s)return;
+    const bg=s.style.backgroundImage;
+    s.className='cus-sprite '+cls;
+    s.style.backgroundImage=bg;
+  }
+  function depth(scale,bot){
+    el.style.left=machCenterX+'px';
+    el.style.bottom=bot+'px';
+    el.style.transform='scale('+scale.toFixed(3)+')';
+    el.style.zIndex=30;
+  }
+
+  // ── Phase 1: Walk IN — back toward machine, shrink ──
+  depth(NEAR_SCALE,NEAR_BOT);
+  setAnim('cus-walk-up');
+  let s=0;
+  const ivIn=setInterval(()=>{
+    s++;const t=s/STEPS;
+    depth(NEAR_SCALE+(FAR_SCALE-NEAR_SCALE)*t, NEAR_BOT+(FAR_BOT-NEAR_BOT)*t);
+    if(s>=STEPS){
+      clearInterval(ivIn);
+      // ── Phase 2: Idle at machine ──
+      cust.phase='playing';
+      setAnim('cus-idle');
+      depth(FAR_SCALE,FAR_BOT);
+      playCustomerSound();
+      setTimeout(()=>{
+        if(!el.parentNode)return;
+        const earn=mDef.earn[0]+Math.floor(Math.random()*(mDef.earn[1]-mDef.earn[0]));
+        money+=earn;stats.totalEarned+=earn;stats.totalCustomers++;stats.totalPlays++;
+        showCoinPop(el,earn);doSave();updateMoneyDisplay();
+        // ── Phase 3: Walk OUT — face toward camera, grow ──
+        cust.phase='leaving';
+        setAnim('cus-walk-down');
+        let s2=0;
+        const ivOut=setInterval(()=>{
+          s2++;const t=s2/STEPS;
+          depth(FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t, FAR_BOT+(NEAR_BOT-FAR_BOT)*t);
+          if(s2>=STEPS){
+            clearInterval(ivOut);
+            el.remove();
+            customers=customers.filter(c=>c.id!==custId);
+          }
+        },30);
+      },7000+Math.random()*13000);
+    }
+  },30);
+}
+
+function walkCustomerTo(cust,targetX,onArrival){
+  const el=cust.el;
+  const step=()=>{
+    if(!el.parentNode){return;}
+    const curr=parseFloat(el.style.left)||0;
+    const dist=targetX-curr;
+    if(Math.abs(dist)<2){
+      el.style.left=targetX+'px';
+      onArrival&&onArrival();
+      return;
+    }
+    const spd=dist>0?2.5:-2.5;
+    el.style.left=(curr+spd)+'px';
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function showCoinPop(el,amount){
+  const pop=document.createElement('div');
+  pop.className='coin-pop';
+  pop.textContent='+$'+amount;
+  pop.style.cssText=`left:${parseFloat(el.style.left)+16}px;bottom:${160}px`;
+  document.getElementById('gameFloor').appendChild(pop);
+  setTimeout(()=>pop.remove(),1600);
+}
+
+/* ──────────────────────────────────────
+   GAME LOOP / TIME SYSTEM
+────────────────────────────────────── */
+function startGameLoop(){
+  stopGameLoop();
+  daySeconds=0;
+  gameTimerInterval=setInterval(()=>{
+    daySeconds++;
+    stats.playtime++;
+    const mins=Math.floor(daySeconds/60);
+    const secs=daySeconds%60;
+    const timeEl=document.getElementById('dayTime');
+    if(timeEl)timeEl.textContent=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+    if(daySeconds>=DAY_DURATION_SECONDS){
+      daySeconds=0;
+      advanceDay();
+    }
+  },1000);
+
+  // Customer spawning
+  customerSpawnInterval=setInterval(()=>{
+    if(isOpen)spawnCustomer();
+  },2500+Math.random()*2000); // 2.5-4.5 sec spawn rate
+
+  // Auto-save every 30 seconds
+  autoSaveInterval=setInterval(()=>doSave(),30000);
+}
+
+function stopGameLoop(){
+  if(gameTimerInterval)clearInterval(gameTimerInterval);
+  if(customerSpawnInterval)clearInterval(customerSpawnInterval);
+  if(autoSaveInterval)clearInterval(autoSaveInterval);
+  gameTimerInterval=customerSpawnInterval=autoSaveInterval=null;
+}
+
+function advanceDay(){
+  day++;
+  stats.totalDays++;
+  // Trigger story chapter if exists
+  setTimeout(()=>triggerStory(day),800);
+  const dayEl=document.getElementById('dayNum');
+  if(dayEl){
+    dayEl.textContent='DAY '+day;
+    dayEl.style.color='var(--pg)';
+    setTimeout(()=>{if(dayEl)dayEl.style.color='var(--py)';},1200);
+  }
+  // Check for news events
+  checkNewsForDay(day);
+  // Random news
+  if(Math.random()<0.35){
+    addRandomNews();
+  }
+  // Machine unlock notification
+  const newlyUnlocked=MACHINES.filter(m=>m.unlockDay===day);
+  newlyUnlocked.forEach(m=>{
+    addNews({
+      type:'urgent',icon:'🕹️',
+      headline_ar:`ماكينة جديدة في الشوب! ${m.name}`,
+      headline_en:`New Machine in Shop! ${m.name}`,
+      body_ar:`${m.name} (${m.game}) أصبحت متاحة للشراء بسعر $${m.price}`,
+      body_en:`${m.name} (${m.game}) is now available to buy for $${m.price}`,
+      day,
+    });
+  });
+  showToast(t(`اليوم ${day} بدأ!`,`Day ${day} started!`));
+  doSave();
+}
+
+function checkNewsForDay(d){
+  const events=NEWS_EVENTS.filter(e=>e.day===d&&!newsRead.includes('event_'+d));
+  events.forEach(ev=>{
+    addNews({...ev,day:d});
+    newsRead.push('event_'+d);
+  });
+}
+
+function addRandomNews(){
+  const ev=RANDOM_NEWS[Math.floor(Math.random()*RANDOM_NEWS.length)];
+  addNews({...ev,day,isRandom:true});
+}
+
+let newsItems=[];
+function addNews(item){
+  newsItems.unshift({...item,id:Date.now()});
+  unreadNews++;
+  const badge=document.getElementById('newsBadge');
+  if(badge)badge.style.display='block';
+}
+
+/* ──────────────────────────────────────
+   OPEN / CLOSE SHOP
+────────────────────────────────────── */
+function toggleOpen(){
+  playClick();
+  if(ownedMachines.length===0){
+    showToast(t('اشتري ماكينة الأول!','Buy a machine first!'));
+    return;
+  }
+  isOpen=!isOpen;
+  updateOpenStatus();
+  doSave();
+  showToast(isOpen?t('المحل فتح! 🎉','Shop is OPEN! 🎉'):t('المحل اتغلق.','Shop is CLOSED.'));
+}
+
+function updateOpenStatus(){
+  const btn=document.getElementById('openBtn');
+  const sign=document.getElementById('openSign');
+  if(btn){
+    btn.textContent=isOpen?'CLOSE ■':'OPEN ▶';
+    btn.className=isOpen?'closed':'';
+  }
+  if(sign){
+    sign.textContent=isOpen?'◉ OPEN':'○ CLOSED';
+    sign.className=isOpen?'':'closed';
+  }
+}
+
+/* ──────────────────────────────────────
+   MONEY DISPLAY
+────────────────────────────────────── */
+function updateMoneyDisplay(){
+  const el=document.getElementById('moneyVal');
+  if(el)el.textContent='$'+money.toFixed(0);
+  const sEl=document.getElementById('shopMoneyVal');
+  if(sEl)sEl.textContent='$'+money.toFixed(0);
+}
+
+/* ──────────────────────────────────────
+   FLOOR — RENDER MACHINES
+────────────────────────────────────── */
+function renderFloorMachines(){
+  const floor=document.getElementById('gameFloor');
+  if(!floor)return;
+  // Remove old machine elements
+  floor.querySelectorAll('.arcade-machine').forEach(e=>e.remove());
+  ownedMachines.forEach((owned,idx)=>{
+    const id=owned.id; const slotIdx=owned.slot;
+    const mDef=MACHINES.find(m=>m.id===id);
+    if(!mDef)return;
+    const slot=MACHINE_SLOTS[slotIdx!==undefined?slotIdx:idx%MACHINE_SLOTS.length];
+    const el=document.createElement('div');
+    el.className='arcade-machine';
+    el.id='mach_'+id;
+    const floorW=floor.offsetWidth||window.innerWidth;
+    const floorH=floor.offsetHeight||window.innerHeight;
+    const sc=slot.scale||1.0;
+    const machW=Math.round(115*sc);
+    // bottomPct: fraction of floor height (0.38 = 38% from bottom)
+    const botPx=slot.bottomPct!==undefined ? Math.round(slot.bottomPct*floorH) : (slot.bottom||40);
+    el.style.cssText=`left:${slot.x/100*floorW}px;bottom:${botPx}px;z-index:${slot.bottomPct>0.45?4:6}`;
+    el.dataset.slot=slotIdx!==undefined?slotIdx:idx%MACHINE_SLOTS.length;
+    el.innerHTML=`
+      <div class="arcade-glow"></div>
+      <img src="${mDef.img}" alt="${mDef.name}" style="width:${machW}px;filter:drop-shadow(0 4px ${Math.round(10*sc)}px rgba(0,0,0,.7)) drop-shadow(0 0 ${Math.round(14*sc)}px rgba(160,80,255,.35))">
+      <div class="arcade-label" style="font-size:${Math.round(5*sc)}px">${mDef.name}</div>
+    `;
+    el.onclick=()=>{const s=parseInt(el.dataset.slot);showSellSwap(id,s);};
+    el.title=mDef.name+' — Click to sell/move';
+    floor.appendChild(el);
+  });
+}
+
+function showMachineInfo(mDef){
+  showToast(`${mDef.name} | ${mDef.game} | $${mDef.earn[0]}-$${mDef.earn[1]}/play`);
+}
+
+/* ──────────────────────────────────────
+   SHOP OVERLAY
+────────────────────────────────────── */
+function renderShop(){
+  const body=document.getElementById('shopBody');
+  if(!body)return;
+  const tiers=[
+    {label:t('● الفئة الأولى — مبتدئ','● TIER 1 — STARTER'),ids:MACHINES.filter(m=>m.tier===1)},
+    {label:t('●● الفئة الثانية — متوسط','●● TIER 2 — MEDIUM'),ids:MACHINES.filter(m=>m.tier===2)},
+    {label:t('●●● الفئة الثالثة — نادر','●●● TIER 3 — RARE'),ids:MACHINES.filter(m=>m.tier===3)},
+  ];
+  body.innerHTML='';
+  tiers.forEach(tier=>{
+    const section=document.createElement('div');
+    section.innerHTML=`<div class="shop-section-title">${tier.label}</div>`;
+    const grid=document.createElement('div');grid.className='machines-grid';
+    tier.ids.forEach(mDef=>{
+      const countOwned=ownedMachines.filter(o=>o.id===mDef.id).length;
+      const maxCount=mDef.max||3;
+      const isFull=countOwned>=maxCount;
+      const unlocked=day>=mDef.unlockDay;
+      const canBuy=!isFull&&unlocked&&money>=mDef.price&&ownedMachines.length<MACHINE_SLOTS.length;
+      const card=document.createElement('div');
+      card.className='machine-card'+(isFull?' owned':'')+((!unlocked)?' locked':'');
+
+      let badge='';
+      if(isFull) badge=`<div class="machine-badge badge-owned">✓ MAX (${maxCount}/${maxCount})</div>`;
+      else if(countOwned>0) badge=`<div class="machine-badge badge-new">${countOwned}/${maxCount}</div>`;
+      else if(!unlocked) badge=`<div class="machine-badge badge-locked">DAY ${mDef.unlockDay}</div>`;
+
+      let btnHtml='';
+      if(isFull) btnHtml=`<div class="machine-owned-label">✓ ${t('الحد الأقصى','MAX')} (${maxCount})</div>`;
+      else if(!unlocked) btnHtml=`<div class="machine-owned-label" style="color:var(--sub)">${t('يُفتح يوم','UNLOCKS DAY')} ${mDef.unlockDay}</div>`;
+      else btnHtml=`<button class="machine-buy-btn" onclick="buyMachine('${mDef.id}')" ${canBuy?'':'disabled'}>${t('شراء','BUY')} $${mDef.price} (${countOwned}/${maxCount})</button>`;
+
+      card.innerHTML=`
+        ${badge}
+        <img src="${mDef.img}" alt="${mDef.name}">
+        <span class="machine-name">${mDef.name}</span>
+        <span class="machine-game">${mDef.game}</span>
+        <span class="machine-price">💰 $${mDef.price}</span>
+        <span class="machine-earn">⬆ $${mDef.earn[0]}-$${mDef.earn[1]}/${t('لعبة','play')}</span>
+        ${btnHtml}
+      `;
+      grid.appendChild(card);
+    });
+    section.appendChild(grid);
+    body.appendChild(section);
+  });
+}
+
+function buyMachine(id){
+  playClick();
+  const mDef=MACHINES.find(m=>m.id===id);
+  if(!mDef)return;
+  const countOwned=ownedMachines.filter(o=>o.id===id).length;
+  if(countOwned>=(mDef.max||3)){
+    showToast(t('وصلت للحد الأقصى ('+mDef.max+')!','Reached max count ('+mDef.max+')!'));return;
+  }
+  if(money<mDef.price){showToast(t('مش معاك فلوس كافية!','Not enough money!'));return;}
+  const usedSlots=ownedMachines.map(o=>o.slot);
+  const freeSlot=MACHINE_SLOTS.findIndex((_,i)=>!usedSlots.includes(i));
+  if(freeSlot===-1){showToast(t('المحل ممتلئ! بع أركيد أو غير مكانه','Shop full! Sell or swap a machine'));return;}
+
+  // Deduct money
+  money-=mDef.price;
+  stats.totalSpent+=mDef.price;
+  // Generate unique instance ID
+  const instId=id+'_'+(Date.now()%100000);
+  ownedMachines.push({id, slot:freeSlot, instId});
+  doSave();
+  updateMoneyDisplay();
+
+  // Close shop, play order animation
+  closeOverlay('shopOverlay');
+  playOrderAnimation(mDef,()=>{
+    renderFloorMachines();
+    showToast(t(`${mDef.name} وصلت! 🎮`,'${mDef.name} arrived! 🎮'));
+    if(!isOpen&&ownedMachines.length===1){
+      // First machine: auto-suggest opening
+      setTimeout(()=>showToast(t('اضغط OPEN عشان تفتح المحل!','Press OPEN to open the shop!')),2000);
+    }
+    renderShop();
+  });
+}
+
+function playOrderAnimation(mDef,onDone){
+  const anim=document.getElementById('orderAnim');
+  const fill=document.getElementById('orderFill');
+  const status=document.getElementById('orderStatus');
+  anim.classList.add('active');
+  fill.style.width='0%';
+  const messages=lang==='ar'
+    ?['جاري المعالجة...','تم التأكيد...','في الطريق إليك...','وصل!']
+    :['Processing...','Confirmed...','On the way...','ARRIVED!'];
+  let prog=0;let msgIdx=0;
+  const iv=setInterval(()=>{
+    prog+=2;fill.style.width=prog+'%';
+    if(prog%25===0&&msgIdx<messages.length){status.textContent=messages[msgIdx++];}
+    if(prog>=100){
+      clearInterval(iv);
+      setTimeout(()=>{anim.classList.remove('active');if(onDone)onDone();},600);
+    }
+  },40);
+}
+
+/* ──────────────────────────────────────
+   STATS OVERLAY
+────────────────────────────────────── */
+function renderStats(){
+  const body=document.getElementById('statBody');
+  if(!body)return;
+  const playHours=Math.floor(stats.playtime/3600);
+  const playMins=Math.floor((stats.playtime%3600)/60);
+  const fameScore=Math.min(100,Math.floor((stats.totalEarned/100)+(day*2)+(stats.totalCustomers/5)));
+  const titleFn=()=>{
+    if(fameScore>=90)return t('أسطورة الأركيد','Arcade Legend');
+    if(fameScore>=70)return t('ملك الأركيد','Arcade King');
+    if(fameScore>=50)return t('مشهور في الحي','Local Celebrity');
+    if(fameScore>=25)return t('صاحب محل','Shop Owner');
+    return t('مبتدئ','Newcomer');
+  };
+  body.innerHTML=`
+    <div class="player-profile-stat">
+      <img class="pps-img" src="arcade/me.png" alt="profile">
+      <div class="pps-info">
+        <span class="pps-name">${playerName}</span>
+        <span class="pps-title">${titleFn()}</span>
+        <span class="pps-day">${t('اليوم','Day')} ${day} | ${t('منذ','Since')} ${new Date(stats.startDate).toLocaleDateString()}</span>
+      </div>
+    </div>
+    <div class="fame-section">
+      <span class="fame-label">★ ${t('الشهرة','FAME')}</span>
+      <div class="fame-bar-track">
+        <div class="fame-bar-fill" style="width:${fameScore}%">
+          <span class="fame-pct">${fameScore}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><span class="stat-label">${t('إجمالي الأرباح','TOTAL EARNED')}</span><span class="stat-value">$${stats.totalEarned.toLocaleString()}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('الرصيد الحالي','CURRENT BALANCE')}</span><span class="stat-value" style="color:var(--py)">$${money.toLocaleString()}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('عدد الزبائن','TOTAL CUSTOMERS')}</span><span class="stat-value" style="color:var(--pm)">${stats.totalCustomers}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('عدد اللعبات','TOTAL PLAYS')}</span><span class="stat-value">${stats.totalPlays}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('الأيام المكتملة','DAYS COMPLETED')}</span><span class="stat-value" style="color:var(--pg)">${stats.totalDays}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('المصروف','TOTAL SPENT')}</span><span class="stat-value" style="color:var(--pr)">$${stats.totalSpent.toLocaleString()}</span></div>
+      <div class="stat-card"><span class="stat-label">${t('وقت اللعب','PLAYTIME')}</span><span class="stat-value" style="font-size:10px">${playHours}h ${playMins}m</span></div>
+      <div class="stat-card"><span class="stat-label">${t('الماكينات المملوكة','OWNED MACHINES')}</span><span class="stat-value" style="color:var(--pm)">${ownedMachines.length}</span></div>
+    </div>
+  `;
+}
+
+/* ──────────────────────────────────────
+   SETTINGS OVERLAY
+────────────────────────────────────── */
+function renderSettings(containerId){
+  const body=document.getElementById(containerId);
+  if(!body)return;
+  body.innerHTML=`
+    <div class="settings-section">
+      <span class="settings-title">◈ ${t('الصوت','AUDIO')}</span>
+      <div class="setting-row">
+        <div class="setting-label">${t('الموسيقى','MUSIC')}<span>${t('موسيقى الخلفية','Background Music')}</span></div>
+        <input type="range" class="px-slider" min="0" max="100" value="${settings.musicVol}" oninput="setSetting('musicVol',this.value)">
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">${t('المؤثرات الصوتية','SFX')}<span>${t('أصوات الكليك والزبائن','Click & Customer sounds')}</span></div>
+        <input type="range" class="px-slider" min="0" max="100" value="${settings.sfxVol}" oninput="setSetting('sfxVol',this.value)">
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">${t('تأثيرات اللعبة','FX VOL')}<span>${t('الأصوات العامة','General sounds')}</span></div>
+        <input type="range" class="px-slider" min="0" max="100" value="${settings.fxVol}" oninput="setSetting('fxVol',this.value)">
+      </div>
+    </div>
+    <div class="settings-section">
+      <span class="settings-title">◈ ${t('اللغة','LANGUAGE')}</span>
+      <div class="setting-row">
+        <div class="setting-label">${t('لغة اللعبة','Game Language')}<span>${t('عربي / إنجليزي','Arabic / English')}</span></div>
+        <div class="lang-toggle">
+          <button class="lang-btn ${lang==='ar'?'active':''}" onclick="setLang('ar')">عربي</button>
+          <button class="lang-btn ${lang==='en'?'active':''}" onclick="setLang('en')">ENG</button>
+        </div>
+      </div>
+    </div>
+    ${containerId==='settingsBody'?`
+    <div class="settings-section">
+      <span class="settings-title">◈ ${t('تغيير الاسم','RENAME')}</span>
+      <div class="rename-row">
+        <span class="rename-cost">${t('التكلفة: $300 — الاسم الحالي:','Cost: $300 — Current name:')} <span style="color:var(--px)">${playerName}</span></span>
+        <input type="text" class="rename-input" id="renameInput" placeholder="${playerName}" maxlength="16">
+        <button class="machine-buy-btn" style="width:100%" onclick="doRename()">${t('تأكيد التغيير ($300)','CONFIRM RENAME ($300)')}</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <span class="settings-title" style="color:var(--pr)">◈ ${t('منطقة الخطر','DANGER ZONE')}</span>
+      <div class="danger-zone">
+        <span class="danger-title">⚠ ${t('إعادة اللعبة من الصفر!','RESET GAME COMPLETELY!')}</span>
+        <button class="danger-btn" onclick="confirmReset()">
+          ⚠ ${t('مسح كل شيء والبدء من جديد','DELETE EVERYTHING & START OVER')}
+        </button>
+      </div>
+    </div>
+    `:''}
+  `;
+}
+
+function setSetting(key,val){
+  settings[key]=parseInt(val);
+  applyVolumes();
+  doSave();
+}
+function setLang(l){
+  lang=l;settings.lang=l;
+  doSave();
+  // Re-render everything
+  renderSettings('settingsBody');
+  renderSettings('titleSettingsBody');
+  renderShop();
+  renderStats();
+  renderNews();
+  updateMoneyDisplay();
+  showToast(l==='ar'?'تم تغيير اللغة للعربي!':'Language changed to English!');
+}
+
+function doRename(){
+  playClick();
+  const inp=document.getElementById('renameInput');
+  const newName=inp?inp.value.trim():'';
+  if(!newName){showToast(t('ادخل اسم جديد!','Enter a new name!'));return;}
+  if(money<300){showToast(t('مش معاك $300!','Need $300!'));return;}
+  money-=300;
+  playerName=newName.toUpperCase();
+  doSave();
+  updateMoneyDisplay();
+  renderSettings('settingsBody');
+  showToast(t(`اسمك اتغير لـ ${playerName}!`,`Name changed to ${playerName}!`));
+}
+
+/* ──────────────────────────────────────
+   NEWS OVERLAY
+────────────────────────────────────── */
+function renderNews(){
+  const body=document.getElementById('newsBody');
+  if(!body)return;
+  const dayEl=document.getElementById('newsDay');
+  if(dayEl)dayEl.textContent=day;
+
+  if(newsItems.length===0){
+    body.innerHTML=`<div style="text-align:center;padding:40px;font-size:7px;color:var(--sub)">${t('لا يوجد أخبار بعد...','No news yet...')}</div>`;
+    return;
+  }
+
+  body.innerHTML='';
+  let lastDay=-1;
+  newsItems.slice(0,30).forEach(item=>{
+    if(item.day!==lastDay){
+      const dh=document.createElement('div');
+      dh.className='news-date-header';
+      dh.textContent=`◄ ${t('اليوم','DAY')} ${item.day} ►`;
+      body.appendChild(dh);
+      lastDay=item.day;
+    }
+    const el=document.createElement('div');
+    el.className='news-item'+(item.type==='urgent'?' urgent':item.type==='rare'?' rare':'');
+    el.innerHTML=`
+      <div class="news-icon">${item.icon}</div>
+      <div class="news-content">
+        <span class="news-headline">${lang==='ar'?item.headline_ar:item.headline_en}</span>
+        <span class="news-body">${lang==='ar'?item.body_ar:item.body_en}</span>
+        <span class="news-time">${t('اليوم','Day')} ${item.day}</span>
+      </div>
+    `;
+    body.appendChild(el);
+  });
+}
+
+/* ──────────────────────────────────────
+   OVERLAY MANAGEMENT
+────────────────────────────────────── */
+function openOverlay(id){
+  playClick();
+  // Play appropriate sound
+  if(id==='newsOverlay'){
+    playSFX('arcade/BN.mp3',settings.sfxVol/100);
+  } else {
+    playSFX('arcade/BSSS.wav',settings.sfxVol/100);
+  }
+  document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Mark hud button active
+  document.querySelectorAll('.hud-icon-btn').forEach(b=>b.classList.remove('active'));
+  const map={'shopOverlay':'btnShop','statOverlay':'btnStat','settingsOverlay':'btnSettingsG','newsOverlay':'btnNews'};
+  if(map[id]){const b=document.getElementById(map[id]);if(b)b.classList.add('active');}
+
+  // Clear news badge on news open
+  if(id==='newsOverlay'){
+    unreadNews=0;
+    const badge=document.getElementById('newsBadge');
+    if(badge)badge.style.display='none';
+    renderNews();
+  }
+  if(id==='shopOverlay')renderShop();
+  if(id==='statOverlay')renderStats();
+  if(id==='settingsOverlay')renderSettings('settingsBody');
+}
+
+function closeOverlay(id){
+  playClick();
+  document.getElementById(id).classList.remove('active');
+  document.querySelectorAll('.hud-icon-btn').forEach(b=>b.classList.remove('active'));
+}
+
+/* ──────────────────────────────────────
+   TITLE SCREEN OVERLAYS
+────────────────────────────────────── */
+function showTitleSettings(){
+  playClick();
+  renderSettings('titleSettingsBody');
+  document.getElementById('titleSettings').classList.add('active');
+}
+function closeTitleSettings(){
+  playClick();
+  document.getElementById('titleSettings').classList.remove('active');
+}
+function showCredits(){
+  playClick();
+  document.getElementById('creditsOverlay').classList.add('active');
+}
+function closeCredits(){
+  playClick();
+  document.getElementById('creditsOverlay').classList.remove('active');
+}
+
+/* ──────────────────────────────────────
+   START / NAME ENTRY
+────────────────────────────────────── */
+function handleStart(){
+  playClick();
+  const save=loadSave();
+  if(save&&save.playerName){
+    // Existing save — go straight to game, NO name screen
+    loadFromSave(save);
+    transitionToGame();
+  } else {
+    // First time — show name entry
+    showNameScreen('');
+  }
+}
+
+function showNameScreen(prefill){
+  document.getElementById('titleScreen').classList.remove('active');
+  document.getElementById('nameScreen').classList.add('active');
+  setTimeout(()=>{
+    const inp=document.getElementById('playerNameInput');
+    if(inp){
+      if(prefill){inp.value=prefill;}
+      inp.select();inp.focus();
+    }
+  },300);
+}
+
+function confirmName(){
+  playClick();
+  const inp=document.getElementById('playerNameInput');
+  const name=(inp?inp.value.trim():'').toUpperCase();
+  if(!name){showToast('ادخل اسمك الأول! / Enter your name!');return;}
+  const prevSave=loadSave();
+  if(prevSave&&prevSave.playerName){
+    // Resuming: just update name, keep all progress
+    playerName=name;
+    doSave();
+  } else {
+    // Fresh start
+    playerName=name;
+    initNewGame();
+  }
+  transitionToGame();
+}
+
+function initNewGame(){
+  money=75;day=1;isOpen=false;ownedMachines=[];
+  stats={totalEarned:0,totalCustomers:0,totalDays:0,totalPlays:0,totalSpent:0,playtime:0,startDate:Date.now()};
+  newsRead=[];unreadNews=0;newsItems=[];customers=[];
+  // Day 1 news
+  addNews({...NEWS_EVENTS[0],day:1});
+  doSave();
+}
+
+function loadFromSave(save){
+  playerName=save.playerName||'PLAYER_01';
+  money=typeof save.money==='number'?save.money:75;
+  day=save.day||1;
+  isOpen=false;
+  // Restore machines — fix any missing slot/instId
+  ownedMachines=(save.ownedMachines||[]).map((o,i)=>{
+    if(typeof o==='string') return {id:o,slot:i,instId:o+'_'+i};
+    return {id:o.id, slot:o.slot!==undefined?o.slot:i, instId:o.instId||o.id+'_'+i};
+  });
+  // Fix duplicate slots — if two machines share a slot, reassign
+  const usedSlots=new Set();
+  ownedMachines.forEach((o,i)=>{
+    if(usedSlots.has(o.slot)){
+      // Find next free slot
+      for(let s=0;s<MACHINE_SLOTS.length;s++){
+        if(!usedSlots.has(s)){o.slot=s;break;}
+      }
+    }
+    usedSlots.add(o.slot);
+  });
+  if(save.settings)Object.assign(settings,save.settings);
+  if(save.stats)Object.assign(stats,save.stats);
+  newsRead=save.newsRead||[];
+  unreadNews=save.unreadNews||0;
+  lang=save.lang||'ar';
+  newsItems=[];
+  NEWS_EVENTS.filter(e=>e.day<=day).forEach(ev=>{newsItems.push(Object.assign({},ev));});
+}
+
+function transitionToGame(){
+  const overlay=document.getElementById('transOverlay');
+  const transText=document.getElementById('transText');
+  overlay.classList.add('show');
+  const msgs=lang==='ar'
+    ?['جاري التحميل...','جاهز!']
+    :['LOADING...','READY!'];
+  transText.textContent=msgs[0];
+  setTimeout(()=>{
+    transText.textContent=msgs[1];
+  },600);
+  setTimeout(()=>{
+    overlay.classList.remove('show');
+    // Show game screen
+    document.getElementById('titleScreen').classList.remove('active');
+    document.getElementById('nameScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+    initGameScreen();
+  },1100);
+}
+
+function initGameScreen(){
+  stopBGM();
+  setTimeout(()=>playBGM('arcade/BMP.mp3'),200);
+  updateMoneyDisplay();
+  updateOpenStatus();
+  document.getElementById('dayNum').textContent='DAY '+day;
+  if(unreadNews>0){
+    const badge=document.getElementById('newsBadge');
+    if(badge)badge.style.display='block';
+  }
+  renderFloorMachines();
+  // Check day 1 news
+  if(newsItems.length===0)addNews({...NEWS_EVENTS[0],day:1});
+  if(day>1)checkNewsForDay(day);
+  // Trigger day 1 story on first launch
+  setTimeout(()=>triggerStory(1),1500);
+  startGameLoop();
+  // Spawn decoration stars on floor
+  spawnFloorParticles();
+}
+
+/* ──────────────────────────────────────
+   FLOOR DECORATION
+────────────────────────────────────── */
+function spawnFloorParticles(){
+  const layer=document.getElementById('starsLayer');
+  if(!layer)return;
+  layer.innerHTML='';
+  for(let i=0;i<40;i++){
+    const s=document.createElement('div');
+    s.className='px-star';
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${1+Math.random()*3}s;--dl:${Math.random()*2}s`;
+    layer.appendChild(s);
+  }
+}
+
+/* ──────────────────────────────────────
+   RESET
+────────────────────────────────────── */
+function confirmReset(){
+  playClick();
+  const dialog=document.getElementById('confirmDialog');
+  const msgEl=document.getElementById('confirmMsg');
+  msgEl.innerHTML=t('كل تقدمك هيتمسح نهائياً!<br>مش هترجع تاني... متأكد؟','All your progress will be deleted!<br>There\'s no going back... Are you sure?');
+  document.getElementById('confirmYes').onclick=()=>{playClick();closeConfirm();resetSave();};
+  dialog.classList.add('active');
+}
+function closeConfirm(){document.getElementById('confirmDialog').classList.remove('active');}
+
+/* ──────────────────────────────────────
+   TOAST
+────────────────────────────────────── */
+let toastTimer=null;
+function showToast(msg,dur=2200){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+/* ──────────────────────────────────────
+   KEYBOARD / ESC
+────────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    // If overlays open, close them first
+    const anyOverlay=document.querySelector('.overlay.active');
+    if(anyOverlay){closeOverlay(anyOverlay.id);return;}
+    if(document.getElementById('titleSettings').classList.contains('active')){
+      document.getElementById('titleSettings').classList.remove('active');return;
+    }
+    if(document.getElementById('creditsOverlay').classList.contains('active')){
+      document.getElementById('creditsOverlay').classList.remove('active');return;
+    }
+    if(document.getElementById('confirmDialog').classList.contains('active')){
+      document.getElementById('confirmDialog').classList.remove('active');return;
+    }
+    // If in game, toggle pause menu
+    if(document.getElementById('gameScreen').classList.contains('active')){
+      togglePauseMenu();return;
+    }
+  }
+  if(e.key==='Enter'){
+    if(document.getElementById('nameScreen').classList.contains('active'))confirmName();
+  }
+});
+
+
+/* ──────────────────────────────────────
+   PAUSE MENU
+────────────────────────────────────── */
+let gamePaused=false;
+
+function togglePauseMenu(){
+  gamePaused=!gamePaused;
+  const pm=document.getElementById('pauseMenu');
+  if(gamePaused){
+    pm.style.display='flex';
+    if(gameTimerInterval){clearInterval(gameTimerInterval);gameTimerInterval=null;}
+    if(customerSpawnInterval){clearInterval(customerSpawnInterval);customerSpawnInterval=null;}
+    if(autoSaveInterval){clearInterval(autoSaveInterval);autoSaveInterval=null;}
+  } else {
+    resumeGame();
+  }
+}
+
+function resumeGame(){
+  gamePaused=false;
+  const pm=document.getElementById('pauseMenu');
+  if(pm)pm.style.display='none';
+  if(!gameTimerInterval)startGameLoop();
+}
+
+function goToMainMenu(){
+  gamePaused=false;
+  const pm=document.getElementById('pauseMenu');
+  if(pm)pm.style.display='none';
+  doSave();
+  stopGameLoop();
+  customers.forEach(c=>{try{if(c.el&&c.el.parentNode)c.el.remove();}catch{}});
+  customers=[];
+  document.querySelectorAll('.customer,.coin-pop').forEach(e=>e.remove());
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('titleScreen').classList.add('active');
+}
+
+/* ──────────────────────────────────────
+   STORY SYSTEM
+────────────────────────────────────── */
+const STORY_CHAPTERS=[
+  {day:1,lines:[
+    {name:'أنت',text:'أخيراً... افتحت أركيدي الخاص. كل حياتي كنت بحلم بيه.'},
+    {name:'أنت',text:'عندي 75 دولار بس في جيبي... لازم أشتري أول ماكينة وأبدأ.'},
+    {name:'أنت',text:'المكان فاضي دلوقتي، بس هيبقى مليان ناس قريباً. أقسم بكده.'},
+  ]},
+  {day:3,lines:[
+    {name:'أنت',text:'الزبائن بدأوا ييجوا! مش كتير، بس ده بداية.'},
+    {name:'أنت',text:'لازم أشتري ماكينات أكتر... كل ماكينة = فلوس أكتر.'},
+  ]},
+  {day:7,lines:[
+    {name:'أنت',text:'أسبوع كامل! الناس بدأت تعرف المكان.'},
+    {name:'جار',text:'سمعت إنك فتحت أركيد هنا؟ ولادي عايزين ييجوا!'},
+    {name:'أنت',text:'(مش صدقت إن حد كلمني كده...) أيوه تفضلوا!'},
+  ]},
+  {day:15,lines:[
+    {name:'صحفي',text:'عايز أعمل مقال عن أركيدك في الجريدة المحلية!'},
+    {name:'أنت',text:'(قلبي وقف...) جد؟! أيوه طبعاً!'},
+    {name:'أنت',text:'ده هيغير كل حاجة. الشهرة جاية.'},
+  ]},
+  {day:22,lines:[
+    {name:'غريب',text:'سمعت إنك عامل كويس... أنا فتحت أركيد قريب منك.'},
+    {name:'أنت',text:'(منافس؟!) مفيش مشكلة. المكان واسع للكل.'},
+    {name:'أنت',text:'بس مش هخليه يتفوق عليّ. لازم أطور نفسي.'},
+  ]},
+  {day:30,lines:[
+    {name:'أنت',text:'30 يوم! الناس بتتكلم عن أركيدي في كل مكان.'},
+    {name:'أنت',text:'الماكينات النادرة وصلت... ده وقت الاستثمار الحقيقي.'},
+  ]},
+  {day:50,lines:[
+    {name:'رجل أعمال',text:'أنا مستعد أدفع مليون دولار لشراء أركيدك!'},
+    {name:'أنت',text:'...'},
+    {name:'أنت',text:'مش للبيع. ده مش بيزنس بالنسبالي. ده حلمي.'},
+  ]},
+  {day:60,lines:[
+    {name:'أنت',text:'60 يوم... من 75 دولار لإمبراطورية أركيد حقيقية.'},
+    {name:'أنت',text:'كل ده بدأ بماكينة واحدة وحلم كبير.'},
+    {name:'أنت',text:'القصة مش خلصت... دي بس البداية. 🎮'},
+  ]},
+];
+let storyQueue=[],storyLineIdx=0,storyTypeTimer=null;
+function triggerStory(d){
+  const ch=STORY_CHAPTERS.find(c=>c.day===d);
+  if(!ch||newsRead.includes('story_'+d))return;
+  newsRead.push('story_'+d);
+  storyQueue=ch.lines.slice();storyLineIdx=0;showNextStoryLine();
+}
+function showNextStoryLine(){
+  if(storyLineIdx>=storyQueue.length){closeStory();return;}
+  const line=storyQueue[storyLineIdx];
+  const dlg=document.getElementById('storyDialog');
+  const txt=document.getElementById('storyText');
+  const nm=document.getElementById('storyName');
+  const cur=document.getElementById('storyCursor');
+  if(!dlg)return;
+  dlg.style.display='block';
+  nm.textContent=line.name;
+  txt.textContent='';
+  if(cur)cur.style.display='inline-block';
+  clearTimeout(storyTypeTimer);
+  let i=0;
+  function go(){
+    if(i<line.text.length){txt.textContent+=line.text[i++];storyTypeTimer=setTimeout(go,26);}
+    else{if(cur)cur.style.display='none';}
+  }
+  go();
+}
+function advanceStory(){
+  const txt=document.getElementById('storyText');
+  const line=storyQueue[storyLineIdx];
+  const cur=document.getElementById('storyCursor');
+  if(line&&txt&&txt.textContent.length<line.text.length){
+    clearTimeout(storyTypeTimer);txt.textContent=line.text;
+    if(cur)cur.style.display='none';return;
+  }
+  storyLineIdx++;showNextStoryLine();
+}
+function closeStory(){
+  const d=document.getElementById('storyDialog');
+  if(d)d.style.display='none';
+  clearTimeout(storyTypeTimer);
+}
+
+/* ──────────────────────────────────────
+   SELL / SWAP MACHINE
+────────────────────────────────────── */
+let sellSwapTarget=null;
+
+function showSellSwap(machineId,slotIdx){
+  playClick();
+  const owned=slotIdx!==undefined
+    ? ownedMachines.find(o=>o.slot===slotIdx)
+    : ownedMachines.find(o=>o.id===machineId);
+  if(!owned)return;
+  // Block if customer is currently playing on this machine
+  const busyCust=customers.find(c=>c.machineSlot===owned.slot&&c.phase==='playing');
+  if(busyCust){
+    showToast(t('فيه زبون بيلعب دلوقتي! انتظر.','A customer is playing! Wait.'));
+    return;
+  }
+  const mDef=MACHINES.find(m=>m.id===machineId);
+  if(!mDef)return;
+  sellSwapTarget=owned;
+  const sellPrice=Math.floor(mDef.price/2);
+  document.getElementById('ssDialogName').textContent=mDef.name;
+  document.getElementById('ssDialogInfo').textContent=mDef.game+' | Bought: $'+mDef.price+' | Sell: $'+sellPrice;
+  document.getElementById('ssSellLabel').textContent='SELL FOR $'+sellPrice;
+  const grid=document.getElementById('swapSlotsGrid');
+  grid.innerHTML='';
+  MACHINE_SLOTS.forEach((_,i)=>{
+    const occupant=ownedMachines.find(o=>o.slot===i);
+    const isCurrentSlot=owned.slot===i;
+    const btn=document.createElement('button');
+    btn.style.cssText='padding:6px 3px;font-family:var(--font);font-size:5px;cursor:pointer;border:2px solid;transition:all .1s;width:100%';
+    if(isCurrentSlot){
+      btn.style.cssText+=';border-color:var(--py);background:rgba(255,255,0,.15);color:var(--py)';
+      btn.textContent='HERE';btn.disabled=true;
+    } else if(occupant){
+      btn.style.cssText+=';border-color:rgba(255,0,255,.5);background:rgba(255,0,255,.08);color:var(--pm)';
+      const nm=MACHINES.find(m=>m.id===occupant.id);
+      btn.textContent='SWAP'+(nm?'\n'+nm.name.slice(0,5):'');
+      btn.onclick=()=>swapMachineSlot(i);
+    } else {
+      btn.style.cssText+=';border-color:rgba(0,255,136,.5);background:rgba(0,255,136,.06);color:var(--pg)';
+      btn.textContent='SLOT '+(i+1);
+      btn.onclick=()=>moveMachineToSlot(i);
+    }
+    grid.appendChild(btn);
+  });
+  document.getElementById('sellSwapDialog').style.display='flex';
+}
+
+function closeSellSwap(){
+  document.getElementById('sellSwapDialog').style.display='none';
+  sellSwapTarget=null;
+}
+
+function sellCurrentMachine(){
+  if(!sellSwapTarget)return;
+  const mDef=MACHINES.find(m=>m.id===sellSwapTarget.id);
+  if(!mDef)return;
+  const sellPrice=Math.floor(mDef.price/2);
+  money+=sellPrice;
+  // Remove only the specific machine slot, not all machines of same type
+  ownedMachines=ownedMachines.filter(o=>o.slot!==sellSwapTarget.slot);
+  closeSellSwap();
+  renderFloorMachines();
+  renderShop();
+  updateMoneyDisplay();
+  doSave();
+  showToast(t('بعت '+mDef.name+' بـ $'+sellPrice+'!','Sold '+mDef.name+' for $'+sellPrice+'!'));
+}
+
+function moveMachineToSlot(newSlot){
+  if(!sellSwapTarget)return;
+  const owned=ownedMachines.find(o=>o.slot===sellSwapTarget.slot);
+  if(!owned)return;
+  // Check target slot is free
+  if(ownedMachines.some(o=>o.slot===newSlot)){
+    showToast(t('المكان ده مش فاضي!','Slot is occupied!'));return;
+  }
+  owned.slot=newSlot;
+  closeSellSwap();
+  renderFloorMachines();
+  doSave();
+  showToast(t('✅ تم نقل الماكينة!','Machine moved!'));
+}
+
+function swapMachineSlot(targetSlot){
+  if(!sellSwapTarget)return;
+  const owned=ownedMachines.find(o=>o.slot===sellSwapTarget.slot);
+  if(!owned)return;
+  const other=ownedMachines.find(o=>o.slot===targetSlot);
+  if(other){
+    const tmp=owned.slot;
+    owned.slot=targetSlot;
+    other.slot=tmp;
+  } else {
+    owned.slot=targetSlot;
+  }
+  closeSellSwap();
+  renderFloorMachines();
+  doSave();
+  showToast(t('✅ تم تبديل المكان!','Slots swapped!'));
+}
+
+/* ──────────────────────────────────────
+   INIT — Check for existing save
+────────────────────────────────────── */
+window.addEventListener('load',()=>{
+  // Start star animations on title
+  spawnFloorParticles();
+  // Start title music after user interaction (handled by unlockAudio)
+  document.getElementById('titleScreen').classList.add('active');
+});
+</script>
+</body>
+</html>

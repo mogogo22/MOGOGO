@@ -3,12 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DASH - MOHAND WORLD</title>
-  <link rel="icon" href="img/Acartoonst.png" type="image/png">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>DASH</title>
+  <link rel="icon" href="img/tylishypogt.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Cairo',sans-serif;background:#060d1a;color:#e8f0fe;height:100vh;overflow:hidden;user-select:none;touch-action:none}
+    :root{
+      --px-cyan:#00ffff;--px-mag:#ff00ff;--px-yel:#ffff00;--px-grn:#00ff88;
+      --px-red:#ff3344;--px-pur:#a855f7;
+      --bg:#060d1a;--bg2:#0a0f2e;
+      --font-px:'Press Start 2P',monospace;
+      --font-ar:'Cairo',sans-serif;
+      --scanline:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+    }
+    body{font-family:var(--font-ar);background:var(--bg);color:#e8f0fe;height:100vh;overflow:hidden;user-select:none;touch-action:none;image-rendering:pixelated}
+    /* CRT scanlines */
+    body::after{content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;background:var(--scanline);opacity:.3}
+    /* Pixel clip-path for buttons */
+    .px-clip{clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 
     /* ── PORTRAIT WARNING ── */
     #rotWarn{display:none;position:fixed;inset:0;z-index:9999;background:#060d1a;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:40px}
@@ -18,14 +30,14 @@
 
     header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(168,85,247,.15);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;height:48px}
     .brand{display:flex;align-items:center;gap:8px}
-    .brand img{width:30px;height:30px;border-radius:8px;border:2px solid rgba(168,85,247,.3)}
-    .brand span{font-weight:900;font-size:14px;background:linear-gradient(90deg,#a855f7,#2a9df4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .brand img{width:28px;height:28px;image-rendering:pixelated;border:2px solid var(--px-pur)}
+    .brand span{font-family:var(--font-px);font-size:11px;color:var(--px-cyan);text-shadow:0 0 8px var(--px-cyan);letter-spacing:1px}
     .back-btn{text-decoration:none;color:#b8d4f0;font-weight:800;font-size:12px;padding:5px 12px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(168,85,247,.15)}
 
-    #hud{position:fixed;top:48px;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:4px 12px;background:rgba(6,13,26,.88);border-bottom:1px solid rgba(255,255,255,.04)}
+    #hud{position:fixed;top:48px;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:4px 12px;background:rgba(2,4,18,.95);border-bottom:2px solid rgba(0,255,255,.2);box-shadow:0 2px 20px rgba(0,255,255,.05)}
     .hud-item{display:flex;flex-direction:column;align-items:center}
-    .hud-val{font-size:14px;font-weight:900;color:#a855f7;line-height:1.1}
-    .hud-label{font-size:8px;color:#5a7a9a;font-weight:700}
+    .hud-val{font-family:var(--font-px);font-size:11px;color:var(--px-cyan);line-height:1.1;text-shadow:0 0 6px var(--px-cyan)}
+    .hud-label{font-size:7px;color:#3a5a7a;font-weight:700;font-family:var(--font-px)}
     #livesRow{display:flex;gap:2px;align-items:center}
     .heart{font-size:13px;transition:all .3s}
     .heart.lost{opacity:.2;filter:grayscale(1)}
@@ -55,6 +67,26 @@
     @keyframes invBlink{0%,100%{opacity:1}50%{opacity:.2}}
     .dash-ghost{position:absolute;width:38px;height:38px;border-radius:10px;pointer-events:none;z-index:9;animation:gf .3s ease forwards}
     @keyframes gf{to{opacity:0;transform:scale(.35)}}
+    /* ── ELEMENTAL PARTICLES ── */
+    .sk-particle{position:absolute;border-radius:50%;pointer-events:none;z-index:11;animation:skPar var(--d,.8s) ease-out forwards}
+    @keyframes skPar{0%{opacity:.9;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-30px)) scale(0)}}
+    /* Water skin */
+    #player.skin-water{box-shadow:0 0 18px #22d3ee,0 0 36px rgba(34,211,238,.4),0 0 60px rgba(34,211,238,.15)!important;background:linear-gradient(135deg,#22d3ee,#0891b2)!important}
+    /* Wind skin */
+    #player.skin-wind{box-shadow:0 0 18px #bae6fd,0 0 36px rgba(186,230,253,.35)!important;background:linear-gradient(135deg,#bae6fd,#64748b)!important;animation:windSway 2s ease-in-out infinite}
+    @keyframes windSway{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+    /* Fire skin */
+    #player.skin-fire{box-shadow:0 0 20px #f97316,0 0 40px rgba(249,115,22,.5),0 0 70px rgba(249,115,22,.2)!important;background:linear-gradient(135deg,#f97316,#991b1b)!important;animation:firePulse .4s ease-in-out infinite}
+    @keyframes firePulse{0%,100%{box-shadow:0 0 20px #f97316,0 0 40px rgba(249,115,22,.5)}50%{box-shadow:0 0 30px #ef4444,0 0 60px rgba(239,68,68,.6)}}
+    /* Light skin */
+    #player.skin-light{box-shadow:0 0 24px #fef08a,0 0 50px rgba(254,240,138,.6),0 0 80px rgba(254,240,138,.25)!important;background:linear-gradient(135deg,#fef08a,#eab308)!important;animation:lightPulse .6s ease-in-out infinite}
+    @keyframes lightPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    /* Shadow skin */
+    #player.skin-shadow{box-shadow:0 0 20px #818cf8,0 0 40px rgba(99,102,241,.6),0 0 80px rgba(99,102,241,.3),inset 0 0 10px rgba(0,0,0,.5)!important;background:radial-gradient(circle at 35% 35%,#312e81,#1e1b4b)!important;animation:shadowPulse .8s ease-in-out infinite}
+    @keyframes shadowPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3) hue-rotate(15deg)}}
+    /* Shadow aura ring */
+    #shadowAura{position:absolute;border-radius:50%;border:2px solid rgba(129,140,248,.4);pointer-events:none;z-index:8;display:none;animation:auraExpand 1.5s ease-out infinite}
+    @keyframes auraExpand{0%{width:38px;height:38px;opacity:.8;transform:translate(-50%,-50%)}100%{width:90px;height:90px;opacity:0;transform:translate(-50%,-50%)}}
 
     .bullet{position:absolute;width:11px;height:11px;border-radius:50%;z-index:11;pointer-events:none;will-change:left,top}
     .ebullet{position:absolute;width:9px;height:9px;border-radius:50%;z-index:11;pointer-events:none;background:radial-gradient(circle,#fff 20%,#ef4444);box-shadow:0 0 6px rgba(239,68,68,.9)}
@@ -112,13 +144,27 @@
     /* ── SCREENS ── */
     .screen{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;padding:16px}
     .screen.active{display:flex}
-    .screen-bg{position:absolute;inset:0;background:rgba(6,13,26,.93);backdrop-filter:blur(8px)}
-    .screen-card{position:relative;z-index:1;background:rgba(255,255,255,.03);border:1px solid rgba(168,85,247,.25);border-radius:22px;padding:28px 24px;max-width:440px;width:100%;text-align:center;box-shadow:0 20px 70px rgba(168,85,247,.1);animation:scIn .4s ease;max-height:90vh;overflow-y:auto}
-    @keyframes scIn{from{opacity:0;transform:scale(.87)}to{opacity:1;transform:scale(1)}}
-    .screen-icon{font-size:50px;display:block;margin-bottom:8px}
-    .screen-title{font-size:24px;font-weight:900;color:#fff;margin-bottom:6px}
-    .screen-title span{background:linear-gradient(90deg,#a855f7,#2a9df4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .screen-sub{color:#7db9e8;font-size:12px;margin-bottom:16px;line-height:1.7}
+    .screen-bg{position:absolute;inset:0;background:rgba(4,6,20,.96)}
+    .screen-card{
+      position:relative;z-index:1;
+      background:rgba(5,8,28,.97);
+      border:3px solid var(--px-pur);
+      box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--px-pur),0 0 40px rgba(168,85,247,.15),inset 0 0 20px rgba(168,85,247,.03);
+      padding:28px 22px;max-width:460px;width:100%;text-align:center;
+      animation:scIn .3s cubic-bezier(.34,1.56,.64,1);
+      max-height:90vh;overflow-y:auto;
+      clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+    }
+    @keyframes scIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .screen-icon{font-size:48px;display:block;margin-bottom:10px;filter:drop-shadow(0 0 12px var(--px-pur))}
+    .screen-title{
+      font-family:var(--font-px);font-size:20px;color:var(--px-cyan);
+      margin-bottom:8px;text-shadow:0 0 10px var(--px-cyan),0 0 20px rgba(0,255,255,.4);
+      letter-spacing:2px;
+    }
+    .screen-title span{color:var(--px-mag);text-shadow:0 0 10px var(--px-mag)}
+    .screen-sub{color:#7db9e8;font-size:11px;margin-bottom:16px;line-height:1.8;font-family:var(--font-ar)}
     .controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
     .ctrl-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 5px}
     .ctrl-item .key{font-size:13px;margin-bottom:2px}
@@ -128,9 +174,24 @@
     .stat-b{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 4px}
     .stat-b .sv{font-size:18px;font-weight:900;color:#a855f7}
     .stat-b .sl{font-size:9px;color:#5a7a9a;font-weight:700;margin-top:2px}
-    .play-btn{width:100%;padding:11px;border-radius:12px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,#a855f7,#6366f1);box-shadow:0 7px 22px rgba(168,85,247,.35);transition:all .25s;margin-bottom:6px}
-    .play-btn:hover{transform:translateY(-2px);box-shadow:0 11px 30px rgba(168,85,247,.5)}
-    .sec-btn{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.08);cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;color:#b8d4f0;background:rgba(255,255,255,.04);margin-bottom:5px}
+    .play-btn{
+      width:100%;padding:12px;border:none;cursor:pointer;
+      font-family:var(--font-px);font-size:9px;color:#000;
+      background:linear-gradient(135deg,var(--px-cyan),#2a9df4);
+      box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--px-cyan),0 0 20px rgba(0,255,255,.3);
+      transition:all .1s;margin-bottom:8px;letter-spacing:1px;
+      clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+    }
+    .play-btn:hover{transform:translateY(-2px);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--px-cyan),0 0 30px rgba(0,255,255,.5)}
+    .play-btn:active{transform:scale(.96)}
+    .sec-btn{
+      width:100%;padding:9px;border:2px solid rgba(0,255,255,.3);cursor:pointer;
+      font-family:var(--font-px);font-size:7px;color:var(--px-cyan);
+      background:rgba(0,255,255,.06);margin-bottom:6px;letter-spacing:1px;
+      clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+      transition:all .1s;
+    }
+    .sec-btn:hover{background:rgba(0,255,255,.15);border-color:var(--px-cyan)}
 
     #puStatus{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:90;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;pointer-events:none}
     .pu-pill{background:rgba(8,16,34,.93);border-radius:50px;padding:3px 9px;font-size:10px;font-weight:800;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:4px}
@@ -171,9 +232,78 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
 
     /* ══ SHOP ══ */
-    #shopScreen .screen-card{max-width:620px;padding:22px 18px}
+    #shopScreen .screen-card{max-width:680px;padding:20px 16px;max-height:90vh;overflow-y:auto}
+/* ── POWER SHOP ── */
+.shop-tabs{display:flex;gap:8px;margin-bottom:18px}
+.shop-tab{flex:1;padding:9px;font-family:var(--font);font-size:8px;cursor:pointer;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:#7888a8;transition:all .15s;text-align:center}
+.shop-tab.active{background:rgba(168,85,247,.2);border-color:#a855f7;color:#c084fc}
+/* Spin animation */
+.spin-btn{
+  width:100%;padding:14px;font-family:var(--font);font-size:9px;cursor:pointer;
+  background:linear-gradient(135deg,#4c1d95,#7c3aed,#a855f7);
+  border:2px solid #c084fc;color:#fff;
+  box-shadow:0 0 20px rgba(168,85,247,.5);
+  transition:all .2s;margin-bottom:14px;letter-spacing:1px;
+}
+.spin-btn:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(168,85,247,.7)}
+.spin-btn:disabled{opacity:.4;cursor:default;transform:none}
+.spin-cost{font-size:7px;color:#c084fc;display:block;margin-top:3px;font-family:var(--font2)}
+/* Spin — vertical flash display */
+#spinWheel{
+  width:100%;height:110px;position:relative;margin-bottom:16px;
+  background:rgba(0,0,0,.6);border:2px solid rgba(168,85,247,.4);
+  display:none;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+#spinFlashName{
+  font-family:var(--font);font-size:18px;color:#fff;text-align:center;
+  text-shadow:0 0 20px currentColor;letter-spacing:2px;
+  transition:none;
+}
+#spinFlashIcon{font-size:36px;display:block;margin-bottom:4px;text-align:center}
+#spinGlow{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(168,85,247,.15),transparent 70%);
+}
+/* Power card in shop */
+.power-card{
+  background:rgba(0,0,20,.7);border:2px solid rgba(168,85,247,.2);
+  padding:14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  transition:all .15s;cursor:pointer;position:relative;
+}
+.power-card.owned{border-color:rgba(34,197,94,.4)}
+.power-card.equipped-pw{border-color:#c084fc;background:rgba(168,85,247,.1);box-shadow:0 0 12px rgba(168,85,247,.2)}
+.power-card:hover:not(.equipped-pw){border-color:rgba(168,85,247,.5);background:rgba(168,85,247,.06)}
+.pw-icon{font-size:30px;flex-shrink:0;width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:10px}
+.pw-info{flex:1}
+.pw-name{font-size:10px;font-weight:900;display:block;margin-bottom:3px}
+.pw-rarity{font-size:7px;letter-spacing:1px;font-family:var(--font);display:block;margin-bottom:5px}
+.pw-desc{font-size:11px;color:#94a3b8;font-family:var(--font2);font-weight:700;display:block;line-height:1.5;margin-bottom:5px}
+.pw-lore{font-size:10px;color:#64748b;font-family:var(--font2);font-style:italic;display:block;line-height:1.5}
+.pw-equip-btn{
+  padding:6px 12px;font-family:var(--font);font-size:7px;cursor:pointer;
+  background:rgba(168,85,247,.15);border:2px solid #a855f7;color:#c084fc;transition:all .12s;margin-top:6px;
+}
+.pw-equip-btn:hover{background:rgba(168,85,247,.3)}
+.pw-equip-btn.eq{background:rgba(34,197,94,.15);border-color:#22c55e;color:#86efac;cursor:default}
+.rarity-badge{
+  position:absolute;top:6px;right:8px;
+  font-size:6px;font-family:var(--font);padding:2px 6px;
+  letter-spacing:1px;
+}
+/* Rarity colors */
+.rc-شائع{color:#94a3b8;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.08)}
+.rc-uncommon,.rc-غير-مألوف{color:#22d3ee;border:1px solid rgba(34,211,238,.3);background:rgba(34,211,238,.08)}
+.rc-rare,.rc-نادر{color:#f97316;border:1px solid rgba(249,115,22,.35);background:rgba(249,115,22,.1)}
+.rc-epic,.rc-ملحمي{color:#fde68a;border:1px solid rgba(253,230,138,.4);background:rgba(253,230,138,.1)}
+.rc-legendary,.rc-أسطوري{color:#c084fc;border:1px solid rgba(192,132,252,.5);background:rgba(192,132,252,.12)}
+/* Shadow power dramatic effect */
+#shadowFlash{position:fixed;inset:0;z-index:650;pointer-events:none;opacity:0;background:#000;transition:opacity .4s}
+#shadowFlash.show{opacity:1}
+
     .shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-    .shop-title{font-size:22px;font-weight:900;background:linear-gradient(90deg,#f59e0b,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .shop-title{font-family:var(--font-px);font-size:12px;color:var(--px-yel);text-shadow:0 0 8px var(--px-yel);letter-spacing:2px}
     .shop-coins{font-size:14px;font-weight:900;color:#fde68a;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);padding:5px 12px;border-radius:50px}
     .skins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
     @media(max-width:480px){.skins-grid{grid-template-columns:repeat(2,1fr)}}
@@ -207,19 +337,19 @@
 </div>
 
 <header>
-  <div class="brand"><img src="img/Acartoonst.png" alt="logo"><span>DASH</span></div>
+  <div class="brand"><img src="img/tylishypogt.png" alt="logo"><span>DASH</span></div>
   <a href="index.html" class="back-btn">← الرجوع للقناة</a>
 </header>
 
 <div id="hud">
   <div class="hud-item"><span class="hud-val" id="scoreEl">0</span><span class="hud-label">SCORE</span></div>
   <div id="livesRow">
-    <span class="heart" id="h1">❤️</span><span class="heart" id="h2">❤️</span>
-    <span class="heart" id="h3">❤️</span><span class="heart" id="h4" style="display:none">❤️</span>
+    <span class="heart" id="h1s" style="display:none">🖤</span><span class="heart" id="h2s" style="display:none">🖤</span><span class="heart" id="h3s" style="display:none">🖤</span><span class="heart" id="h4s" style="display:none">🖤</span><span class="heart" id="h5s" style="display:none">🖤</span><span class="heart" id="h1r" style="display:none">❤️</span><span class="heart" id="h2r" style="display:none">❤️</span><span class="heart" id="h3r" style="display:none">❤️</span><span class="heart" id="h4r" style="display:none">❤️</span>
   </div>
   <div class="hud-item"><span class="hud-val" id="comboEl" style="color:#f59e0b">x1</span><span class="hud-label">COMBO</span></div>
   <div class="hud-item"><span class="hud-val" id="waveEl" style="color:#f59e0b">1</span><span class="hud-label">WAVE</span></div>
   <div class="hud-item"><span class="hud-val" id="coinsEl">0</span><span class="hud-label">🪙</span></div>
+  <div class="hud-item"><span class="hud-val" id="gemsEl" style="color:#c084fc">0</span><span class="hud-label">💎</span></div>
   <div class="hud-item"><span class="hud-val" id="killsEl" style="color:#ef4444">0</span><span class="hud-label">💀</span></div>
 </div>
 
@@ -229,6 +359,7 @@
   <div id="aimDot"><div class="ar"></div></div>
   <div id="crosshair"><div class="cr"></div></div>
   <div id="player"></div>
+  <div id="shadowAura" style="position:absolute;left:0;top:0"></div>
   <div id="shieldRing"></div>
   <div id="boss">😈</div>
 </div>
@@ -244,12 +375,20 @@
 </div>
 <div id="puStatus"></div>
 <div id="dashBar"><span class="dash-label">⚡ DASH</span><div class="dash-track"><div id="dashFill" style="width:100%"></div></div></div>
+<div id="ultBar" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:90;width:120px;flex-direction:column;align-items:center;gap:2px">
+  <span style="font-size:8px;color:#818cf8;font-weight:800">🌑 E — الظل المطلق</span>
+  <div style="width:100%;height:5px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden">
+    <div id="ultFill" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#312e81,#818cf8);width:100%"></div>
+  </div>
+  <span id="ultLabel" style="font-size:7px;color:#818cf8">جاهز!</span>
+</div>
 
 <!-- MOBILE CONTROLS -->
 <div id="mobileControls">
   <div id="actionBtns">
     <button class="act-btn" id="shootBtnM">💥</button>
     <button class="act-btn" id="dashBtnM">⚡</button>
+    <button class="act-btn" id="eBtnM" style="display:none;background:linear-gradient(135deg,#1e1b4b,#312e81);box-shadow:0 0 16px rgba(99,102,241,.6)">🌑</button>
   </div>
   <div id="joyZone">
     <div id="joyBase"></div>
@@ -262,8 +401,9 @@
   <div class="screen-bg"></div>
   <div class="screen-card">
     <span class="screen-icon" id="startIcon">🟣</span>
-    <h1 class="screen-title">DA<span>SH</span></h1>
-    <p class="screen-sub">تحرك، اطلق النار، تجنب الأعداء!<br>كل 5 Waves — البيج بوص يجيك 😈🔥</p>
+    <h1 class="screen-title" style="font-size:26px;letter-spacing:4px;margin-bottom:4px">DASH</h1>
+    <div style="font-family:var(--font-px);font-size:6px;color:var(--px-mag);letter-spacing:3px;margin-bottom:12px;animation:blink 1.2s step-end infinite">◄ MOHAND WORLD ►</div>
+    <p class="screen-sub">اللعبة مبنية على قصة ونهاية<br>اقتل البوص واجمع الجواهر 💎</p>
     <div class="controls-grid">
       <div class="ctrl-item"><div class="key">WASD / Arrows</div><div class="desc">تحريك</div></div>
       <div class="ctrl-item"><div class="key">Space / Shift</div><div class="desc">داش ⚡</div></div>
@@ -271,22 +411,72 @@
       <div class="ctrl-item"><div class="key">جويستيك 📱</div><div class="desc">تحكم موبايل</div></div>
     </div>
     <div class="hs-badge">🏆 أعلى نقطة: <span id="hsDisplay">0</span> &nbsp;|&nbsp; 🪙 <span id="totalCoinsDisplay">0</span></div>
-    <button class="play-btn" onclick="startGame()">🚀 العب الآن!</button>
-    <button class="sec-btn" onclick="showScreen('shopScreen')">🛍️ المتجر</button>
-    <a href="index.html" style="display:block;margin-top:8px;color:#5a7a9a;font-size:11px;text-decoration:none">← الرجوع للقناة</a>
+    <button class="play-btn" onclick="initAudio();startGame()">▶ START GAME</button>
+    <button class="sec-btn" onclick="showScreen('shopScreen')">🛍️ SHOP</button>
+    <button class="sec-btn" onclick="showScreen('settingsScreen')">⚙ SETTINGS</button>
+    <a href="index.html" style="display:block;margin-top:8px;color:#3a5a7a;font-family:var(--font-px);font-size:6px;text-decoration:none;letter-spacing:1px">← BACK</a>
   </div>
 </div>
 
 <!-- ══ SHOP SCREEN ══ -->
+<div id="shadowFlash"></div>
+<!-- SPIN MODAL -->
+<div id="spinModal" style="position:fixed;inset:0;z-index:900;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92)">
+  <div style="width:90%;max-width:420px;background:#05081c;border:3px solid #c084fc;box-shadow:0 0 0 2px #05081c,0 0 0 5px #c084fc,0 0 50px rgba(192,132,252,.3);padding:28px 22px;text-align:center;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));animation:scIn .25s cubic-bezier(.34,1.56,.64,1)">
+    <div style="font-family:'Press Start 2P',monospace;font-size:11px;color:#c084fc;margin-bottom:4px;letter-spacing:2px">🎰 ELEMENTAL SPIN</div>
+    <div style="font-family:'Cairo',sans-serif;font-size:11px;color:#7888a8;margin-bottom:20px">التكلفة: 5 جواهر 💎 — لديك: <span id="spinModalGems">0</span></div>
+    <!-- Spin Display -->
+    <div id="spinDisplay" style="height:100px;background:#000;border:2px solid rgba(192,132,252,.4);margin-bottom:16px;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;overflow:hidden">
+      <div id="spinBgGlow" style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(168,85,247,.1),transparent 70%);pointer-events:none"></div>
+      <div id="spinIcon" style="font-size:36px;line-height:1">🎲</div>
+      <div id="spinName" style="font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;margin-top:6px;letter-spacing:1px">???</div>
+      <div id="spinRarity" style="font-size:6px;font-family:'Press Start 2P',monospace;color:#7888a8;margin-top:4px;letter-spacing:2px"></div>
+    </div>
+    <!-- Spin Button -->
+    <button id="spinGoBtn" onclick="executeSpin()" style="width:100%;padding:12px;font-family:'Press Start 2P',monospace;font-size:9px;cursor:pointer;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a855f7);border:none;color:#fff;box-shadow:0 0 0 2px #05081c,0 0 0 4px #c084fc,0 0 20px rgba(168,85,247,.4);margin-bottom:10px;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))">
+      ▶ SPIN (5 💜)
+    </button>
+    <button onclick="closeSpinModal()" style="width:100%;padding:8px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;background:rgba(0,255,255,.06);border:2px solid rgba(0,255,255,.3);color:#00ffff;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))">
+      ✕ CLOSE
+    </button>
+  </div>
+</div>
 <div class="screen" id="shopScreen">
   <div class="screen-bg"></div>
-  <div class="screen-card" style="max-width:640px">
-    <div class="shop-header">
-      <div class="shop-title">🛍️ متجر السكنات</div>
-      <div class="shop-coins">🪙 <span id="shopCoinsEl">0</span></div>
+  <div class="screen-card">
+    <div class="shop-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="shop-title">🛍️ المتجر</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="shop-coins">🪙 <span id="shopCoinsEl">0</span></div>
+        <div class="shop-coins" style="border-color:rgba(192,132,252,.4);background:rgba(192,132,252,.08)">💜 <span id="shopGemsEl">0</span></div>
+      </div>
     </div>
-    <div class="skins-grid" id="skinsGrid"></div>
-    <button class="sec-btn" onclick="showScreen('startScreen')">← رجوع</button>
+    <!-- تابات -->
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button id="tabSkinsBtn" onclick="showShopTab('skins')" style="flex:1;padding:8px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:pointer;background:rgba(0,255,255,.15);border:2px solid #00ffff;color:#00ffff">🎨 SKINS</button>
+      <button id="tabPowersBtn" onclick="showShopTab('powers')" style="flex:1;padding:8px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:pointer;background:rgba(168,85,247,.08);border:2px solid rgba(168,85,247,.3);color:#c084fc">⚡ POWERS</button>
+    </div>
+    <!-- تاب السكنات -->
+    <div id="tabSkins"><div class="skins-grid" id="skinsGrid"></div></div>
+    <!-- تاب القوى -->
+    <div id="tabPowers" style="display:none">
+      <button class="spin-btn" id="spinBtn" onclick="doSpin()">
+        🎰 Spin!
+        <span class="spin-cost">التكلفة: 5 جواهر 💎 — لديك: <span id="spinGemsCount">0</span></span>
+      </button>
+      <div id="spinWheel">
+        <div id="spinGlow"></div>
+        <div id="spinFlashIcon">🎲</div>
+        <div id="spinFlashName">???</div>
+      </div>
+      <div id="spinResult">
+        <div id="spinResultIcon" style="font-size:34px;margin-bottom:6px"></div>
+        <div id="spinResultName" style="font-family:'Press Start 2P',monospace;font-size:9px;color:#c084fc;margin-bottom:4px"></div>
+        <div id="spinResultDesc" style="font-family:'Cairo',sans-serif;font-size:12px;color:#94a3b8;font-weight:700"></div>
+      </div>
+      <div id="powersGrid"></div>
+    </div>
+    <button class="sec-btn" onclick="showScreen('startScreen')" style="margin-top:10px">← رجوع</button>
   </div>
 </div>
 
@@ -294,10 +484,37 @@
 <div class="screen" id="pauseScreen">
   <div class="screen-bg"></div>
   <div class="screen-card">
-    <span class="screen-icon">⏸️</span>
-    <h1 class="screen-title">مؤقت <span>⏸</span></h1>
-    <button class="play-btn" onclick="togglePause()">▶️ استمر</button>
-    <button class="sec-btn" onclick="confirmQuit()">🏠 الخروج</button>
+    <h1 class="screen-title">⏸ PAUSED</h1>
+    <p style="font-family:var(--font-ar);color:#7db9e8;font-size:12px;margin-bottom:16px">اللعبة مؤقفة</p>
+    <button class="play-btn" onclick="togglePause()">▶ RESUME</button>
+    <button class="sec-btn" onclick="showScreen('settingsScreen')">⚙ SETTINGS</button>
+    <button class="sec-btn" onclick="confirmQuit()">⏏ MAIN MENU</button>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="screen" id="settingsScreen">
+  <div class="screen-bg"></div>
+  <div class="screen-card" style="max-width:480px">
+    <h1 class="screen-title" style="font-size:14px;margin-bottom:20px">⚙ SETTINGS</h1>
+    <div id="settingsBody"></div>
+    <button class="sec-btn" style="margin-top:10px" onclick="closeSettings()">← BACK</button>
+  </div>
+</div>
+
+<!-- ══ STORY DIALOG ══ -->
+<div id="storyDialog" style="position:fixed;bottom:0;left:0;right:0;z-index:800;display:none;padding:12px;pointer-events:none">
+  <div style="max-width:700px;margin:0 auto;background:rgba(2,4,20,.98);border:3px solid var(--px-pur);padding:16px 18px;pointer-events:all;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--px-pur),0 0 30px rgba(168,85,247,.2);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="flex-shrink:0;text-align:center">
+        <img src="img/tylishypogt.png" style="width:48px;height:48px;image-rendering:pixelated;border:2px solid var(--px-pur)">
+        <div id="storyName" style="font-family:var(--font-px);font-size:5px;color:var(--px-pur);margin-top:3px">DASH</div>
+      </div>
+      <div style="flex:1">
+        <div id="storyText" style="font-family:var(--font-ar);font-size:13px;font-weight:700;color:#e8d8ff;line-height:1.7;min-height:36px"></div>
+        <button onclick="advanceStory()" style="margin-top:8px;font-family:var(--font-px);font-size:6px;color:var(--px-cyan);background:rgba(0,255,255,.08);border:2px solid var(--px-cyan);padding:5px 14px;cursor:pointer;letter-spacing:1px">NEXT ▶</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -327,55 +544,183 @@
    SKINS DATA
 ═══════════════════════════════════════════════════════════ */
 const SKINS_DEF = [
+  // ── COIN SKINS ──
   {
     id:'purple', name:'البنفسجي', icon:'🟣',
     color:'#a855f7', color2:'#6366f1', glow:'rgba(168,85,247,.8)',
     dashColor:'rgba(168,85,247,.5)', dashColor2:'rgba(99,102,241,.4)',
     price:0,
-    ability:'الجلد الافتراضي — طلقة واحدة',
+    ability:'طلقة واحدة — الشكل الأساسي',
+    abilityFull:'الشكل الافتراضي. طلقة واحدة لكل ضربة. بداية كل بطل.',
     abilityDesc:'',
+    particleCSS:'',
   },
   {
     id:'orange', name:'البرتقاني', icon:'🟠',
     color:'#f97316', color2:'#ea580c', glow:'rgba(249,115,22,.8)',
     dashColor:'rgba(249,115,22,.5)', dashColor2:'rgba(234,88,12,.4)',
     price:500,
-    ability:'طلقتان في آنٍ واحد!',
+    ability:'💥 طلقتان دفعة واحدة في كل ضربة!',
+    abilityFull:'كل ضغطة إطلاق = طلقتان بزاوية مختلفة. ضرر مضاعف في كل اتجاه!',
     abilityDesc:'doubleShot',
+    particleCSS:'',
   },
   {
     id:'green', name:'الأخضر', icon:'🟢',
     color:'#22c55e', color2:'#16a34a', glow:'rgba(34,197,94,.8)',
     dashColor:'rgba(34,197,94,.5)', dashColor2:'rgba(22,163,74,.4)',
-    price:250,
-    ability:'قوة البوشن ضعف المدة (20ث)',
+    price:400,
+    ability:'⏳ مدة كل بوشن تتضاعف (×2)!',
+    abilityFull:'كل بوشن تلتقطه يدوم ضعف مدته الأصلية. الشيلد يصير 20ث، السرعة تصير 10ث!',
     abilityDesc:'doublePowerup',
+    particleCSS:'',
   },
   {
     id:'red', name:'الأحمر', icon:'🔴',
     color:'#ef4444', color2:'#b91c1c', glow:'rgba(239,68,68,.8)',
     dashColor:'rgba(239,68,68,.5)', dashColor2:'rgba(185,28,28,.4)',
     price:750,
-    ability:'4 قلوب كحد أقصى!',
+    ability:'❤️ 4 قلوب بدل 3 كحد أقصى!',
+    abilityFull:'قلب إضافي = فرصة ثانية. قاوم أطول وامتص أكتر ضرر!',
     abilityDesc:'extraHeart',
+    particleCSS:'',
   },
   {
     id:'yellow', name:'الأصفر', icon:'🟡',
     color:'#facc15', color2:'#ca8a04', glow:'rgba(250,204,21,.8)',
     dashColor:'rgba(250,204,21,.5)', dashColor2:'rgba(202,138,4,.4)',
-    price:400,
-    ability:'سرعة أعلى + داش أطول!',
+    price:250,
+    ability:'⚡ سرعة أعلى + داش أطول بمرتين!',
+    abilityFull:'السرعة 40% أسرع من الطبيعي. الداش يقطع مسافة أطول بكثير. الأسرع في اللعبة!',
     abilityDesc:'speedster',
+    particleCSS:'',
   },
   {
     id:'white', name:'الأبيض', icon:'⬜',
     color:'#e2e8f0', color2:'#94a3b8', glow:'rgba(226,232,240,.8)',
     dashColor:'rgba(226,232,240,.5)', dashColor2:'rgba(148,163,184,.4)',
     price:1000,
-    ability:'كل 10ث: 3 بوتات تهاجم! (ماكس 3)',
+    ability:'👾 كل 10ث: 3 بوتات تهاجم معك!',
+    abilityFull:'بوتات ذكية تتبع أقرب عدو وتدمره. ماكس 3 بوتات في وقت واحد. لو مات بوت يرجع بعد 10ث!',
     abilityDesc:'botSpawn',
+    particleCSS:'',
+  },
+  // ── GEM SKINS — ELEMENTAL ──
+  {
+    id:'water', name:'الماء', icon:'💧',
+    color:'#22d3ee', color2:'#0891b2', glow:'rgba(34,211,238,.9)',
+    dashColor:'rgba(34,211,238,.5)', dashColor2:'rgba(8,145,178,.4)',
+    price:0, gemPrice:5, rarity:'شائع', rarityColor:'#94a3b8',
+    ability:'💧 3 طلقات مائية • الداش يدفع الأعداء',
+    abilityFull:'3 طلقات في شعاع واسع. الداش يولد موجة تدفع الأعداء بعيداً!',
+    abilityDesc:'water',
+    particleCSS:'water',
+    bulletCount:3, bulletSpread:0.3,
+  },
+  {
+    id:'wind', name:'الريح', icon:'🌪️',
+    color:'#bae6fd', color2:'#64748b', glow:'rgba(186,230,253,.7)',
+    dashColor:'rgba(186,230,253,.4)', dashColor2:'rgba(100,116,139,.3)',
+    price:0, gemPrice:5, rarity:'غير شائع', rarityColor:'#22d3ee',
+    ability:'🌬️ عواصف تبعد الأعداء • بوشن ×3',
+    abilityFull:'الطلقات عواصف هوائية تدفع الأعداء دون أن تقتلهم. كل بوشن يدوم 3 أضعاف مدته!',
+    abilityDesc:'wind',
+    particleCSS:'wind',
+    bulletCount:1, windForce:true,
+  },
+  {
+    id:'fire', name:'النار', icon:'🔥',
+    color:'#f97316', color2:'#991b1b', glow:'rgba(249,115,22,.9)',
+    dashColor:'rgba(249,115,22,.6)', dashColor2:'rgba(153,27,27,.5)',
+    price:0, gemPrice:5, rarity:'نادر', rarityColor:'#f97316',
+    ability:'🔥 3 طلقات نارية + حرق • الداش يشعل',
+    abilityFull:'3 طلقات نارية تشعل الأعداء وتحرقهم 5 ثوانٍ. الداش يحرق كل عدو تلمسه!',
+    abilityDesc:'fire',
+    particleCSS:'fire',
+    bulletCount:3, burnDmg:true,
+  },
+  {
+    id:'light', name:'الضوء', icon:'✨',
+    color:'#fef08a', color2:'#eab308', glow:'rgba(254,240,138,1)',
+    dashColor:'rgba(254,240,138,.6)', dashColor2:'rgba(234,179,8,.4)',
+    price:0, gemPrice:5, rarity:'ملحمي', rarityColor:'#fde68a',
+    ability:'☀️ 5 طلقات ضوئية • سرعة أعلى • بوشن ×2',
+    abilityFull:'5 طلقات في دائرة كاملة! السرعة أعلى بـ40%. كل بوشن يدوم ضعفين. قوة الضوء المطلقة!',
+    abilityDesc:'light',
+    particleCSS:'light',
+    bulletCount:5, speedBoost:1.4, puMult:2,
+  },
+  {
+    id:'shadow', name:'الظل', icon:'👤',
+    color:'#818cf8', color2:'#1e1b4b', glow:'rgba(129,140,248,1)',
+    dashColor:'rgba(99,102,241,.6)', dashColor2:'rgba(30,27,75,.6)',
+    price:0, gemPrice:5, rarity:'أسطوري', rarityColor:'#c084fc',
+    ability:'🌑 5 قلوب • الداش يجمد الزمن • E: الظل المطلق',
+    abilityFull:'الأقوى. 5 قلوب سوداء. الداش يوقف الزمن 3ث. بوت ظل كل 10ث. بوشن يدوم دقيقة كاملة. اضغط E للظل المطلق!',
+    abilityDesc:'shadow',
+    particleCSS:'shadow',
+    bulletCount:5, puMult:6,
   },
 ];
+
+/* ═══════════════════════════════════════════════════════════
+   POWERS — 5 elemental abilities unlocked with gems 💜
+═══════════════════════════════════════════════════════════ */
+const POWERS = [
+  {
+    id:'water', name:'الماء', rarity:'شائع', rarityEn:'COMMON',
+    icon:'💧', cost:5,
+    color:'#22d3ee', color2:'#0891b2', glow:'rgba(34,211,238,.8)',
+    particleColor:'rgba(34,211,238,',
+    desc:'3 طلقات مائية • الداش يدفع الأعداء بعيداً',
+    descLong:'ثلاث طلقات مائية متسارعة تخترق الأعداء. عند الداش، تنفجر موجة مائية تدفع كل الأعداء المجاورين بعيداً!',
+    bullets:3, bulletColor:'#22d3ee', bulletGlow:'rgba(34,211,238,.9)',
+    dashPush:true, dashPushRadius:80,
+  },
+  {
+    id:'wind', name:'الريح', rarity:'غير شائغ', rarityEn:'UNCOMMON',
+    icon:'🌪️', cost:5,
+    color:'#94a3b8', color2:'#64748b', glow:'rgba(148,163,184,.7)',
+    particleColor:'rgba(200,220,240,',
+    desc:'عواصف رياح تبعد الأعداء • مدة البوشن 3× أطول',
+    descLong:'تطلق عواصف هوائية تبعد الأعداء بعيداً دون أن تقتلهم. كل بوشن تلتقطه يدوم 3 أضعاف مدته الطبيعية!',
+    bullets:1, bulletColor:'#94a3b8', bulletGlow:'rgba(148,163,184,.8)',
+    windPush:true, windPushRadius:100, puMult:3,
+  },
+  {
+    id:'fire', name:'النار', rarity:'نادر', rarityEn:'RARE',
+    icon:'🔥', cost:5,
+    color:'#f97316', color2:'#dc2626', glow:'rgba(249,115,22,.8)',
+    particleColor:'rgba(249,115,22,',
+    desc:'3 طلقات نارية + حرق 5ث • الداش يحرق بالتلامس',
+    descLong:'ثلاث طلقات نارية تلتصق بالأعداء وتحرقهم لمدة 5 ثوانٍ بضرر مستمر. الداش يشعل كل عدو تلمسه!',
+    bullets:3, bulletColor:'#f97316', bulletGlow:'rgba(249,115,22,.9)',
+    burnDmg:true, burnDur:300, dashBurn:true,
+  },
+  {
+    id:'light', name:'الضوء', rarity:'ملحمي', rarityEn:'EPIC',
+    icon:'✨', cost:5,
+    color:'#fde68a', color2:'#f59e0b', glow:'rgba(253,230,138,.9)',
+    particleColor:'rgba(255,230,100,',
+    desc:'5 طلقات ضوء سريعة وقوية • سرعة أعلى • بوشن 2× أطول',
+    descLong:'خمس طلقات ضوئية متفجرة سريعة وقوية تدمر كل شيء أمامها. السرعة أعلى من المعتاد وكل بوشن يدوم ضعف مدته!',
+    bullets:5, bulletColor:'#fde68a', bulletGlow:'rgba(253,230,138,1)',
+    speedBoost:1.4, puMult:2,
+  },
+  {
+    id:'shadow', name:'الظل', rarity:'أسطوري', rarityEn:'LEGENDARY',
+    icon:'👤', cost:5,
+    color:'#1e1b4b', color2:'#312e81', glow:'rgba(99,102,241,.9)',
+    particleColor:'rgba(99,102,241,',
+    desc:'الداش يوقف الزمن 3ث • 5 طلقات ظل • بوت كل 10ث • بوشن 6× أطول',
+    descLong:'قوة الظل المطلقة. الداش يجمد الوقت 3 ثوانٍ. 5 طلقات ظل مدمرة. بوت ظل يظهر كل 10 ثوانٍ ويقتل الأعداء. كل بوشن يدوم دقيقة كاملة!',
+    bullets:5, bulletColor:'#818cf8', bulletGlow:'rgba(129,140,248,.9)',
+    timeStop:true, timeStopDur:3,
+    puMult:6,
+    shadowBot:true, shadowBotInterval:600,
+  },
+];
+
 
 /* ═══════════════════════════════════════════════════════════
    PERSISTENCE
@@ -391,11 +736,14 @@ function writeSave(data){
 let saveData = loadSave();
 let HS           = saveData.hs || 0;
 let totalCoins   = saveData.totalCoins || 0;
+let gems         = saveData.gems > 0 ? saveData.gems : 0;
 let ownedSkins   = saveData.ownedSkins || ['purple'];
 let equippedSkin = saveData.equippedSkin || 'purple';
+let ownedPowers  = saveData.ownedPowers || [];
+let equippedPower= saveData.equippedPower || null;
 
 function persistAll(){
-  writeSave({hs:HS, totalCoins, ownedSkins, equippedSkin});
+  writeSave({hs:HS, totalCoins, gems, ownedSkins, equippedSkin, ownedPowers, equippedPower, v:4});
 }
 
 function getSkin(){ return SKINS_DEF.find(s=>s.id===equippedSkin)||SKINS_DEF[0]; }
@@ -406,8 +754,12 @@ function getSkin(){ return SKINS_DEF.find(s=>s.id===equippedSkin)||SKINS_DEF[0];
 let bgAudio=null, bgAudioBoss=null, audioReady=false;
 function initAudio(){
   if(audioReady)return; audioReady=true;
-  bgAudio=new Audio('m/classicgame.mp3'); bgAudio.loop=true; bgAudio.volume=0.35;
-  bgAudioBoss=new Audio('m/music.mp3'); bgAudioBoss.loop=true; bgAudioBoss.volume=0.45;
+  bgAudio=new Audio('m/classicgame.mp3'); bgAudio.loop=true;
+  bgAudio.volume=(gameSettings?.musicVol||80)/100;
+  bgAudioBoss=new Audio('m/music.mp3'); bgAudioBoss.loop=true;
+  bgAudioBoss.volume=(gameSettings?.musicVol||80)/100;
+  // Auto-play menu music
+  if(!GR)setTimeout(()=>playBg('bg'),100);
 }
 let bgKey=null;
 function playBg(k){
@@ -423,6 +775,14 @@ function stopBg(){
 ═══════════════════════════════════════════════════════════ */
 let GR=false, paused=false;
 let score=0, lives=3, maxLives=3, combo=1, wave=1, coins_=0, kills=0;
+// Active power state
+let activePower=null;   // current power id
+let pwrShadowBot=null;  // shadow bot element
+let pwrShadowBotT=0;    // timer
+let pwrShadowBotHp=5;   // shadow bot hp
+let pwrTimeStopped=false;
+let pwrTimeStopT=0;
+let burnEnemies=[];     // enemies being burned {e, t}
 let fid=null, lt=0;
 
 const PEL  = document.getElementById('player');
@@ -442,7 +802,8 @@ window.addEventListener('resize',cacheArena);
 
 // powerup state
 let shOn=false,shT=0, slOn=false,slT=0, mgOn=false,mgT=0,
-    spOn=false,spT=0, muOn=false,muT=0;
+    spOn=false,spT=0, muOn=false,muT=0,
+    x2On=false,x2T=0;
 let enemies=[], coins=[], pups=[], bullets=[], ebullets=[], wbots=[];
 let eTimer=0, cTimer=0, pTimer=0, scTimer=0, healTimer=0;
 const COIN_MAX=15;
@@ -460,11 +821,221 @@ let lastDir={x:1,y:0};
 /* ═══════════════════════════════════════════════════════════
    SHOP
 ═══════════════════════════════════════════════════════════ */
+
+/* ── SPIN ANIMATION ── */
+function openSpinModal(){
+  playClick();
+  document.getElementById('spinModal').style.display='flex';
+  document.getElementById('spinModalGems').textContent=gems;
+  // Reset display
+  document.getElementById('spinIcon').textContent='🎲';
+  document.getElementById('spinName').textContent='???';
+  document.getElementById('spinRarity').textContent='';
+  document.getElementById('spinBgGlow').style.background='radial-gradient(ellipse at center,rgba(168,85,247,.1),transparent 70%)';
+  document.getElementById('spinGoBtn').disabled=false;
+  document.getElementById('spinGoBtn').textContent='▶ SPIN (5 💎)';
+}
+function closeSpinModal(){
+  playClick();
+  document.getElementById('spinModal').style.display='none';
+  buildShop();
+}
+function executeSpin(){
+  if(gems<5){showToast('مش معاك 5 جواهر!');return;}
+  gems-=5; persistAll(); refreshGemDisplay();
+  document.getElementById('spinModalGems').textContent=gems;
+  document.getElementById('spinGoBtn').disabled=true;
+  document.getElementById('spinGoBtn').textContent='spin ...';
+
+  // Pick result
+  const weights=[40,28,18,10,4];
+  let r=Math.random()*100,pw=null,cumul=0;
+  const gemSkins=SKINS_DEF.filter(s=>s.gemPrice);
+  for(let i=0;i<gemSkins.length;i++){cumul+=weights[i];if(r<cumul){pw=gemSkins[i];break;}}
+  if(!pw)pw=gemSkins[0];
+  const alreadyOwned=ownedSkins.includes(pw.id);
+  if(!alreadyOwned)ownedSkins.push(pw.id);
+  persistAll();
+
+  // Flash animation: random names fast → slow → land
+  const rcColors={'شائع':'#94a3b8','غير شائع':'#22d3ee','نادر':'#f97316','ملحمي':'#fde68a','أسطوري':'#c084fc'};
+  const iconEl=document.getElementById('spinIcon');
+  const nameEl=document.getElementById('spinName');
+  const rarEl=document.getElementById('spinRarity');
+  const glowEl=document.getElementById('spinBgGlow');
+
+  let elapsed=0, interval=40;
+  const totalDur=2800;
+  function flash(){
+    const rnd=gemSkins[Math.floor(Math.random()*gemSkins.length)];
+    const col=rcColors[rnd.rarity]||'#c084fc';
+    iconEl.textContent=rnd.icon;
+    nameEl.textContent=rnd.name;
+    nameEl.style.color=col;
+    rarEl.textContent=rnd.rarity;
+    glowEl.style.background='radial-gradient(ellipse at center,'+col+'30,transparent 70%)';
+    elapsed+=interval;
+    interval=Math.min(350, 40+Math.pow(elapsed/totalDur,2)*600);
+    if(elapsed<totalDur){setTimeout(flash,interval);}
+    else{
+      // Land on result
+      const col2=rcColors[pw.rarity]||'#c084fc';
+      iconEl.textContent=pw.icon;
+      iconEl.style.filter='drop-shadow(0 0 12px '+col2+')';
+      nameEl.textContent=pw.name;
+      nameEl.style.color=col2;
+      rarEl.textContent='★ '+pw.rarity+' ★';
+      rarEl.style.color=col2;
+      glowEl.style.background='radial-gradient(ellipse at center,'+col2+'40,transparent 65%)';
+      document.getElementById('spinGoBtn').disabled=false;
+      document.getElementById('spinGoBtn').textContent='▶ SPIN AGAIN (5 💎)';
+      showToast(alreadyOwned ? pw.icon+' '+pw.name+' — مكررة!' : pw.icon+' حصلت على '+pw.name+'!');
+      if(pw.id==='shadow'){
+        const sf=document.getElementById('shadowFlash');
+        sf.style.opacity='.6';sf.classList.add('show');
+        setTimeout(()=>{sf.style.opacity='0';setTimeout(()=>sf.classList.remove('show'),400);},800);
+      }
+    }
+  }
+  flash();
+}
+
+function doSpin(){
+  if(gems<5){showToast('مش معاك 5 جواهر! اقتل البوص الأول.');return;}
+  gems-=5;persistAll();refreshGemDisplay();
+  document.getElementById('shopGemsEl').textContent=gems;
+
+  // Pick result (weighted)
+  const weights=[40,28,18,10,4];
+  let r=Math.random()*100,pw=POWERS[0],cumul=0;
+  for(let i=0;i<POWERS.length;i++){cumul+=weights[i];if(r<cumul){pw=POWERS[i];break;}}
+  if(!ownedPowers.includes(pw.id))ownedPowers.push(pw.id);
+  persistAll();
+
+  const wheel=document.getElementById('spinWheel');
+  const nameEl=document.getElementById('spinFlashName');
+  const iconEl=document.getElementById('spinFlashIcon');
+  const glow=document.getElementById('spinGlow');
+  wheel.style.display='flex';
+  document.getElementById('spinResult').style.display='none';
+  document.getElementById('spinBtn').disabled=true;
+
+  // Rarity color map
+  const rcColors={'شائع':'#94a3b8','غير شائع':'#22d3ee','نادر':'#f97316','ملحمي':'#fde68a','أسطوري':'#c084fc'};
+
+  // Flash random names fast → slow → land on result
+  const totalDur=3200;
+  let elapsed=0;
+  let interval=40; // start fast
+  let flashTimer=null;
+
+  function flash(){
+    // Pick random power to flash
+    const rndPw=POWERS[Math.floor(Math.random()*POWERS.length)];
+    const col=rcColors[rndPw.rarity]||'#fff';
+    nameEl.textContent=rndPw.name;
+    nameEl.style.color=col;
+    iconEl.textContent=rndPw.icon;
+    glow.style.background=`radial-gradient(ellipse at center,${col}22,transparent 70%)`;
+    elapsed+=interval;
+    // Ease out: interval grows over time
+    interval=Math.min(400, 40+Math.pow(elapsed/totalDur,2)*500);
+    if(elapsed<totalDur){
+      flashTimer=setTimeout(flash,interval);
+    } else {
+      // Land on result
+      const col2=rcColors[pw.rarity]||'#c084fc';
+      nameEl.textContent=pw.name;
+      nameEl.style.color=col2;
+      iconEl.textContent=pw.icon;
+      glow.style.background=`radial-gradient(ellipse at center,${col2}40,transparent 70%)`;
+      // Show result box
+      setTimeout(()=>{
+        document.getElementById('spinResultIcon').textContent=pw.icon;
+        document.getElementById('spinResultName').textContent=pw.name+' — '+pw.rarity;
+        document.getElementById('spinResultDesc').textContent=pw.desc;
+        document.getElementById('spinResult').style.display='block';
+        document.getElementById('spinBtn').disabled=false;
+        buildPowersGrid();
+        showToast(`${pw.icon} حصلت على قوة ${pw.name}!`);
+        if(pw.id==='shadow'){
+          const sf=document.getElementById('shadowFlash');
+          sf.classList.add('show');setTimeout(()=>sf.classList.remove('show'),800);
+          flashFXGame('rgba(0,0,0,.9)');
+        }
+      },400);
+    }
+  }
+  flash();
+}
+
+function buildPowersGrid(){
+  const grid=document.getElementById('powersGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  POWERS.forEach(pw=>{
+    const owned=ownedPowers.includes(pw.id);
+    const eqd=equippedPower===pw.id;
+    const rc=pw.rarity==='شائع'?'شائع':pw.rarity;
+    const rcClass='rc-'+rc.replace(' ','-');
+    const card=document.createElement('div');
+    card.className='power-card'+(owned?' owned':'')+(eqd?' equipped-pw':'');
+    card.innerHTML=`
+      <div class="pw-icon" style="background:linear-gradient(135deg,${pw.color}33,${pw.color2}22);border:2px solid ${pw.color}66">${pw.icon}</div>
+      <div class="pw-info">
+        <span class="pw-name" style="color:${pw.color}">${pw.name}</span>
+        <span class="pw-rarity ${rcClass}">${pw.rarityEn} — ${pw.rarity}</span>
+        <span class="pw-desc">${pw.desc}</span>
+        <span class="pw-lore">${pw.descLong}</span>
+        ${owned
+          ? `<button class="pw-equip-btn ${eqd?'eq':''}" onclick="equipPower('${pw.id}')">${eqd?'✅ مجهّز':'تجهيز'}</button>`
+          : `<div style="font-size:9px;color:#475569;font-family:var(--font2);margin-top:5px">🔒 لازم تعمل سبين للحصول عليها</div>`
+        }
+      </div>
+      <div class="rarity-badge ${rcClass}">${pw.rarityEn}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function equipPower(id){
+  if(!ownedPowers.includes(id))return;
+  // Add to ownedSkins if not there
+  if(!ownedSkins.includes(id))ownedSkins.push(id);
+  if(equippedPower===id){
+    // Unequip: go back to purple
+    equippedPower=null;
+    equippedSkin='purple';
+  } else {
+    equippedPower=id;
+    equippedSkin=id; // set skin = power skin
+  }
+  persistAll();
+  buildPowersGrid();
+  buildShop(); // refresh skins grid too
+  applyPlayerSkin();
+  applyActivePower();
+  const pw=POWERS.find(p=>p.id===id);
+  const icon=pw?pw.icon:'⚡';
+  const name=pw?pw.name:id;
+  showToast(equippedPower===id?`${icon} جهّزت سكن ${name}!`:'❌ رجعت للبنفسجي');
+}
+
 function buildShop(){
   document.getElementById('shopCoinsEl').textContent = totalCoins.toLocaleString();
+  document.getElementById('shopGemsEl').textContent = gems;
   const grid = document.getElementById('skinsGrid');
   grid.innerHTML='';
+
+  // Coin skins
+  const coinLabel=document.createElement('div');
+  coinLabel.style.cssText='font-family:var(--font);font-size:7px;color:#f59e0b;letter-spacing:2px;margin-bottom:10px;grid-column:1/-1';
+  coinLabel.textContent='◈ السكنات — شراء بالعملات 🪙';
+  grid.appendChild(coinLabel);
+
   SKINS_DEF.forEach(sk=>{
+    // Show gem skins only if owned
+    if(sk.gemPrice && !ownedSkins.includes(sk.id))return;
     const owned = ownedSkins.includes(sk.id);
     const equipped = equippedSkin===sk.id;
     const canBuy = !owned && totalCoins>=sk.price;
@@ -485,13 +1056,48 @@ function buildShop(){
 
     card.innerHTML=`
       ${badge}
-      <div class="skin-preview" style="background:linear-gradient(135deg,${sk.color},${sk.color2});box-shadow:0 0 14px ${sk.glow}">${sk.icon}</div>
-      <div class="skin-name" style="color:${sk.color}">${sk.name}</div>
-      <div class="skin-ability">${sk.ability}</div>
+      <div class="skin-preview" style="background:linear-gradient(135deg,${sk.color},${sk.color2});box-shadow:0 0 14px ${sk.glow},0 0 28px ${sk.glow.replace('.8','.25')}">${sk.icon}</div>
+      <div class="skin-name" style="color:${sk.color};font-family:'Press Start 2P',monospace;font-size:7px">${sk.name}</div>
+      <div class="skin-ability" style="font-size:9px">${sk.ability}</div>
+      <div style="font-size:9px;color:#475569;margin-bottom:4px;line-height:1.4;font-family:'Cairo',sans-serif">${sk.abilityFull||''}</div>
       ${btnHtml}
     `;
     grid.appendChild(card);
   });
+  // Gem skins shown above in main grid when owned
+  const rc2={'شائع':'#94a3b8','غير شائع':'#22d3ee','نادر':'#f97316','ملحمي':'#fde68a','أسطوري':'#c084fc'};
+  if(false){// disabled — shown in main grid
+  SKINS_DEF.filter(s=>s.gemPrice).forEach(sk=>{
+    const owned=ownedSkins.includes(sk.id),equipped=equippedSkin===sk.id;
+    const canBuy=!owned&&gems>=(sk.gemPrice||5);
+    const col=rc2[sk.rarity]||'#c084fc';
+    const card=document.createElement('div');
+    card.className='skin-card'+(owned?' owned':'')+(equipped?' equipped':'');
+    card.style.borderColor=equipped?col:'';
+    // Equip btn if owned
+    const equipBtn=equipped
+      ?'<button class="shop-buy-btn" disabled style="width:100%;margin-bottom:4px;background:rgba(34,197,94,.15);border:2px solid #22c55e;color:#86efac;font-family:Cairo,sans-serif;font-size:11px">✓ مجهّز الآن</button>'
+      :owned
+        ?'<button class="shop-buy-btn btn-equip" onclick="equipSkin(\''+sk.id+'\''+')" style="width:100%;margin-bottom:4px">✅ تجهيز</button>'
+        :'';
+    const btn=equipBtn+'<button class="shop-buy-btn" onclick="openSpinModal()" style="width:100%;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:2px solid #c084fc;cursor:pointer;padding:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900">🎰 Spin (5 💎)</button>';
+    grid.appendChild(card);
+  }); // end disabled gem section
+  }
+}
+
+function buyGemSkin(id){
+  const sk=SKINS_DEF.find(s=>s.id===id);
+  if(!sk||ownedSkins.includes(id))return;
+  if(gems<(sk.gemPrice||5)){showToast('مش معاك جواهر كافية! اقتل البوص.');return;}
+  gems-=(sk.gemPrice||5);
+  ownedSkins.push(id);
+  equippedSkin=id;
+  persistAll();
+  buildShop();
+  refreshTopDisplays();
+  refreshGemDisplay();
+  showToast(`${sk.icon} حصلت على سكن ${sk.name}!`);
 }
 
 function buySkin(id){
@@ -512,6 +1118,7 @@ function equipSkin(id){
   persistAll();
   buildShop();
   applyPlayerSkin();
+  // applyActivePower already called above
   showToast(`🎮 جهّزت ${SKINS_DEF.find(s=>s.id===id).name}!`);
   document.getElementById('startIcon').textContent=getSkin().icon;
 }
@@ -519,14 +1126,108 @@ function equipSkin(id){
 function applyPlayerSkin(){
   const sk=getSkin();
   PEL.textContent=sk.icon;
-  PEL.style.background=`linear-gradient(135deg,${sk.color},${sk.color2})`;
-  PEL.style.boxShadow=`0 0 18px ${sk.glow},0 0 36px ${sk.glow.replace('.8','.3')}`;
+  // Remove all skin classes
+  PEL.className=PEL.className.replace(/skin-\w+/g,'').trim();
+  // Apply skin-specific class for elemental skins
+  if(sk.particleCSS)PEL.classList.add('skin-'+sk.particleCSS);
+  // Apply colors for non-elemental (elemental handled by CSS class)
+  if(!sk.particleCSS){
+    PEL.style.background=`linear-gradient(135deg,${sk.color},${sk.color2})`;
+    PEL.style.boxShadow=`0 0 18px ${sk.glow},0 0 36px ${sk.glow.replace('.8','.3')}`;
+  } else {
+    PEL.style.background='';
+    PEL.style.boxShadow='';
+  }
   document.getElementById('dashFill').style.background=`linear-gradient(90deg,${sk.color},${sk.color2})`;
+  // Shadow aura
+  const aura=document.getElementById('shadowAura');
+  if(aura)aura.style.display=sk.id==='shadow'?'block':'none';
+  // Start ambient particles for elemental skins
+  stopSkinParticles();
+  if(sk.particleCSS)startSkinParticles(sk);
+}
+
+let skinParticleTimer=null;
+function stopSkinParticles(){
+  if(skinParticleTimer)clearInterval(skinParticleTimer);
+  skinParticleTimer=null;
+}
+function startSkinParticles(sk){
+  const colors={water:'#22d3ee',wind:'#bae6fd',fire:'#f97316',light:'#fef08a',shadow:'#818cf8'};
+  const col=colors[sk.id]||sk.color;
+  const pRate=sk.id==='fire'?100:sk.id==='shadow'?250:150;
+  skinParticleTimer=setInterval(()=>{
+    if(!GR)return;
+    const p=document.createElement('div');p.className='sk-particle';
+    const ang=Math.random()*Math.PI*2;
+    const dist=16+Math.random()*10;
+    const tx=Math.cos(ang)*dist, ty=Math.sin(ang)*dist-20;
+    const sz=3+Math.random()*5;
+    p.style.cssText=`width:${sz}px;height:${sz}px;background:${col};left:${px+19+Math.cos(ang)*18}px;top:${py+19+Math.sin(ang)*18}px;--tx:${tx}px;--ty:${ty}px;--d:${.5+Math.random()*.5}s`;
+    GA.appendChild(p);
+    setTimeout(()=>p.remove(),900);
+  },pRate);
+}
+function applyActivePower(){
+  const sk=getSkin();
+  // activePower = فقط للسكنات العنصرية (من POWERS)
+  const elementalIds=['water','wind','fire','light','shadow'];
+  activePower=elementalIds.includes(sk.abilityDesc)?sk.abilityDesc:null;
+  burnEnemies=[];shadowBots.forEach(b=>{try{b.el.remove();}catch{}});shadowBots=[];
+  pwrShadowBotT=0;pwrTimeStopped=false;
+  shadowUltCD=0;shadowUltActive=false;shadowUltT=0;
+  const ebtn=document.getElementById('eBtnM');
+  if(ebtn)ebtn.style.display=(activePower==='shadow')?'flex':'none';
+  const ub=document.getElementById('ultBar');
+  if(ub)ub.style.display=(activePower==='shadow')?'flex':'none';
+}
+
+let shadowUltCD=0, shadowUltActive=false, shadowUltT=0;
+const SHADOW_ULT_CD=1800; // cooldown frames
+
+function shadowUltimate(){
+  if(activePower!=='shadow'||shadowUltCD>0)return;
+  shadowUltCD=SHADOW_ULT_CD;
+  shadowUltActive=true; shadowUltT=0;
+  // Full screen dark effect
+  const sf=document.getElementById('shadowFlash');
+  sf.style.transition='opacity .3s';
+  sf.style.opacity='0.75';
+  sf.style.background='radial-gradient(ellipse at center,#0a0010 30%,#000 100%)';
+  sf.classList.add('show');
+  // Time stop 15s
+  pwrTimeStopped=true;
+  showToast('🌑 الظل المطلق! الزمن جامد 8ث...');
+  // During ult: shoot 10 bullets every 0.5s automatically for 3s
+  let ultShots=0;
+  const ultIv=setInterval(()=>{
+    if(!GR){clearInterval(ultIv);return;}
+    const cx=px+19,cy=py+19;
+    for(let a=0;a<6;a++){
+      const ang=(a/10)*Math.PI*2;
+      mkBulletPower(cx,cy,Math.cos(ang)*9,Math.sin(ang)*9,POWERS.find(p=>p.id==='shadow'));
+    }
+    ultShots++;
+    if(ultShots>=6)clearInterval(ultIv);
+  },500);
+  // Release after 15s
+  setTimeout(()=>{
+    pwrTimeStopped=false;
+    shadowUltActive=false;
+    sf.style.opacity='0';
+    setTimeout(()=>{sf.classList.remove('show');sf.style.background='#000';sf.style.transition='opacity .4s';},400);
+    showToast('🌑 عاد الزمن...');
+  }, 8000);
 }
 
 function refreshTopDisplays(){
   document.getElementById('hsDisplay').textContent=HS;
   document.getElementById('totalCoinsDisplay').textContent=totalCoins.toLocaleString();
+  refreshGemDisplay();
+}
+function refreshGemDisplay(){
+  const el=document.getElementById('gemsEl');
+  if(el)el.textContent=gems;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -538,6 +1239,7 @@ document.addEventListener('keydown',e=>{
   initAudio();
   if((e.key===' '||e.key==='Shift')&&GR&&!paused)tryDash();
   if((e.key==='f'||e.key==='ف')&&GR&&!paused)shoot();
+  if((e.key==='e'||e.key==='E')&&GR&&!paused&&activePower==='shadow')shadowUltimate();
   if(e.key==='Escape'||e.key.toLowerCase()==='p'){if(GR)togglePause();}
   if([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault();
 });
@@ -594,6 +1296,7 @@ joyZone.addEventListener('touchcancel',joyEnd,{passive:false});
 // Action buttons
 document.getElementById('shootBtnM').addEventListener('touchstart',e=>{e.preventDefault();initAudio();if(GR&&!paused)shoot();},{passive:false});
 document.getElementById('dashBtnM').addEventListener('touchstart',e=>{e.preventDefault();initAudio();if(GR&&!paused)tryDash();},{passive:false});
+document.getElementById('eBtnM').addEventListener('touchstart',e=>{e.preventDefault();initAudio();if(GR&&!paused&&activePower==='shadow')shadowUltimate();},{passive:false});
 
 /* ═══════════════════════════════════════════════════════════
    MAIN LOOP
@@ -609,8 +1312,10 @@ function loop(ts){
   moveCoins(dt);
   movePups(dt);
   tickTimers(dt);
-  if(equippedSkin==='white')tickWbots(dt);
+  if(equippedSkin==='white'||getSkin().abilityDesc==='botSpawn')tickWbots(dt);
   if(bAlive&&bReady)tickBoss(dt);
+  if(activePower==='shadow')tickShadowBots(dt);
+  if(pwrTimeStopped){/* enemies paused - handled in move functions */}
   checkHits();
   refreshHUD();
   fid=requestAnimationFrame(loop);
@@ -634,14 +1339,17 @@ function movePlayer(dt){
   if(!joyActive && vx!==0&&vy!==0){vx*=0.707;vy*=0.707;}
 
   // Yellow skin: faster + longer dash
-  const isYellow = equippedSkin==='yellow';
+  const isYellow = equippedSkin==='yellow'||getSkin().abilityDesc==='speedster';
+  const lightBoost=(activePower==='light')?1.4:1;
   const baseSpd = isYellow ? 6.8 : 4.8;
-  const spd = baseSpd * (spOn?1.7:1);
+  const spd = baseSpd * (spOn?1.7:1) * lightBoost;
 
   if(dashing&&dashLeft>0){
     dashLeft-=dt;
-    px+=dashVx*20*dt; py+=dashVy*20*dt;
-    if(Math.random()<0.65)mkGhost();
+    // Guard: if direction is zero somehow, stop dash
+    if(dashVx===0&&dashVy===0){dashing=false;}
+    else{px+=dashVx*20*dt; py+=dashVy*20*dt;}
+    if(Math.random()<0.4)mkGhost(); // reduced ghost spam
     if(dashLeft<=0){dashing=false;PEL.style.filter='';}
   } else {
     px+=vx*spd*dt; py+=vy*spd*dt;
@@ -651,6 +1359,10 @@ function movePlayer(dt){
   px=Math.max(0,Math.min(AW-38,px));
   py=Math.max(0,Math.min(AH-38,py));
   PEL.style.left=px+'px'; PEL.style.top=py+'px';
+
+  // Shadow aura follows player
+  const aura=document.getElementById('shadowAura');
+  if(aura&&aura.style.display!=='none'){aura.style.left=(px+19)+'px';aura.style.top=(py+19)+'px';}
 
   if(shOn){
     const sr=document.getElementById('shieldRing');
@@ -666,7 +1378,7 @@ function movePlayer(dt){
 
 function tryDash(){
   if(dashCD>0)return;
-  const isYellow=equippedSkin==='yellow';
+  const isYellow=equippedSkin==='yellow'||getSkin().abilityDesc==='speedster';
   const sk=getSkin();
   let vx=0,vy=0;
   if(joyActive){vx=joyVx;vy=joyVy;}
@@ -676,16 +1388,49 @@ function tryDash(){
     if(K['arrowleft'] ||K['a']||K['ش'])vx=-1;
     if(K['arrowright']||K['d']||K['ي'])vx= 1;
   }
-  if(vx===0&&vy===0){vx=lastDir.x;vy=lastDir.y;}
-  else{const d=Math.sqrt(vx*vx+vy*vy);vx/=d;vy/=d;}
-  dashVx=vx;dashVy=vy;
+  if(vx===0&&vy===0){vx=lastDir.x||1;vy=lastDir.y||0;}
+  const dLen=Math.sqrt(vx*vx+vy*vy)||1;
+  dashVx=vx/dLen; dashVy=vy/dLen;
+  // Final guard: no dash if still zero
+  if(dashVx===0&&dashVy===0){dashVx=1;}
   dashing=true;
-  dashLeft = isYellow ? DASH_DUR*2.2 : DASH_DUR;
+  let dashDurMult=1;
+  if(isYellow)dashDurMult=2.2;
+  if(activePower==='shadow')dashDurMult=2.8; // shadow = long dash
+  dashLeft = DASH_DUR*dashDurMult;
   dashCD=DASH_MAX;
   inv=true; invT=dashLeft+8;
   PEL.style.filter='brightness(2.2) saturate(2)';
   for(let i=0;i<4;i++)setTimeout(()=>mkGhost(),i*45);
   flashFX(`rgba(${hexToRgb(sk.color)},.2)`);
+
+  // ── Power dash effects ──
+  if(activePower==='water'){
+    // Dash push: push enemies away
+    enemies.forEach(e=>{
+      const dx=(e.x+e.t.w/2)-(px+19), dy=(e.y+e.t.h/2)-(py+19);
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      if(d<80){e.x+=dx/d*60;e.y+=dy/d*60;}
+    });
+    flashFX('rgba(34,211,238,.3)');
+  }
+  if(activePower==='fire'){
+    enemies.forEach(e=>{
+      const dx=(e.x+e.t.w/2)-(px+19), dy=(e.y+e.t.h/2)-(py+19);
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      if(d<60&&!burnEnemies.find(x=>x.e===e)){
+        burnEnemies.push({e,t:0,dashBurn:true}); // dashBurn = نص قوة
+      }
+    });
+    flashFX('rgba(249,115,22,.35)');
+  }
+  if(activePower==='shadow'){
+    // Time stop!
+    pwrTimeStopped=true; pwrTimeStopT=0;
+    flashFX('rgba(0,0,0,.85)');
+    showToast('⏸ الزمن توقف... 3ث');
+    setTimeout(()=>{pwrTimeStopped=false;},3000);
+  }
 }
 
 function mkGhost(){
@@ -706,7 +1451,7 @@ function hexToRgb(hex){
 function shoot(){
   if(!GR||paused||shootCD>0)return;
   shootCD=12;
-  const isOrange=equippedSkin==='orange';
+  const isOrange=equippedSkin==='orange'||getSkin().abilityDesc==='doubleShot';
   CROSS.classList.add('shooting');AIMD.classList.add('shooting');
   setTimeout(()=>{CROSS.classList.remove('shooting');AIMD.classList.remove('shooting');},110);
 
@@ -724,19 +1469,45 @@ function shoot(){
   const dx=tx-cx,dy=ty-cy,len=Math.sqrt(dx*dx+dy*dy)||1;
   const vx=dx/len*8.5,vy=dy/len*8.5;
 
+  const sk_shoot=getSkin();
   if(muOn){
     [-0.35,-0.175,0,0.175,0.35].forEach(a=>{
       const c=Math.cos(a),s=Math.sin(a);
       mkBullet(cx,cy,vx*c-vy*s,vx*s+vy*c,true);
     });
-  } else if(isOrange){
-    // Double shot: two bullets slightly spread
+  } else if(activePower){
+    // Elemental skin shoot
+    const pw=POWERS.find(p=>p.id===activePower);
+    const n=sk_shoot.bulletCount||pw?.bullets||1;
+    const spread=n>1?0.28:0;
+    if(activePower==='wind'){
+      // طلقتان ريح بانتشار خفيف
+      const windPw={...pw,bulletColor:'#bae6fd',bulletGlow:'rgba(186,230,253,.9)',windBullet:true};
+      const wa=0.15;
+      mkBulletPower(cx,cy,vx*Math.cos(wa)-vy*Math.sin(wa),vx*Math.sin(wa)+vy*Math.cos(wa),windPw);
+      mkBulletPower(cx,cy,vx*Math.cos(-wa)-vy*Math.sin(-wa),vx*Math.sin(-wa)+vy*Math.cos(-wa),windPw);
+    } else {
+      for(let bi=0;bi<n;bi++){
+        const a=(bi-(n-1)/2)*spread;
+        const c=Math.cos(a),s=Math.sin(a);
+        mkBulletPower(cx,cy,vx*c-vy*s,vx*s+vy*c,pw||{bulletColor:sk_shoot.color,bulletGlow:sk_shoot.glow,id:activePower});
+      }
+    }
+  } else if(sk_shoot.abilityDesc==='doubleShot'){
+    // Orange: 2 bullets spread
     mkBullet(cx,cy,vx,vy,false);
-    const a=0.15,c=Math.cos(a),s=Math.sin(a);
+    const a=0.18,c=Math.cos(a),s=Math.sin(a);
     mkBullet(cx,cy,vx*c-vy*s,vx*s+vy*c,false);
   } else {
     mkBullet(cx,cy,vx,vy,false);
   }
+}
+
+function mkBulletPower(x,y,vx,vy,pw){
+  const el=document.createElement('div');el.className='bullet';
+  el.style.cssText=`left:${x}px;top:${y}px;background:radial-gradient(circle,#fff 30%,${pw.bulletColor});box-shadow:0 0 10px ${pw.bulletGlow},0 0 20px ${pw.bulletGlow}`;
+  GA.appendChild(el);
+  bullets.push({el,x,y,vx,vy,pw});
 }
 
 function mkBullet(x,y,vx,vy,multi){
@@ -768,6 +1539,14 @@ function moveBullets(dt){
           e.el.remove();enemies.splice(j,1);
           checkWaveDone();
         } else {
+          // Fire burn on hit
+          if(b.pw&&b.pw.burnDmg&&!burnEnemies.find(x=>x.e===e)){burnEnemies.push({e,t:0});}
+          // Wind push on hit
+          if(b.pw&&b.pw.windBullet){
+            const edx=(e.x+e.t.w/2)-(cx),edy=(e.y+e.t.h/2)-(cy);
+            const ed=Math.sqrt(edx*edx+edy*edy)||1;
+            e.x+=edx/ed*55; e.y+=edy/ed*55;
+          }
           e.el.style.filter='brightness(3)';
           setTimeout(()=>{if(e.el)e.el.style.filter='';},70);
         }
@@ -861,6 +1640,7 @@ const ET=[
 ];
 
 function spawnEnemy(){
+  if(enemies.length>=20)return; // cap to reduce lag
   const pool=ET.filter((_,i)=>{
     if(i===5)return false;
     if(i===1&&wave<2)return false;
@@ -899,6 +1679,8 @@ function splitEnemy(e){
 }
 
 function moveEnemies(dt){
+  // Shadow time stop
+  if(pwrTimeStopped)return;
   for(let i=enemies.length-1;i>=0;i--){
     const e=enemies[i];
     if(!e.el.parentNode){enemies.splice(i,1);continue;}
@@ -919,7 +1701,7 @@ function moveEnemies(dt){
       if(e.sT>=Math.max(65,180-wave*8)){e.sT=0;spawnEB(e.x+17,e.y+17,3.5+wave*.07);}
     }
   }
-  if(!bAlive&&wActive){
+  if(!bAlive&&wActive&&!storyPaused){
     eTimer+=dt;
     const rate=Math.max(14,62-wave*3);
     if(eTimer>=rate&&wSpawned<wTarget){
@@ -976,6 +1758,7 @@ function beginWave(){
   wb.textContent=`🌊 Wave ${wave}${nextIsBoss?' — استعد للبوص! 😈':'!'}`;
   wb.classList.add('show');setTimeout(()=>wb.classList.remove('show'),2400);
   showToast(`🌊 Wave ${wave} — يلا!`);
+  checkStory(wave-1);
   flashFX('rgba(42,157,244,.15)');
   document.getElementById('waveEl').textContent=wave;
 }
@@ -1004,9 +1787,9 @@ function triggerBoss(){
 
 const BOSS_MSGS=[
   ['انت الي اكلت الشاورما بتاعتي ياض ؟ 🌯😤','عايزك تكتب وصيتك النهاردة... 💀'],
-  ['جيت تاني يا حيوان؟؟ 😡🔥','المرة دي مش هيبقاش في رحمة! 💀💀'],
-  ['ظننت إني خلصت منك؟ 😤','هاديكك علقة مش هتنساها! 👊💥'],
-  ['أنا أقوى من أي وقت فاتت! 😈🔥','استعد لمواجهة مصيرك... ☠️'],
+  ['جيت تاني يا حيوان؟؟ 😡🔥','المرة دي مش هيبقى فيه رحمة! 💀💀'],
+  ['كنت بحسب إني خلصت منك؟ 😤','هديك علقة مش هتنساها! 👊💥'],
+  ['أنا أقوى من أي وقت فات! 😈🔥','استعد لمواجهة مصيرك... ☠️'],
 ];
 function showBossChat(){
   const chat=document.getElementById('bossChat');
@@ -1034,7 +1817,7 @@ function typeMsg(el,txt,spd,cursor,done){
   },spd);
 }
 function spawnEmbers(){
-  for(let i=0;i<10;i++){
+  for(let i=0;i<5;i++){
     const p=document.createElement('div');p.className='bp';
     const sz=5+Math.random()*9;
     p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*AW}px;bottom:${Math.random()*AH}px;background:rgba(${195+Math.floor(Math.random()*60)},${Math.floor(Math.random()*18)},10,.8);animation-duration:${2.5+Math.random()*4}s;animation-delay:${Math.random()*2}s`;
@@ -1094,8 +1877,12 @@ function bossDefeated(){
   ebullets.forEach(b=>b.el.remove());ebullets=[];
   playBg('bg');
   const bonus=700+bossCount*250;score+=bonus;kills++;
-  mkBoom(bx+bSZ/2,by+bSZ/2,'#ef4444',32);mkBoom(bx+bSZ/2,by+bSZ/2,'#fbbf24',22);mkBoom(bx+bSZ/2,by+bSZ/2,'#a855f7',15);
-  flashFX('rgba(245,158,11,.5)');showToast(`💀 البوص مات! +${bonus} 🏆`);
+  gems+=1; persistAll();
+  mkBoom(bx+bSZ/2,by+bSZ/2,'#ef4444',14);mkBoom(bx+bSZ/2,by+bSZ/2,'#fbbf24',10);mkBoom(bx+bSZ/2,by+bSZ/2,'#a855f7',7);
+  // Gem drop animation
+  spawnFloat(bx+bSZ/2,by+bSZ/2,'💎 +1 جوهرة!','#c084fc');
+  flashFX('rgba(245,158,11,.5)');showToast(`💀 البوص مات! +${bonus} 💎 +1 جوهرة!`);
+  refreshGemDisplay();
   setTimeout(beginWave,1800);
 }
 
@@ -1115,6 +1902,8 @@ function moveCoins(dt){
     }
     if(rectsOv(px,py,38,38,c.x,c.y,20,20)){
       const pts=combo*5;score+=pts;coins_++;
+      totalCoins+=(x2On?0:1); // weakcoin = 0 coins earned
+      if(x2On)spawnFloat(c.x,c.y,'💸0','#ef4444');
       // Add to total persistent coins
       totalCoins+=1;
       combo=Math.min(combo+1,10);
@@ -1141,7 +1930,12 @@ const PUT=[
   {type:'speed', em:'🟢',cls:'pu-speed', lbl:'سرعة',   col:'#22c55e',dur:300,w:18},
   {type:'heal',  em:'❤️',cls:'pu-heal',  lbl:'هيل',    col:'#ef4444',dur:0,  w:10},
   {type:'multi', em:'⚡',cls:'pu-multi', lbl:'5 طلقات',col:'#f59e0b',dur:600,w:10},
+  {type:'weakcoin',em:'💸',cls:'pu-x2coin',lbl:'2x عملات!',col:'#ef4444',dur:600,w:14},
 ];
+// x2coin CSS
+const x2Style=document.createElement('style');
+x2Style.textContent='.pu-x2coin{background:rgba(239,68,68,.1);border:2px solid #ef4444;box-shadow:0 0 18px rgba(239,68,68,.7);animation:rarePulse .8s ease-in-out infinite}';
+document.head.appendChild(x2Style);
 const PW=PUT.reduce((s,p)=>s+p.w,0);
 function randPU(){let r=Math.random()*PW;for(const p of PUT){r-=p.w;if(r<=0)return p;}return PUT[0];}
 
@@ -1171,14 +1965,16 @@ function spawnPU(pu){
 function pickupPU(pu){
   showToast(`${pu.em} ${pu.lbl}!`);
 
-  // Green skin: double duration
-  const isGreen=equippedSkin==='green';
-  const durMult=isGreen?2:1;
+  // Green skin: double duration; power mult
+  const isGreen=equippedSkin==='green'||getSkin().abilityDesc==='doublePowerup';
+  const pw2=activePower?POWERS.find(p=>p.id===activePower):null;
+  const durMult=(isGreen?2:1)*(pw2?.puMult||1);
 
   if(pu.type==='shield'){shOn=true;shT=pu.dur*durMult;document.getElementById('shieldRing').style.display='block';}
   if(pu.type==='slow')  {slOn=true;slT=pu.dur*durMult;}
   if(pu.type==='magnet'){mgOn=true;mgT=pu.dur*durMult;}
   if(pu.type==='speed') {spOn=true;spT=pu.dur*durMult;}
+  if(pu.type==='weakcoin'){x2On=true;x2T=pu.dur;showToast('💸 العملات اتضعفت! 30ث');}
   if(pu.type==='multi') {muOn=true;muT=pu.dur*durMult;}
   if(pu.type==='heal'){
     if(lives<maxLives){lives++;updateHearts();spawnFloat(px,py,'❤️+1','#ef4444');}
@@ -1199,12 +1995,63 @@ function pickupPU(pu){
 function tickTimers(dt){
   if(dashCD>0){dashCD=Math.max(0,dashCD-dt);document.getElementById('dashFill').style.width=((1-dashCD/DASH_MAX)*100)+'%';}
   if(shootCD>0)shootCD=Math.max(0,shootCD-dt);
+
+  // ── POWER TICKS ──
+  // Time stop countdown
+  if(pwrTimeStopped){pwrTimeStopT+=dt;}
+
+  // Burn enemies (fire power)
+  for(let i=burnEnemies.length-1;i>=0;i--){
+    const b=burnEnemies[i];
+    if(!b.e.el.parentNode){burnEnemies.splice(i,1);continue;}
+    b.t+=dt;
+    if(b.t%12<1){// damage tick every ~12 frames
+      b.e.hp-=b.dashBurn?0.25:0.5; // dash burn = نص قوة
+      b.e.el.style.filter='brightness(2) sepia(1) hue-rotate(0deg)';
+      setTimeout(()=>{if(b.e.el)b.e.el.style.filter='';},80);
+      if(b.e.hp<=0){
+        kills++;score+=b.e.t.pts*combo;
+        mkBoom(b.e.x+b.e.t.w/2,b.e.y+b.e.t.h/2,'#f97316',5);
+        spawnFloat(b.e.x,b.e.y,'🔥','#f97316');
+        b.e.el.remove();enemies=enemies.filter(x=>x!==b.e);
+        burnEnemies.splice(i,1);checkWaveDone();continue;
+      }
+    }
+    if(b.t>=300){burnEnemies.splice(i,1);}
+  }
+
+  // Wind push enemies away continuously
+  if(activePower==='wind'){
+    enemies.forEach(e=>{
+      const dx=(e.x+e.t.w/2)-(px+19),dy=(e.y+e.t.h/2)-(py+19);
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      if(d<100){e.x+=dx/d*0.8*dt;e.y+=dy/d*0.8*dt;}
+    });
+  }
+
+  // Shadow bot spawn
+  if(activePower==='shadow'&&GR){
+    pwrShadowBotT+=dt;
+    if(pwrShadowBotT>=600){
+      pwrShadowBotT=0;
+      spawnShadowBot();
+    }
+  }
   if(invT>0){invT-=dt;if(invT<=0){inv=false;PEL.classList.remove('invincible');}}
   if(shT>0){shT-=dt;if(shT<=0){shOn=false;document.getElementById('shieldRing').style.display='none';refreshPuBar();}}
   if(slT>0){slT-=dt;if(slT<=0){slOn=false;refreshPuBar();}}
   if(mgT>0){mgT-=dt;if(mgT<=0){mgOn=false;refreshPuBar();}}
   if(spT>0){spT-=dt;if(spT<=0){spOn=false;refreshPuBar();}}
   if(muT>0){muT-=dt;if(muT<=0){muOn=false;refreshPuBar();}}
+  if(x2T>0){x2T-=dt;if(x2T<=0){x2On=false;refreshPuBar();}}
+  if(shadowUltCD>0){
+    shadowUltCD=Math.max(0,shadowUltCD-dt);
+    const pct=(1-shadowUltCD/SHADOW_ULT_CD)*100;
+    const uf=document.getElementById('ultFill');
+    const ul=document.getElementById('ultLabel');
+    if(uf)uf.style.width=pct+'%';
+    if(ul)ul.textContent=shadowUltCD>0?Math.ceil(shadowUltCD/60)+'ث...':'جاهز!';
+  }
   scTimer+=dt;if(scTimer>=60){scTimer=0;score+=wave;}
 }
 let puCD=0;
@@ -1216,11 +2063,72 @@ function _buildPB(){
   if(mgOn)addPill('🧲','مغناطيس','#f59e0b',mgT/290);
   if(spOn)addPill('🟢','سرعة','#22c55e',spT/300);
   if(muOn)addPill('⚡','5 طلقات','#f59e0b',muT/600);
+  if(x2On)addPill('💸','2x عملات','#ef4444',x2T/600);
 }
 function addPill(em,lbl,col,pct){
   const d=document.createElement('div');d.className='pu-pill';
   d.innerHTML=`${em} ${lbl} <div class="pu-bar"><div class="pu-fill" style="width:${Math.max(0,pct*100).toFixed(0)}%;background:${col}"></div></div>`;
   document.getElementById('puStatus').appendChild(d);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHADOW BOT (shadow power)
+═══════════════════════════════════════════════════════════ */
+let shadowBots=[];
+let shadowBotIdC=0;
+
+function spawnShadowBot(){
+  if(shadowBots.length>=1)return; // max 1 at a time
+  const el=document.createElement('div');
+  el.style.cssText=`position:absolute;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#818cf8,#1e1b4b);box-shadow:0 0 12px rgba(99,102,241,.9),0 0 24px rgba(99,102,241,.4);z-index:9;display:flex;align-items:center;justify-content:center;font-size:10px;left:${px+8}px;top:${py+8}px`;
+  el.textContent='👁️';
+  GA.appendChild(el);
+  shadowBots.push({el,x:px+8,y:py+8,hp:5,id:++shadowBotIdC});
+  showToast('👁️ بوت الظل ظهر!');
+}
+
+function tickShadowBots(dt){
+  // Shadow bots orbit player AND attack nearby enemies (like white bots)
+  for(let i=shadowBots.length-1;i>=0;i--){
+    const b=shadowBots[i];
+    if(!b.el.parentNode){shadowBots.splice(i,1);continue;}
+
+    // Find nearest enemy within attack range
+    let target=null,bestD=Infinity;
+    enemies.forEach(e=>{
+      const d=(e.x+e.t.w/2-b.x)**2+(e.y+e.t.h/2-b.y)**2;
+      if(d<90*90&&d<bestD){bestD=d;target={x:e.x+e.t.w/2,y:e.y+e.t.h/2,e};}
+    });
+    if(bAlive&&bReady){
+      const d=(bx+bSZ/2-b.x)**2+(by+bSZ/2-b.y)**2;
+      if(d<120*120&&d<bestD){bestD=d;target={x:bx+bSZ/2,y:by+bSZ/2,boss:true};}
+    }
+
+    if(target){
+      // Chase enemy
+      const dx=target.x-b.x,dy=target.y-b.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+      b.x+=dx/d*5*dt; b.y+=dy/d*5*dt;
+      if(d<20){
+        if(target.boss){hitBoss();hitBoss();hitBoss();}
+        else if(target.e&&target.e.el.parentNode){
+          kills++;score+=target.e.t.pts*combo;
+          mkBoom(target.e.x+target.e.t.w/2,target.e.y+target.e.t.h/2,'#818cf8',6);
+          spawnFloat(target.e.x,target.e.y,'💀','#818cf8');
+          target.e.el.remove();enemies=enemies.filter(x=>x!==target.e);checkWaveDone();
+        }
+        b.hp--;
+        if(b.hp<=0){b.el.remove();shadowBots.splice(i,1);}
+      }
+    } else {
+      // Orbit around player when no enemy nearby
+      const ang=performance.now()/900+i*2.09;
+      const orbitR=55;
+      b.x+=(px+19+Math.cos(ang)*orbitR-b.x)*0.08*dt;
+      b.y+=(py+19+Math.sin(ang)*orbitR-b.y)*0.08*dt;
+    }
+    b.el.style.left=b.x+'px';
+    b.el.style.top=b.y+'px';
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1267,12 +2175,24 @@ function refreshHUD(){
   puCD--;if(puCD<=0){puCD=7;_buildPB();}
 }
 function updateHearts(){
-  // Show/hide 4th heart based on red skin
-  const h4=document.getElementById('h4');
-  if(equippedSkin==='red')h4.style.display='';else h4.style.display='none';
+  const sk_h=getSkin();
+  // shadow skin OR shadow power = 5 black hearts
+  const isShadow=(sk_h.abilityDesc==='shadow')||(activePower==='shadow');
+  // red skin = 4 hearts
+  const isRed=(sk_h.abilityDesc==='extraHeart')||(equippedSkin==='red');
+  // Black hearts (shadow)
+  for(let i=1;i<=5;i++){
+    const el=document.getElementById('h'+i+'s');
+    if(!el)continue;
+    el.style.display=isShadow?'inline':'none';
+    el.classList.toggle('lost',i>lives);
+  }
+  // Red hearts (normal/red)
   for(let i=1;i<=4;i++){
-    const h=document.getElementById('h'+i);
-    if(h)h.classList.toggle('lost',i>lives);
+    const el=document.getElementById('h'+i+'r');
+    if(!el)continue;
+    el.style.display=(!isShadow&&(i<=3||isRed))?'inline':'none';
+    el.classList.toggle('lost',i>lives);
   }
 }
 
@@ -1281,16 +2201,18 @@ function updateHearts(){
 ═══════════════════════════════════════════════════════════ */
 function startGame(){
   initAudio();
+  stopBg(); // reset bgKey so playBg works
+  applyActivePower(); // must run first so activePower is set
   const sk=getSkin();
-
-  // Red skin: 4 max hearts
-  maxLives = equippedSkin==='red' ? 4 : 3;
+  const sk0=getSkin();
+  maxLives = activePower==='shadow' ? 5 : (sk0.abilityDesc==='extraHeart'||equippedSkin==='red') ? 4 : 3;
   lives=maxLives;
 
   score=0;combo=1;wave=1;coins_=0;kills=0;bossCount=0;
   _sc=_co=_wv=_cn=_kl=-1;
   dashCD=0;dashing=false;dashLeft=0;inv=false;invT=0;shootCD=0;
-  shOn=false;shT=0;slOn=false;slT=0;mgOn=false;mgT=0;spOn=false;spT=0;muOn=false;muT=0;
+  shOn=false;shT=0;slOn=false;slT=0;mgOn=false;mgT=0;spOn=false;spT=0;muOn=false;muT=0;x2On=false;x2T=0;
+  shadowUltCD=0;shadowUltActive=false;shadowUltT=0;pwrTimeStopped=false;
   eTimer=0;cTimer=0;pTimer=0;scTimer=0;healTimer=0;wbotTimer=0;
   wSpawned=0;wTarget=8;wActive=false;
   bAlive=false;bReady=false;bMT=0;bST=0;bSZ=88;
@@ -1324,7 +2246,7 @@ function startGame(){
 }
 
 function endGame(){
-  GR=false;cancelAnimationFrame(fid);stopBg();
+  GR=false;cancelAnimationFrame(fid);stopBg();stopSkinParticles();
   GA.classList.remove('boss-mode');
   document.querySelectorAll('.bp,.wbot').forEach(p=>p.remove());
   wbots=[];
@@ -1369,9 +2291,11 @@ function confirmQuit(){GR=false;cancelAnimationFrame(fid);stopBg();persistAll();
 ═══════════════════════════════════════════════════════════ */
 function rectsOv(ax,ay,aw,ah,bx2,by2,bw,bh){return ax<bx2+bw&&ax+aw>bx2&&ay<by2+bh&&ay+ah>by2;}
 function mkBoom(cx,cy,color,n){
-  for(let i=0;i<n;i++){
+  // Cap particles to reduce lag
+  const cap=Math.min(n,8);
+  for(let i=0;i<cap;i++){
     const p=document.createElement('div');p.className='particle';
-    const sz=3+Math.random()*5,ang=(Math.PI*2/n)*i,dist=20+Math.random()*25;
+    const sz=3+Math.random()*5,ang=(Math.PI*2/cap)*i,dist=20+Math.random()*25;
     p.style.cssText=`width:${sz}px;height:${sz}px;left:${cx}px;top:${cy}px;background:${color};--tx:translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist}px) scale(0)`;
     GA.appendChild(p);setTimeout(()=>p.remove(),560);
   }
@@ -1386,20 +2310,294 @@ function flashFX(color){
   f.style.background=color;f.classList.add('show');
   setTimeout(()=>f.classList.remove('show'),280);
 }
+function flashFXGame(color){
+  // Full screen flash used for shadow ult
+  flashFX(color);
+}
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1700);
 }
+
+/* ══════════════════════════════════════════════════════════
+   SHOP TABS
+══════════════════════════════════════════════════════════ */
+function showShopTab(tab){
+  document.getElementById('tabSkins').style.display=tab==='skins'?'':'none';
+  document.getElementById('tabPowers').style.display=tab==='powers'?'':'none';
+  document.getElementById('tabSkinsBtn').style.background=tab==='skins'?'rgba(0,255,255,.15)':'rgba(0,0,0,.3)';
+  document.getElementById('tabPowersBtn').style.background=tab==='powers'?'rgba(168,85,247,.2)':'rgba(0,0,0,.3)';
+  if(tab==='powers'){
+    document.getElementById('spinGemsCount').textContent=gems;
+    buildPowersGrid();
+  }
+}
+
+/* SPIN */
+function doSpin(){
+  if(gems<5){showToast('مش معاك 5 جواهر! اقتل البوص الأول.');return;}
+  gems-=5;persistAll();refreshGemDisplay();
+  document.getElementById('shopGemsEl').textContent=gems;
+
+  // Pick result (weighted)
+  const weights=[40,28,18,10,4];
+  let r=Math.random()*100,pw=POWERS[0],cumul=0;
+  for(let i=0;i<POWERS.length;i++){cumul+=weights[i];if(r<cumul){pw=POWERS[i];break;}}
+  if(!ownedPowers.includes(pw.id))ownedPowers.push(pw.id);
+  persistAll();
+
+  const wheel=document.getElementById('spinWheel');
+  const nameEl=document.getElementById('spinFlashName');
+  const iconEl=document.getElementById('spinFlashIcon');
+  const glow=document.getElementById('spinGlow');
+  wheel.style.display='flex';
+  document.getElementById('spinResult').style.display='none';
+  document.getElementById('spinBtn').disabled=true;
+
+  // Rarity color map
+  const rcColors={'شائع':'#94a3b8','غير شائع':'#22d3ee','نادر':'#f97316','ملحمي':'#fde68a','أسطوري':'#c084fc'};
+
+  // Flash random names fast → slow → land on result
+  const totalDur=3200;
+  let elapsed=0;
+  let interval=40; // start fast
+  let flashTimer=null;
+
+  function flash(){
+    // Pick random power to flash
+    const rndPw=POWERS[Math.floor(Math.random()*POWERS.length)];
+    const col=rcColors[rndPw.rarity]||'#fff';
+    nameEl.textContent=rndPw.name;
+    nameEl.style.color=col;
+    iconEl.textContent=rndPw.icon;
+    glow.style.background=`radial-gradient(ellipse at center,${col}22,transparent 70%)`;
+    elapsed+=interval;
+    // Ease out: interval grows over time
+    interval=Math.min(400, 40+Math.pow(elapsed/totalDur,2)*500);
+    if(elapsed<totalDur){
+      flashTimer=setTimeout(flash,interval);
+    } else {
+      // Land on result
+      const col2=rcColors[pw.rarity]||'#c084fc';
+      nameEl.textContent=pw.name;
+      nameEl.style.color=col2;
+      iconEl.textContent=pw.icon;
+      glow.style.background=`radial-gradient(ellipse at center,${col2}40,transparent 70%)`;
+      // Show result box
+      setTimeout(()=>{
+        document.getElementById('spinResultIcon').textContent=pw.icon;
+        document.getElementById('spinResultName').textContent=pw.name+' — '+pw.rarity;
+        document.getElementById('spinResultDesc').textContent=pw.desc;
+        document.getElementById('spinResult').style.display='block';
+        document.getElementById('spinBtn').disabled=false;
+        buildPowersGrid();
+        showToast(`${pw.icon} حصلت على قوة ${pw.name}!`);
+        if(pw.id==='shadow'){
+          const sf=document.getElementById('shadowFlash');
+          sf.classList.add('show');setTimeout(()=>sf.classList.remove('show'),800);
+          flashFXGame('rgba(0,0,0,.9)');
+        }
+      },400);
+    }
+  }
+  flash();
+}
+
+
+/* POWERS GRID */
+function buildPowersGrid(){
+  const grid=document.getElementById('powersGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  POWERS.forEach(pw=>{
+    const owned=ownedPowers.includes(pw.id);
+    const eqd=equippedPower===pw.id;
+    const rc=pw.rarity==='شائع'?'شائع':pw.rarity;
+    const rcClass='rc-'+rc.replace(' ','-');
+    const card=document.createElement('div');
+    card.className='power-card'+(owned?' owned':'')+(eqd?' equipped-pw':'');
+    card.innerHTML=`
+      <div class="pw-icon" style="background:linear-gradient(135deg,${pw.color}33,${pw.color2}22);border:2px solid ${pw.color}66">${pw.icon}</div>
+      <div class="pw-info">
+        <span class="pw-name" style="color:${pw.color}">${pw.name}</span>
+        <span class="pw-rarity ${rcClass}">${pw.rarityEn} — ${pw.rarity}</span>
+        <span class="pw-desc">${pw.desc}</span>
+        <span class="pw-lore">${pw.descLong}</span>
+        ${owned
+          ? `<button class="pw-equip-btn ${eqd?'eq':''}" onclick="equipPower('${pw.id}')">${eqd?'✅ مجهّز':'تجهيز'}</button>`
+          : `<div style="font-size:9px;color:#475569;font-family:var(--font2);margin-top:5px">🔒 اسحب من البكرة للحصول عليها</div>`
+        }
+      </div>
+      <div class="rarity-badge ${rcClass}">${pw.rarityEn}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+
+/* EQUIP POWER */
+function equipPower(id){
+  if(!ownedPowers.includes(id))return;
+  // Add to ownedSkins if not there
+  if(!ownedSkins.includes(id))ownedSkins.push(id);
+  if(equippedPower===id){
+    // Unequip: go back to purple
+    equippedPower=null;
+    equippedSkin='purple';
+  } else {
+    equippedPower=id;
+    equippedSkin=id; // set skin = power skin
+  }
+  persistAll();
+  buildPowersGrid();
+  buildShop(); // refresh skins grid too
+  applyPlayerSkin();
+  applyActivePower();
+  const pw=POWERS.find(p=>p.id===id);
+  const icon=pw?pw.icon:'⚡';
+  const name=pw?pw.name:id;
+  showToast(equippedPower===id?`${icon} جهّزت سكن ${name}!`:'❌ رجعت للبنفسجي');
+}
 function showScreen(id){
-  hideAll();document.getElementById(id).classList.add('active');
-  if(id==='shopScreen')buildShop();
-  if(id==='startScreen'){
+  hideAll();
+  document.getElementById(id).classList.add('active');
+  if(id==='shopScreen'){buildShop();refreshGemDisplay();}
+  if(id==='settingsScreen')renderSettings();
+  if(id==='startScreen'||id==='shopScreen'||id==='settingsScreen'){
     refreshTopDisplays();
-    document.getElementById('startIcon').textContent=getSkin().icon;
+    const si=document.getElementById('startIcon');
+    if(si)si.textContent=getSkin().icon;
+    // Play menu music when on any menu screen
+    if(audioReady&&!GR)playBg('bg');
   }
 }
 function hideAll(){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));}
+
+function closeSettings(){
+  // Return to whoever called settings (pause or start)
+  if(GR)showScreen('pauseScreen');else showScreen('startScreen');
+}
+
+/* ── SETTINGS RENDER ── */
+const gameSettings={musicVol:80,sfxVol:80,showFPS:false};
+(function(){
+  try{const s=JSON.parse(localStorage.getItem('dashSettings'));if(s)Object.assign(gameSettings,s);}catch{}
+})();
+function saveSettings(){try{localStorage.setItem('dashSettings',JSON.stringify(gameSettings));}catch{}}
+
+function renderSettings(){
+  const body=document.getElementById('settingsBody');
+  if(!body)return;
+  const row=(icon,label,ctrl)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:8px;background:rgba(0,255,255,.04);border:2px solid rgba(0,255,255,.12);clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))">
+      <div style="font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;color:#ccd">${icon} ${label}</div>
+      ${ctrl}
+    </div>`;
+  const slider=(val,cb)=>`<input type="range" min="0" max="100" value="${val}" oninput="${cb}" style="-webkit-appearance:none;width:110px;height:8px;background:rgba(0,255,255,.15);border:2px solid rgba(0,255,255,.3);outline:none;cursor:pointer;accent-color:var(--px-cyan)">`;
+  body.innerHTML=`
+    <div style="display:flex;flex-direction:column">
+      ${row('🎵','الموسيقى',slider(gameSettings.musicVol,'gameSettings.musicVol=+this.value;applyVols();saveSettings()'))}
+      ${row('🔊','المؤثرات',slider(gameSettings.sfxVol,'gameSettings.sfxVol=+this.value;saveSettings()'))}
+      ${row('💎','جواهرك',`<span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#c084fc">${gems} 💎</span>`)}
+      ${row('🪙','عملاتك',`<span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#00ffff">${totalCoins.toLocaleString()} 🪙</span>`)}
+      ${row('🏆','أعلى نقطة',`<span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#ffff00">${HS}</span>`)}
+      <div style="margin-top:8px;padding:10px;background:rgba(255,51,68,.06);border:2px solid rgba(255,51,68,.3);clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))">
+        <div style="font-family:'Cairo',sans-serif;font-size:11px;color:#f87171;margin-bottom:8px">⚠ منطقة الخطر</div>
+        <button onclick="if(confirm('مسح كل البيانات؟ لا رجعة!'))resetAll()" style="width:100%;padding:9px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:pointer;background:rgba(255,51,68,.15);border:2px solid #ff3344;color:#ff3344;letter-spacing:1px">RESET ALL DATA ⚠</button>
+      </div>
+    </div>
+  `;
+}
+function applyVols(){
+  const v=gameSettings.musicVol/100;
+  if(bgAudio)bgAudio.volume=v;
+  if(bgAudioBoss)bgAudioBoss.volume=v;
+}
+function resetAll(){
+  localStorage.removeItem('cdSave_v3');
+  localStorage.removeItem('dashSettings');
+  localStorage.removeItem('dashStory');
+  location.reload();
+}
+
+/* ── STORY SYSTEM ── */
+const DASH_STORY=[
+  {wave:0, lines:[
+    {name:'DASH',text:'...أخيراً صحيت.'},
+    {name:'DASH',text:'مش فاكر إيه اللي حصل. بس أعرف إن في حاجة لازم أوقفها.'},
+    {name:'DASH',text:'هحارب لحد ما اعرف الحقيقة.'},
+  ]},
+  {wave:5, lines:[
+    {name:'DASH',text:'البوص الأول مات... بس حاسس إنه دي مش النهاية.'},
+    {name:'DASH',text:'الجوهرة دي... فيها طاقة غريبة.'},
+  ]},
+  {wave:10, lines:[
+    {name:'DASH',text:'كل ما قتلت أكتر، كل ما بقا اصعب.'},
+    {name:'DASH',text:'بس القوة دي... هل هي نعمة ولا لعنة؟'},
+  ]},
+  {wave:15, lines:[
+    {name:'مجهول',text:'أنت مش بتحاربهم ... أنت بتحارب نفسك.'},
+    {name:'DASH',text:'مين إنت؟!'},
+    {name:'مجهول',text:'أنا الظل. الجزء اللي حاولت تنساه.'},
+  ]},
+  {wave:20, lines:[
+    {name:'DASH',text:'فهمت دلوقتي. الأعداء دول... كانوا جزء مني.'},
+    {name:'DASH',text:'لو هزمتهم كلهم... هل هرجع تاني؟'},
+    {name:'DASH',text:'مش مهم. هكمل.'},
+  ]},
+];
+let storyQueue=[],storyLineIdx=0,storyTimer=null;
+let storyShownWaves=new Set(JSON.parse(localStorage.getItem('dashStory')||'[]'));
+let storyPaused=false; // pause enemy spawn during story
+
+function saveStoryProgress(){
+  try{localStorage.setItem('dashStory',JSON.stringify([...storyShownWaves]));}catch{}
+}
+
+function checkStory(currentWave){
+  const chapter=DASH_STORY.find(c=>c.wave===currentWave&&!storyShownWaves.has(currentWave));
+  if(!chapter)return;
+  storyShownWaves.add(currentWave);
+  saveStoryProgress();
+  storyQueue=chapter.lines.slice();storyLineIdx=0;
+  storyPaused=true; // freeze spawns
+  setTimeout(showNextLine,600);
+}
+
+function showNextLine(){
+  if(storyLineIdx>=storyQueue.length){closeStoryDialog();return;}
+  const line=storyQueue[storyLineIdx];
+  const dlg=document.getElementById('storyDialog');
+  const txt=document.getElementById('storyText');
+  const nm=document.getElementById('storyName');
+  if(!dlg)return;
+  dlg.style.display='block';
+  nm.textContent=line.name;
+  txt.textContent='';
+  clearTimeout(storyTimer);
+  let i=0;
+  function go(){
+    if(i<line.text.length){txt.textContent+=line.text[i++];storyTimer=setTimeout(go,28);}
+  }
+  go();
+}
+
+function advanceStory(){
+  const txt=document.getElementById('storyText');
+  const line=storyQueue[storyLineIdx];
+  if(line&&txt.textContent.length<line.text.length){
+    clearTimeout(storyTimer);txt.textContent=line.text;return;
+  }
+  storyLineIdx++;showNextLine();
+}
+
+function closeStoryDialog(){
+  const d=document.getElementById('storyDialog');
+  if(d)d.style.display='none';
+  clearTimeout(storyTimer);
+  storyPaused=false; // resume spawns
+}
 
 /* ── INIT ── */
 refreshTopDisplays();

@@ -428,3 +428,227 @@ body {
   color: #fff;
   border-color: rgba(42,157,244,0.4);
 }
+/* ============================================================
+   GAMES SECTION — ARCADE NEON STYLE
+   ضع هذا الكود بدلاً من .section-games و .games-grid و .game-card
+   في ملف style.css
+   ============================================================ */
+
+/* ── SECTION WRAPPER ── */
+.section-games {
+  padding: 90px 20px;
+  background: #060d1a;
+  position: relative;
+  overflow: hidden;
+}
+
+/* شبكة خلفية */
+.section-games::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(42,157,244,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42,157,244,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* وهج علوي */
+.section-games::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 2px;
+  background: linear-gradient(90deg, transparent, #2a9df4, #7c3aed, transparent);
+  pointer-events: none;
+}
+
+/* ── SECTION HEADER ── */
+.section-games .section-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 52px;
+}
+
+.section-games .section-tag {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.section-games .section-title {
+  font-size: 32px;
+  background: linear-gradient(90deg, #ffffff, #2a9df4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── GAMES GRID ── */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(42,157,244,0.18);
+}
+
+@media (max-width: 900px) {
+  .games-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 500px) {
+  .games-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── GAME CARD ── */
+.game-card {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #080f1e;
+  border-right: 1px solid rgba(42,157,244,0.12);
+  border-bottom: 1px solid rgba(42,157,244,0.12);
+  cursor: pointer;
+  transition: none;
+}
+
+/* إزالة border الزائدة للأعمدة الأخيرة */
+.game-card:nth-child(4n) { border-right: none; }
+.game-card:nth-last-child(-n+4):not(:nth-child(4n-1)):not(:nth-child(4n-2)):not(:nth-child(4n-3)) {
+  border-bottom: none;
+}
+
+/* الصورة */
+.game-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.game-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease, filter 0.3s ease;
+  filter: brightness(0.7) saturate(0.8);
+}
+
+.game-card:hover .game-img-wrap img {
+  transform: scale(1.1);
+  filter: brightness(0.4) saturate(0.4);
+}
+
+/* overlay دائم في الأسفل */
+.game-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 10px 12px 12px;
+  background: linear-gradient(transparent, rgba(4,8,22,0.95) 50%);
+  z-index: 2;
+  transition: opacity 0.3s;
+}
+
+.game-card:hover .game-info {
+  opacity: 0;
+}
+
+.game-info h6 {
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-info p {
+  font-size: 11px;
+  color: rgba(42,157,244,0.8);
+  font-weight: 700;
+  display: none;
+}
+
+/* overlay عند الهوڤر */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.game-card:hover .game-overlay {
+  opacity: 1;
+}
+
+.game-overlay span {
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(42,157,244,0.9);
+  padding: 7px 18px;
+  border: 2px solid #2a9df4;
+  letter-spacing: 1px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+
+/* رقم الكارت */
+.game-card::before {
+  content: attr(data-index);
+  position: absolute;
+  top: 8px; right: 8px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  color: rgba(42,157,244,0.5);
+  font-weight: 700;
+  z-index: 4;
+  letter-spacing: 1px;
+}
+
+/* خط نيون على الهوڤر */
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.game-card:hover::after {
+  border-color: rgba(42,157,244,0.6);
+  box-shadow: inset 0 0 20px rgba(42,157,244,0.08);
+}
+
+/* أول كارت (DASH) — مميز */
+.game-card:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.game-card:first-child .game-info h6 {
+  font-size: 16px;
+}
+
+.game-card:first-child .game-overlay span {
+  font-size: 15px;
+  padding: 10px 24px;
+}
+
+/* بادج "NEW" للأول */
+.game-card:first-child::before {
+  content: 'NEW';
+  top: 14px; right: 14px;
+  font-size: 9px;
+  background: #2a9df4;
+  color: #fff;
+  padding: 3px 8px;
+  letter-spacing: 2px;
+}
