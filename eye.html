@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>اغمزلي 😉</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d0d14;--bg2:#13131f;--bg3:#1a1a2a;--bg4:#222235;
+  --gold:#f59e0b;--orange:#f97316;--purple:#a855f7;
+  --text:#f0f0ff;--sub:#6b7280;--r:18px;
+  --font:'Segoe UI',Tahoma,Arial,sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
+body{display:flex;flex-direction:column;align-items:center}
+.scr{display:none;width:100%;max-width:440px;min-height:100vh;flex-direction:column;align-items:center;padding:20px 16px 40px;gap:14px}
+.scr.on{display:flex;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.big-emoji{font-size:64px;animation:bounce 2.5s ease-in-out infinite;user-select:none;line-height:1}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.page-title{font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.page-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+.btn{width:100%;padding:15px;border:none;border-radius:var(--r);font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;transition:transform .1s;letter-spacing:.2px}
+.btn:active{transform:scale(.96)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000;box-shadow:0 6px 20px rgba(245,158,11,.3)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1.5px solid rgba(255,255,255,.08)}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#7c3aed);color:#fff}
+.row{display:flex;gap:10px;width:100%}
+.section-label{width:100%;font-size:11px;font-weight:800;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase}
+.settings-box{width:100%;background:var(--bg2);border-radius:var(--r);padding:4px 16px;border:1px solid rgba(255,255,255,.05)}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.srow:last-child{border-bottom:none}
+.srow .name{font-size:14px;font-weight:700}
+.srow .desc{font-size:11px;color:var(--sub);margin-top:2px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.tslider{position:absolute;inset:0;background:var(--bg4);border-radius:12px;cursor:pointer;transition:.25s;border:1.5px solid rgba(255,255,255,.08)}
+.tslider::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;left:3px;top:2px;background:var(--sub);transition:.25s}
+.toggle input:checked+.tslider{background:linear-gradient(135deg,var(--gold),var(--orange))}
+.toggle input:checked+.tslider::before{transform:translateX(20px);background:#fff}
+/* Player list */
+.player-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.player-row{display:flex;gap:8px;align-items:center;animation:fadeUp .2s ease}
+.player-num{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0}
+.player-input{flex:1;background:var(--bg3);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 14px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;outline:none;transition:border-color .2s}
+.player-input:focus{border-color:var(--gold)}
+.player-input::placeholder{color:var(--sub)}
+.del-btn{width:34px;height:34px;border-radius:50%;background:rgba(239,68,68,.12);border:none;color:#ef4444;font-size:18px;cursor:pointer;flex-shrink:0;transition:background .15s}
+.del-btn:active{background:rgba(239,68,68,.3)}
+.add-player-btn{width:100%;padding:12px;border:2px dashed rgba(255,255,255,.1);border-radius:var(--r);background:transparent;color:var(--sub);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.add-player-btn:active{border-color:var(--gold);color:var(--gold)}
+/* Turn card */
+.turn-card{width:100%;background:var(--bg2);border-radius:24px;padding:28px 20px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.turn-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#000}
+.turn-name{font-size:22px;font-weight:900;margin-bottom:6px}
+/* Card 3D */
+.card-scene{perspective:900px;width:100%;max-width:280px;margin:0 auto}
+.card-3d{width:100%;padding-top:140%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1)}
+.card-3d.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.face-front{box-shadow:0 12px 40px rgba(0,0,0,.5);cursor:pointer;overflow:hidden;position:relative}
+.face-front::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 10px)}
+.face-front::after{content:'؟';font-size:80px;font-weight:900;color:rgba(255,255,255,.2)}
+.face-back{transform:rotateY(180deg);background:linear-gradient(135deg,#12122a,#1e1e3a);border:2px solid rgba(255,255,255,.08)}
+.hold-ring-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2}
+.hold-ring{width:72px;height:72px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.ring-track{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.12)}
+.ring-fill{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(255,255,255,.9) var(--p,0%),transparent 0%)}
+.ring-label{position:relative;z-index:1;font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-align:center;line-height:1.4}
+.card-big-num{font-size:72px;font-weight:900;line-height:1}
+.card-big-eye{font-size:76px;line-height:1;animation:eyePop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes eyePop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
+.card-eye-msg{font-size:15px;font-weight:800;text-align:center;line-height:1.5;padding:0 16px;color:#fff}
+.card-num-label{font-size:13px;font-weight:700;opacity:.5}
+.next-card-btn{position:absolute;bottom:14px;left:14px;right:14px;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;transition:background .15s}
+.next-card-btn:active{background:rgba(255,255,255,.25)}
+/* Board */
+.players-board{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.player-board-card{background:var(--bg2);border-radius:16px;padding:14px 12px;text-align:center;border:1.5px solid rgba(255,255,255,.06);position:relative;transition:all .3s}
+.player-board-card.eliminated{opacity:.3;filter:grayscale(1)}
+.player-board-card.flash{border-color:var(--gold);box-shadow:0 0 20px rgba(245,158,11,.2);animation:flash .4s ease}
+@keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.pb-avatar{width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#000}
+.pb-name{font-size:13px;font-weight:800;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-xs{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;min-height:18px}
+.x-mark{font-size:13px}
+.pb-add-x{width:26px;height:26px;border-radius:50%;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);color:#ef4444;font-size:16px;cursor:pointer;transition:all .15s;margin-top:6px;display:inline-flex;align-items:center;justify-content:center}
+.pb-add-x:active{background:rgba(239,68,68,.3);transform:scale(.88)}
+.elim-tag{position:absolute;top:6px;left:6px;font-size:9px;background:rgba(239,68,68,.18);color:#ef4444;border-radius:6px;padding:2px 5px;font-weight:800}
+/* Vote */
+.vote-grid{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.vote-card{background:var(--bg2);border-radius:16px;padding:16px 12px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.vote-card:active{transform:scale(.95)}
+.vote-card.selected{border-color:var(--gold);background:rgba(245,158,11,.08);box-shadow:0 0 18px rgba(245,158,11,.15)}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.show{display:flex}
+.modal-box{width:100%;max-width:440px;background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px 40px;border-top:1px solid rgba(255,255,255,.08);animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;gap:12px}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:18px;font-weight:900;text-align:center}
+/* Result */
+.rp-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:14px;padding:12px 14px}
+.rp-info{flex:1}
+.rp-name{font-size:14px;font-weight:800}
+.rp-xs{font-size:11px;color:var(--sub);margin-top:2px}
+.rp-badge{font-size:11px;padding:3px 8px;border-radius:8px;font-weight:800}
+.b-wink{background:rgba(168,85,247,.2);color:#a855f7}
+.b-out{background:rgba(239,68,68,.15);color:#ef4444}
+.b-safe{background:rgba(34,197,94,.12);color:#22c55e}
+/* Toast */
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(20,20,34,.97);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:11px 22px;border-radius:50px;font-size:13px;font-weight:700;z-index:999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" id="modalBox">
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div class="scr on" id="s_title">
+  <div style="height:20px"></div>
+  <div class="big-emoji">😉</div>
+  <div class="page-title">اغمزلي</div>
+  <div class="page-sub">لعبة اجتماعية مصرية<br>فيها غماز واحد — مين هيكشف نفسه؟ 👀</div>
+  <button class="btn btn-gold" onclick="goSetup()">🎮 العب دلوقتي</button>
+  <button class="btn btn-ghost" onclick="goHowTo()">📖 إزاي اللعب؟</button>
+</div>
+
+<!-- HOWTO -->
+<div class="scr" id="s_howto">
+  <div class="page-title" style="font-size:22px">إزاي اللعب؟</div>
+  <div id="howtoSteps" style="width:100%;display:flex;flex-direction:column;gap:10px"></div>
+  <button class="btn btn-ghost" onclick="go('s_title')">← رجوع</button>
+</div>
+
+<!-- SETUP -->
+<div class="scr" id="s_setup">
+  <div class="page-title" style="font-size:22px">إعداد اللعبة</div>
+  <div class="section-label">اللاعبين (3 — 15)</div>
+  <div class="player-list" id="playerList"></div>
+  <button class="add-player-btn" id="addBtn" onclick="addPlayer()">＋ ضيف لاعب</button>
+  <div class="section-label">⚙️ الإعدادات</div>
+  <div class="settings-box">
+    <div class="srow">
+      <div><div class="name">غمازان</div><div class="desc">عينان بدل واحدة (4+ لاعبين)</div></div>
+      <label class="toggle"><input type="checkbox" id="opt2wink"><span class="tslider"></span></label>
+    </div>
+    <div class="srow">
+      <div><div class="name">وضع الصعوبة</div><div class="desc">وقت أقل للكشف</div></div>
+      <label class="toggle"><input type="checkbox" id="optHard"><span class="tslider"></span></label>
+    </div>
+    <div class="srow">
+      <div><div class="name">اهتزاز</div><div class="desc">اهتزاز عند كشف الكرت</div></div>
+      <label class="toggle"><input type="checkbox" id="optVib" checked><span class="tslider"></span></label>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-ghost" style="flex:1" onclick="go('s_title')">← رجوع</button>
+    <button class="btn btn-gold" style="flex:2" onclick="startRound()">🎲 ابدأ الجولة!</button>
+  </div>
+</div>
+
+<!-- TURN -->
+<div class="scr" id="s_turn">
+  <div class="page-title" style="font-size:20px">دور مين؟</div>
+  <div class="turn-card">
+    <div class="turn-avatar" id="turnAv"></div>
+    <div class="turn-name" id="turnName"></div>
+    <div id="turnDots" style="display:flex;gap:5px;justify-content:center;margin-top:12px"></div>
+    <div style="font-size:12px;color:var(--sub);margin-top:10px">اضغط عشان تشوف كرتك لوحدك 🤫</div>
+  </div>
+  <button class="btn btn-gold" onclick="goCard()">👁️ أنا جاهز — شوف كرتي</button>
+  <div style="font-size:11px;color:var(--sub);text-align:center">متخليش حد تاني يشوف!</div>
+</div>
+
+<!-- CARD -->
+<div class="scr" id="s_card">
+  <div style="font-size:13px;color:var(--sub);font-weight:700" id="cardLabel"></div>
+  <div class="card-scene">
+    <div class="card-3d" id="card3d">
+      <div class="face face-front" id="cardFront">
+        <div class="hold-ring-wrap">
+          <div class="hold-ring">
+            <div class="ring-track"></div>
+            <div class="ring-fill" id="ringFill"></div>
+            <div class="ring-label">اضغط<br>واستنى</div>
+          </div>
+        </div>
+      </div>
+      <div class="face face-back" id="cardBack"></div>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--sub);text-align:center;max-width:240px">اضغط على الكرت واستنى لحد ما يتكشف ⏳</div>
+</div>
+
+<!-- BOARD -->
+<div class="scr" id="s_board">
+  <div style="font-size:20px;font-weight:900;text-align:center">لوحة اللاعبين 📋</div>
+  <div style="font-size:12px;color:var(--sub);text-align:center" id="boardSub"></div>
+  <div class="players-board" id="playersBoard"></div>
+  <div class="row">
+    <button class="btn btn-ghost" style="flex:1" onclick="go('s_title')">🏠 رئيسية</button>
+    <button class="btn btn-gold" style="flex:2" id="boardNextBtn" onclick="nextAction()">يلا نغمز 😉</button>
+  </div>
+</div>
+
+<!-- VOTE -->
+<div class="scr" id="s_vote">
+  <div class="big-emoji" style="font-size:48px">🕵️</div>
+  <div class="page-title" style="font-size:20px">مين الغماز؟</div>
+  <div class="page-sub" id="voteSub">اتهم اللي تعتقد إنه الغماز</div>
+  <div class="vote-grid" id="voteGrid"></div>
+  <button class="btn btn-red" id="voteBtn" onclick="confirmVote()" disabled>✅ أنا متأكد</button>
+  <button class="btn btn-ghost" onclick="skipVote()">تخطي — مش عارف</button>
+</div>
+
+<!-- RESULT -->
+<div class="scr" id="s_result">
+  <div class="big-emoji" id="resultEmoji">🎉</div>
+  <div style="font-size:22px;font-weight:900;text-align:center" id="resultMain"></div>
+  <div style="font-size:14px;color:var(--sub);text-align:center;line-height:1.7" id="resultDetail"></div>
+  <div style="width:100%;display:flex;flex-direction:column;gap:8px" id="resultPlayers"></div>
+  <div class="row" style="margin-top:4px">
+    <button class="btn btn-ghost" style="flex:1" onclick="go('s_title')">🏠 رئيسية</button>
+    <button class="btn btn-gold" style="flex:2" onclick="newRound()">🔄 جولة جديدة</button>
+  </div>
+</div>
+
+<script>
+const COLORS=[
+  ['#f59e0b','#d97706'],['#3b82f6','#1d4ed8'],['#10b981','#047857'],
+  ['#8b5cf6','#6d28d9'],['#ec4899','#be185d'],['#f97316','#c2410c'],
+  ['#06b6d4','#0e7490'],['#ef4444','#991b1b'],['#84cc16','#4d7c0f'],
+  ['#a78bfa','#5b21b6'],['#fbbf24','#b45309'],['#34d399','#065f46'],
+  ['#f472b6','#9d174d'],['#60a5fa','#1e3a8a'],['#4ade80','#14532d'],
+];
+const MAX_X=5;
+const HOWTO_DATA=[
+  ['1️⃣','ادخل أسماء اللاعبين','من 3 لـ 15 لاعب في نفس الوقت'],
+  ['2️⃣','كل واحد يشوف كرته لوحده','اضغط واستنى لحد ما يتكشف — مش حد تاني يشوف!'],
+  ['3️⃣','الغماز يغمز للكل','اللي طلعله 😉 يغمز لأي حد غير شخص واحد'],
+  ['4️⃣','ضيف ❌ على اللي اتكشف','اللوحة تظهر بعد الجولة — ضيف ❌ للي اتضح إنه الغماز'],
+  ['5️⃣','5 ❌ والواحد يطلع','اللاعب اللي وصل لـ 5 ❌ يتحذف'],
+  ['6️⃣','التصويت','اللاعب الأخير يحاول يكشف الغماز — صح يكسب، غلط يخسر!'],
+];
+
+let G={players:[],cards:[],order:[],orderIdx:0,winkerCount:1,revealed:false};
+let holdP=0,holdInterval=null,selectedVote=null;
+
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('on');window.scrollTo(0,0);}
+}
+function toast(msg,dur=2200){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);
+}
+function vib(ms=50){if(document.getElementById('optVib')?.checked&&navigator.vibrate)navigator.vibrate(ms);}
+function shuffle(a){return a.sort(()=>Math.random()-.5);}
+function ini(name){return name.trim().charAt(0)||'؟';}
+function avEl(p,sz=48){
+  return `<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:linear-gradient(135deg,${p.color[0]},${p.color[1]});display:flex;align-items:center;justify-content:center;font-size:${Math.floor(sz*.35)}px;font-weight:900;color:#000;flex-shrink:0">${ini(p.name)}</div>`;
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+function openModal(title,body){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+/* ══ HOWTO ══ */
+function goHowTo(){
+  document.getElementById('howtoSteps').innerHTML=HOWTO_DATA.map(([e,t,d])=>`
+    <div style="background:var(--bg2);border-radius:var(--r);padding:14px;border:1px solid rgba(255,255,255,.05);display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:24px">${e}</span>
+      <div><div style="font-size:14px;font-weight:800;margin-bottom:3px">${t}</div><div style="font-size:12px;color:var(--sub)">${d}</div></div>
+    </div>`).join('');
+  go('s_howto');
+}
+
+/* ══ SETUP ══ */
+function goSetup(){
+  if(!G.players.length){
+    G.players=[];
+    for(let i=1;i<=4;i++) G.players.push({name:'لاعب '+i,color:COLORS[i-1],xs:0,eliminated:false});
+  }
+  renderList();go('s_setup');
+}
+function renderList(){
+  document.getElementById('playerList').innerHTML=G.players.map((p,i)=>`
+    <div class="player-row">
+      <div class="player-num">${i+1}</div>
+      <input class="player-input" id="pin_${i}" value="${p.name}" placeholder="اسم اللاعب ${i+1}" oninput="G.players[${i}].name=this.value">
+      ${G.players.length>3?`<button class="del-btn" onclick="delPlayer(${i})">×</button>`:'<div style="width:34px"></div>'}
+    </div>`).join('');
+  document.getElementById('addBtn').style.display=G.players.length>=15?'none':'flex';
+}
+function addPlayer(){
+  if(G.players.length>=15){toast('الحد الأقصى 15!');return;}
+  const i=G.players.length;
+  G.players.push({name:'لاعب '+(i+1),color:COLORS[i%COLORS.length],xs:0,eliminated:false});
+  renderList();
+  setTimeout(()=>{const el=document.getElementById('pin_'+i);if(el){el.focus();el.select();}},60);
+}
+function delPlayer(i){
+  if(G.players.length<=3){toast('لازم 3 لاعبين على الأقل!');return;}
+  G.players.splice(i,1);
+  G.players.forEach((p,j)=>p.color=COLORS[j%COLORS.length]);
+  renderList();
+}
+
+/* ══ START ROUND ══ */
+function startRound(){
+  // sync names
+  G.players.forEach((p,i)=>{const el=document.getElementById('pin_'+i);if(el&&el.value.trim())p.name=el.value.trim();});
+  const active=G.players.filter(p=>!p.eliminated);
+  if(active.length<3){toast('محتاج 3 لاعبين على الأقل!');return;}
+
+  const two=document.getElementById('opt2wink').checked&&active.length>=4;
+  G.winkerCount=two?2:1;
+
+  // build cards
+  const wIdxs=shuffle(active.map((_,i)=>i)).slice(0,G.winkerCount);
+  G.cards=active.map((p,i)=>({
+    type:wIdxs.includes(i)?'eye':'number',
+    val:0,
+    playerIdx:G.players.indexOf(p),
+  }));
+  let n=1;G.cards.forEach(c=>{if(c.type==='number')c.val=n++;});
+
+  G.order=shuffle(active.map((_,i)=>G.players.indexOf(active[i])));
+  G.orderIdx=0;G.revealed=false;
+
+  renderTurn();go('s_turn');
+}
+
+/* ══ TURN ══ */
+function renderTurn(){
+  const pIdx=G.order[G.orderIdx];
+  const p=G.players[pIdx];
+  const total=G.order.length;
+  document.getElementById('turnName').textContent=p.name;
+  const av=document.getElementById('turnAv');
+  av.textContent=ini(p.name);
+  av.style.background=`linear-gradient(135deg,${p.color[0]},${p.color[1]})`;
+  const dots=document.getElementById('turnDots');
+  dots.innerHTML=Array.from({length:total},(_,i)=>`
+    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i<G.orderIdx?'#22c55e':i===G.orderIdx?p.color[0]:'rgba(255,255,255,.12)'}"></span>`).join('');
+}
+
+function goCard(){
+  const pIdx=G.order[G.orderIdx];
+  const p=G.players[pIdx];
+  const cardObj=G.cards.find(c=>c.playerIdx===pIdx);
+
+  document.getElementById('cardLabel').textContent='كرت '+p.name+' 🤫';
+  const front=document.getElementById('cardFront');
+  front.style.background=`linear-gradient(135deg,${p.color[0]},${p.color[1]})`;
+
+  document.getElementById('card3d').classList.remove('flipped');
+  document.getElementById('cardBack').innerHTML='';
+  document.getElementById('ringFill').style.setProperty('--p','0%');
+  holdP=0;G.revealed=false;
+
+  go('s_card');
+
+  const bindHold=()=>{
+    front.onmousedown=()=>startHold(cardObj,p);
+    front.onmouseup=front.onmouseleave=endHold;
+    front.ontouchstart=e=>{e.preventDefault();startHold(cardObj,p);};
+    front.ontouchend=e=>{e.preventDefault();endHold();};
+    front.ontouchcancel=endHold;
+  };
+  bindHold();
+}
+
+function startHold(cardObj,p){
+  if(G.revealed)return;
+  holdP=0;
+  const speed=document.getElementById('optHard').checked?2.8:4;
+  clearInterval(holdInterval);
+  holdInterval=setInterval(()=>{
+    holdP=Math.min(100,holdP+speed);
+    document.getElementById('ringFill').style.setProperty('--p',holdP+'%');
+    if(holdP>=100){clearInterval(holdInterval);flipCard(cardObj,p);}
+  },20);
+}
+function endHold(){
+  clearInterval(holdInterval);holdInterval=null;
+  if(!G.revealed){holdP=0;document.getElementById('ringFill').style.setProperty('--p','0%');}
+}
+
+function flipCard(cardObj,p){
+  if(G.revealed)return;
+  G.revealed=true;
+  vib(cardObj.type==='eye'?[80,40,100]:60);
+  document.getElementById('card3d').classList.add('flipped');
+
+  setTimeout(()=>{
+    const back=document.getElementById('cardBack');
+    if(cardObj.type==='eye'){
+      back.style.background='linear-gradient(135deg,#2d0a4e,#1a0a2e)';
+      back.style.border='2px solid rgba(168,85,247,.4)';
+      back.innerHTML=`
+        <div class="card-big-eye">😉</div>
+        <div class="card-eye-msg">اغمز للكل<br>ما عادا شخص واحد</div>
+        <button class="next-card-btn" onclick="afterReveal()">التالي ←</button>`;
+      document.body.style.background='#1a0a2e';
+      setTimeout(()=>document.body.style.background='',350);
+    } else {
+      back.style.background=`linear-gradient(135deg,${p.color[0]}18,${p.color[1]}10)`;
+      back.style.border=`2px solid ${p.color[0]}33`;
+      back.innerHTML=`
+        <div class="card-big-num" style="color:${p.color[0]}">${cardObj.val}</div>
+        <div class="card-num-label" style="color:${p.color[0]}99">رقمك</div>
+        <button class="next-card-btn" onclick="afterReveal()">التالي ←</button>`;
+    }
+  },330);
+}
+
+function afterReveal(){
+  G.orderIdx++;
+  if(G.orderIdx>=G.order.length){renderBoard();go('s_board');}
+  else{renderTurn();go('s_turn');}
+}
+
+/* ══ BOARD ══ */
+function renderBoard(){
+  const active=G.players.filter(p=>!p.eliminated);
+  document.getElementById('boardSub').textContent=`ضيف ❌ على اللي اتكشف — ${MAX_X} ❌ والواحد يطلع`;
+  document.getElementById('playersBoard').innerHTML=G.players.map((p,i)=>`
+    <div class="player-board-card${p.eliminated?' eliminated':''}" id="pbc_${i}">
+      ${p.eliminated?'<div class="elim-tag">خارج 🚫</div>':''}
+      <div class="pb-avatar" style="background:linear-gradient(135deg,${p.color[0]},${p.color[1]})">${ini(p.name)}</div>
+      <div class="pb-name">${p.name}</div>
+      <div class="pb-xs" id="pbxs_${i}">${'❌'.repeat(p.xs)}</div>
+      ${!p.eliminated?`<button class="pb-add-x" onclick="addX(${i})">＋</button>`:''}
+    </div>`).join('');
+
+  const btn=document.getElementById('boardNextBtn');
+  if(active.length<=2){btn.textContent='🕵️ وقت التصويت!';btn.onclick=()=>{renderVote();go('s_vote');};}
+  else{btn.textContent='يلا نغمز 😉';btn.onclick=nextAction;}
+}
+
+function addX(i){
+  const p=G.players[i];
+  if(p.eliminated)return;
+  p.xs++;vib(40);
+  const el=document.getElementById('pbc_'+i);
+  el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),400);
+  document.getElementById('pbxs_'+i).innerHTML='❌'.repeat(p.xs);
+  if(p.xs>=MAX_X){
+    p.eliminated=true;
+    toast('😬 '+p.name+' اتحذف!',2500);
+    vib([60,40,60,40,80]);
+    setTimeout(()=>{
+      renderBoard();
+      const still=G.players.filter(x=>!x.eliminated);
+      if(still.length<=1)setTimeout(showFinalResult,800);
+    },300);
+  }
+}
+
+function nextAction(){
+  const active=G.players.filter(p=>!p.eliminated);
+  if(active.length<=1){showFinalResult();return;}
+  startRound();
+}
+
+/* ══ VOTE ══ */
+function renderVote(){
+  selectedVote=null;
+  document.getElementById('voteBtn').disabled=true;
+  const active=G.players.filter(p=>!p.eliminated);
+  document.getElementById('voteSub').textContent='اللاعبين الباقيين: '+active.map(p=>p.name).join('، ');
+  document.getElementById('voteGrid').innerHTML=active.map(p=>{
+    const pi=G.players.indexOf(p);
+    return `<div class="vote-card" onclick="pickVote(${pi})" id="vc_${pi}">
+      ${avEl(p,44)}
+      <div style="font-size:13px;font-weight:800;margin-top:8px">${p.name}</div>
+    </div>`;
+  }).join('');
+}
+function pickVote(pi){
+  selectedVote=pi;
+  document.querySelectorAll('.vote-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('vc_'+pi)?.classList.add('selected');
+  document.getElementById('voteBtn').disabled=false;
+  vib(30);
+}
+function confirmVote(){
+  if(selectedVote===null)return;
+  const wIdxs=G.cards.filter(c=>c.type==='eye').map(c=>c.playerIdx);
+  const correct=wIdxs.includes(selectedVote);
+  revealVoteResult(correct,wIdxs);
+}
+function skipVote(){
+  const wIdxs=G.cards.filter(c=>c.type==='eye').map(c=>c.playerIdx);
+  revealVoteResult(false,wIdxs);
+}
+function revealVoteResult(correct,wIdxs){
+  const names=wIdxs.map(i=>G.players[i].name).join(' و ');
+  openModal(
+    correct?'🎉 صح! كشفت الغماز!':'😮 غلط!',
+    `<div style="text-align:center;font-size:14px;color:var(--sub);margin-bottom:12px">الغماز${wIdxs.length>1?' كانوا':' كان'}: <strong style="color:var(--gold)">${names}</strong></div>
+     <div style="text-align:center;font-size:13px;font-weight:700;color:${correct?'#22c55e':'#ef4444'};margin-bottom:16px">${correct?'كسبت 🎉':'الغماز ضحك عليك 😂'}</div>
+     <button class="btn btn-gold" onclick="closeModal();showFinalResult()">رؤية النتائج النهائية</button>`
+  );
+}
+
+/* ══ FINAL RESULT ══ */
+function showFinalResult(){
+  const wIdxs=G.cards.filter(c=>c.type==='eye').map(c=>c.playerIdx);
+  document.getElementById('resultEmoji').textContent='😉';
+  document.getElementById('resultMain').textContent='انتهت اللعبة!';
+  document.getElementById('resultDetail').textContent='الغماز كان: '+wIdxs.map(i=>G.players[i]?.name||'؟').join(' و ');
+  document.getElementById('resultPlayers').innerHTML=G.players.map((p,i)=>{
+    const isW=wIdxs.includes(i);
+    const badge=p.eliminated?'<span class="rp-badge b-out">خارج 🚫</span>':isW?'<span class="rp-badge b-wink">الغماز 😉</span>':'<span class="rp-badge b-safe">سالم ✓</span>';
+    return `<div class="rp-row">${avEl(p,36)}<div class="rp-info"><div class="rp-name">${p.name}</div><div class="rp-xs">${p.xs?'❌'.repeat(p.xs):'لا شيء'}</div></div>${badge}</div>`;
+  }).join('');
+  go('s_result');
+}
+
+function newRound(){
+  // reset xs and eliminated for new full game
+  openModal('🔄 جولة جديدة',`
+    <div style="font-size:14px;color:var(--sub);text-align:center;margin-bottom:16px">عايز تبدأ من الأول أو تكمل نفس اللاعبين؟</div>
+    <button class="btn btn-gold" style="margin-bottom:10px" onclick="closeModal();resetAndStart()">🆕 بداية جديدة (امسح الـ ❌)</button>
+    <button class="btn btn-ghost" onclick="closeModal();startRound()">▶️ جولة جديدة (نفس الـ ❌)</button>
+  `);
+}
+function resetAndStart(){
+  G.players.forEach(p=>{p.xs=0;p.eliminated=false;});
+  startRound();
+}
+</script>
+</body>
+</html>
