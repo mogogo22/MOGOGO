@@ -364,36 +364,52 @@ function goCard(){
   const p=G.players[pIdx];
   const cardObj=G.cards.find(c=>c.playerIdx===pIdx);
 
-  document.getElementById('cardLabel').textContent='كرت '+p.name+' 🤫';
+  // ── Reset كامل للكارت ──
+  clearInterval(holdInterval); holdInterval=null; holdP=0; G.revealed=false;
+
+  const card3d=document.getElementById('card3d');
   const front=document.getElementById('cardFront');
+  const back=document.getElementById('cardBack');
+  const ring=document.getElementById('ringFill');
+
+  // إزالة الـ flip فوراً بدون animation مؤقتاً
+  card3d.style.transition='none';
+  card3d.classList.remove('flipped');
+  back.innerHTML='';
+  ring.style.setProperty('--p','0%');
+  // إعادة الـ transition بعد frame واحد
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      card3d.style.transition='';
+    });
+  });
+
+  document.getElementById('cardLabel').textContent='كرت '+p.name+' 🤫';
   front.style.background=`linear-gradient(135deg,${p.color[0]},${p.color[1]})`;
 
-  document.getElementById('card3d').classList.remove('flipped');
-  document.getElementById('cardBack').innerHTML='';
-  document.getElementById('ringFill').style.setProperty('--p','0%');
-  holdP=0;G.revealed=false;
+  // ── إزالة الـ events القديمة وإضافة جديدة ──
+  const newFront=front.cloneNode(true);
+  front.parentNode.replaceChild(newFront,front);
+
+  newFront.onmousedown=()=>startHold(cardObj,p);
+  newFront.onmouseup=newFront.onmouseleave=endHold;
+  newFront.ontouchstart=e=>{e.preventDefault();startHold(cardObj,p);};
+  newFront.ontouchend=e=>{e.preventDefault();endHold();};
+  newFront.ontouchcancel=endHold;
 
   go('s_card');
-
-  const bindHold=()=>{
-    front.onmousedown=()=>startHold(cardObj,p);
-    front.onmouseup=front.onmouseleave=endHold;
-    front.ontouchstart=e=>{e.preventDefault();startHold(cardObj,p);};
-    front.ontouchend=e=>{e.preventDefault();endHold();};
-    front.ontouchcancel=endHold;
-  };
-  bindHold();
 }
 
 function startHold(cardObj,p){
   if(G.revealed)return;
   holdP=0;
-  const speed=document.getElementById('optHard').checked?2.8:4;
-  clearInterval(holdInterval);
+  const speed=document.getElementById('optHard')?.checked?2.8:4;
+  clearInterval(holdInterval); holdInterval=null;
   holdInterval=setInterval(()=>{
     holdP=Math.min(100,holdP+speed);
-    document.getElementById('ringFill').style.setProperty('--p',holdP+'%');
-    if(holdP>=100){clearInterval(holdInterval);flipCard(cardObj,p);}
+    const ring=document.getElementById('ringFill');
+    if(ring) ring.style.setProperty('--p',holdP+'%');
+    if(holdP>=100){clearInterval(holdInterval);holdInterval=null;flipCard(cardObj,p);}
   },20);
 }
 function endHold(){
