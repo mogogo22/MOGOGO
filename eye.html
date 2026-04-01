@@ -387,15 +387,14 @@ function goCard(){
   document.getElementById('cardLabel').textContent='كرت '+p.name+' 🤫';
   front.style.background=`linear-gradient(135deg,${p.color[0]},${p.color[1]})`;
 
-  // ── إزالة الـ events القديمة وإضافة جديدة ──
-  const newFront=front.cloneNode(true);
-  front.parentNode.replaceChild(newFront,front);
-
-  newFront.onmousedown=()=>startHold(cardObj,p);
-  newFront.onmouseup=newFront.onmouseleave=endHold;
-  newFront.ontouchstart=e=>{e.preventDefault();startHold(cardObj,p);};
-  newFront.ontouchend=e=>{e.preventDefault();endHold();};
-  newFront.ontouchcancel=endHold;
+  // ── ربط الـ events مباشرة بدون cloneNode ──
+  const f=document.getElementById('cardFront');
+  f.onmousedown=()=>startHold(cardObj,p);
+  f.onmouseup=()=>endHold();
+  f.onmouseleave=()=>endHold();
+  f.ontouchstart=e=>{e.preventDefault();startHold(cardObj,p);};
+  f.ontouchend=e=>{e.preventDefault();endHold();};
+  f.ontouchcancel=()=>endHold();
 
   go('s_card');
 }
@@ -431,7 +430,9 @@ function flipCard(cardObj,p){
       back.innerHTML=`
         <div class="card-big-eye">😉</div>
         <div class="card-eye-msg">اغمز للكل<br>ما عادا شخص واحد</div>
-        <button class="next-card-btn" onclick="afterReveal()">التالي ←</button>`;
+        <button class="next-card-btn" id="nextBtn">التالي ←</button>`;
+      document.getElementById('nextBtn').addEventListener('click', afterReveal);
+      document.getElementById('nextBtn').addEventListener('touchend', e=>{e.preventDefault();afterReveal();});
       document.body.style.background='#1a0a2e';
       setTimeout(()=>document.body.style.background='',350);
     } else {
@@ -440,7 +441,9 @@ function flipCard(cardObj,p){
       back.innerHTML=`
         <div class="card-big-num" style="color:${p.color[0]}">${cardObj.val}</div>
         <div class="card-num-label" style="color:${p.color[0]}99">رقمك</div>
-        <button class="next-card-btn" onclick="afterReveal()">التالي ←</button>`;
+        <button class="next-card-btn" id="nextBtn">التالي ←</button>`;
+      document.getElementById('nextBtn').addEventListener('click', afterReveal);
+      document.getElementById('nextBtn').addEventListener('touchend', e=>{e.preventDefault();afterReveal();});
     }
   },330);
 }
