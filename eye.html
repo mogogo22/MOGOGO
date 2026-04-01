@@ -75,7 +75,7 @@ body{display:flex;flex-direction:column;align-items:center}
 @keyframes eyePop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
 .card-eye-msg{font-size:15px;font-weight:800;text-align:center;line-height:1.5;padding:0 16px;color:#fff}
 .card-num-label{font-size:13px;font-weight:700;opacity:.5}
-.next-card-btn{position:absolute;bottom:14px;left:14px;right:14px;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;transition:background .15s}
+.next-card-btn{position:absolute;bottom:14px;left:14px;right:14px;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;transition:background .15s;z-index:10}
 .next-card-btn:active{background:rgba(255,255,255,.25)}
 /* Board */
 .players-board{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -366,6 +366,8 @@ function goCard(){
 
   // ── Reset كامل للكارت ──
   clearInterval(holdInterval); holdInterval=null; holdP=0; G.revealed=false;
+  const ringWrap=document.querySelector('.hold-ring-wrap');
+  if(ringWrap) ringWrap.style.pointerEvents='';
 
   const card3d=document.getElementById('card3d');
   const front=document.getElementById('cardFront');
@@ -420,6 +422,9 @@ function flipCard(cardObj,p){
   if(G.revealed)return;
   G.revealed=true;
   vib(cardObj.type==='eye'?[80,40,100]:60);
+  // إخفاء الـ hold ring عشان ميغطيش زرار التالي
+  const ring=document.querySelector('.hold-ring-wrap');
+  if(ring) ring.style.pointerEvents='none';
   document.getElementById('card3d').classList.add('flipped');
 
   setTimeout(()=>{
