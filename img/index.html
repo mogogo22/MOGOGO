@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MOHAND WORLD</title>
+  <link rel="icon" href="img/Acartoonst.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <div class="particles" id="particles"></div>
+
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <img class="logo-img" src="img/Acartoonst.png" alt="logo">
+        <a class="logo-text" href="#">MOHAND WORLD</a>
+      </div>
+      <nav class="navbar">
+        <a href="#youtube" class="nav-link">🎯 اهداف القناه</a>
+        <a href="#data" class="nav-link">🎮 العاب</a>
+        <div class="dropdown" id="videoDropdown">
+          <button class="nav-link dropdown-toggle" id="dropdownToggle">🎬 فيديوهاتي ▾</button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="video.html" target="_blank">📹 الفيديوهات</a>
+            <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">⚡ Shorts</a>
+          </div>
+        </div>
+      </nav>
+      <button class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#youtube" class="mob-link">🎯 اهداف القناه</a>
+    <a href="#data" class="mob-link">🎮 العاب</a>
+    <button class="mob-link mob-drop-btn" id="mobileDropdownToggle">🎬 فيديوهاتي ▾</button>
+    <div class="mobile-submenu" id="mobileSubmenu">
+      <a href="video.html" target="_blank">📹 الفيديوهات</a>
+      <a href="https://www.youtube.com/@rip_mogogo/shorts" target="_blank">⚡ Shorts</a>
+    </div>
+  </div>
+
+  <section class="hero" id="index">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🌟 يوتيوبر متواضع</div>
+      <h1 class="hero-title">هبقا مشهور<br><span class="gradient-text">في يوم من الأيام 😶</span></h1>
+      <p class="hero-sub">اهلاً بيك في عالم مهند</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#foont">💬 تواصل معايا</a>
+        <a class="btn-secondary" href="#youtube">🎯 اعرف أكتر</a>
+      </div>
+      <div class="social-row">
+        <a href="https://discord.com/invite/rxneXG2PxS" target="_blank" class="social-btn discord">
+          <img src="img/Untcitled.png" alt="discord"><span>Discord</span>
+        </a>
+        <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank" class="social-btn yt">
+          <img src="img/Untitled.png" alt="youtube"><span>YouTube</span>
+        </a>
+      </div>
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-num" data-target="50">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">فيديو</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" data-target="5">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">أدوات</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" data-target="9">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">ألعاب</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint"><span>اسكرول للأسفل</span><div class="scroll-arrow">↓</div></div>
+  </section>
+
+  <section class="section-goals" id="youtube">
+    <div class="section-container">
+      <div class="section-header reveal">
+        <span class="section-tag">Channel Goals</span>
+        <h2 class="section-title">اهداف القناه 🎯</h2>
+        <p class="section-desc">رحلتي ورسالتي لكل من يتابعني</p>
+      </div>
+      <div class="goals-grid">
+        <article class="goal-card reveal">
+          <div class="card-glow"></div>
+          <div class="card-icon-wrap"><img src="img/Luffy.png" alt="هدف"></div>
+          <h3>الهدف المحدد من القناه</h3>
+          <p>هدفي في القناه هو اني اسعد كل شخص مكتئب بمقطع فيديو واتمنى لكم السعادة دائماً</p>
+          <div class="card-tag">💙 السعادة</div>
+        </article>
+        <article class="goal-card reveal">
+          <div class="card-glow"></div>
+          <div class="card-icon-wrap"><img src="img/Untiddtled.png" alt="دعم"></div>
+          <h3>هدفي في القناه</h3>
+          <p>انكم تدعموني وده بيفرق معايا جداً كل كلمة حلوه في تعليق بتخليني استمر اكتر واكتر</p>
+          <div class="card-tag">❤️ الدعم</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+     <section class="section-games" id="data">
+      <div class="section-container">
+        <div class="section-header reveal">
+          <span class="section-tag">Mini Games</span>
+          <h2 class="section-title">العاب 🎮</h2>
+          <p class="section-desc">العب وتسلى مع ألعابي الصغيرة</p>
+        </div>
+        <div class="games-grid">
+    
+          <div class="game-card reveal" data-index="01">
+            <div class="game-img-wrap">
+              <a href="eye.html" target="_blank">
+                <img src="img/eye.png" alt="eye">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>إغمزلي 👀</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="02">
+            <div class="game-img-wrap">
+              <a href="ai.html" target="_blank">
+                <img src="img/dash.png" alt="DASH">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>DASH ⚡</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="03">
+            <div class="game-img-wrap">
+              <a href="insdex.html" target="_blank">
+                <img src="img/Ya5utK8.png" alt="Mini Photoshop">
+                <div class="game-overlay"><span>▶ استخدم الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>Mini Photoshop 🎨</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="04">
+            <div class="game-img-wrap">
+              <a href="zaka.html" target="_blank">
+                <img src="img/cfSv.png" alt="IQ Test">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>IQ Test 🧠</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="05">
+            <div class="game-img-wrap">
+              <a href="xo.html" target="_blank">
+                <img src="img/xo.png" alt="XO Game">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>XO 👑</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="06">
+            <div class="game-img-wrap">
+              <a href="cards.html" target="_blank">
+                <img src="img/cardscover.png" alt="Card Wars">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>Card Wars 🏹</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="07">
+            <div class="game-img-wrap">
+              <a href="Month.html" target="_blank">
+                <img src="img/Brith.png" alt="Birth Month">
+                <div class="game-overlay"><span>▶ استخدم الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>Birth Month 🤔</h6></div>
+          </div>
+    
+          <div class="game-card reveal" data-index="08">
+            <div class="game-img-wrap">
+              <a href="laf.html" target="_blank">
+                <img src="img/bank.png" alt="لف ودوران">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>لف ودوران 🎲</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="09">
+            <div class="game-img-wrap">
+              <a href="arcade.html" target="_blank">
+                <img src="arcade/Pback.gif" alt="Arcade">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>Arcade 🎮</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="10">
+            <div class="game-img-wrap">
+              <a href="chess.html" target="_blank">
+                <img src="img/ch.jpg" alt="شطرنج">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>شطرنج ♟️</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="11">
+            <div class="game-img-wrap">
+              <a href="https://mogogo22.github.io/BookMarks/" target="_blank">
+                <img src="img/book.png" alt="مختصر">
+                <div class="game-overlay"><span>▶ استخدم الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>مختصر ⚡</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="12">
+            <div class="game-img-wrap">
+              <a href="https://mogogo22.github.io/MOGOGO-AI/" target="_blank">
+                <img src="img/mogo.jpg" alt="فضفضلي">
+                <div class="game-overlay"><span>▶ استخدم الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>فضفضلي 😆</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="13">
+            <div class="game-img-wrap">
+              <a href="https://mogogo22.github.io/khadmat/" target="_blank">
+                <img src="img/خدماT.png" alt="خدمات">
+                <div class="game-overlay"><span>▶ استخدم الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>خدماT</h6></div>
+          </div>
+
+          <div class="game-card reveal" data-index="14">
+            <div class="game-img-wrap">
+              <a href="" target="_blank">
+                <img src="secret/" alt="Secret">
+                <div class="game-overlay"><span>▶ العب الآن</span></div>
+              </a>
+            </div>
+            <div class="game-info"><h6>قريباً...</h6></div>
+          </div>
+    
+        </div>
+      </div>
+    </section>
+
+  <section class="section-about" id="about">
+    <div class="section-container">
+      <div class="section-header reveal">
+        <span class="section-tag">About</span>
+        <h2 class="section-title">لمحة عن القناه 📺</h2>
+      </div>
+      <div class="about-grid">
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Usntitled.png" alt=""></div>
+          <h3>MOGOGO</h3><p>ناديني بـ موجو</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Unstitled.png" alt=""></div>
+          <h3>البريد</h3><p>mm3350493@gmail.com</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Untitaaled.png" alt=""></div>
+          <h3>MOHAND WORLD</h3><p>بداية القناه: 10/1/2022</p>
+        </article>
+        <article class="about-card reveal">
+          <div class="about-icon"><img src="img/Acartoonst.png" alt=""></div>
+          <h3>صورة القناه</h3><p>إن شاء الله استمر بفضل ربنا</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer" id="foont">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="img/Acartoonst.png" alt="logo"><span>MOHAND WORLD</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.youtube.com/channel/UC5K3eI5ts9hk-2v-CIsWUhQ" target="_blank">📺 YouTube</a>
+        <a href="https://discord.com/invite/rxneXG2PxS" target="_blank">💬 Discord</a>
+      </div>
+      <p class="footer-copy">Copyright © 2026 <span>MOGOGO</span> ❤️</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop">↑</button>
+  <script src="main.js"></script>
+</body>
+</html>

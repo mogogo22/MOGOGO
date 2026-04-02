@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>شطرنج ♟️</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f18;--bg2:#16161f;--bg3:#1e1e2a;--bg4:#26263a;
+  --gold:#f59e0b;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;
+  --text:#f0f0ff;--sub:#6b7280;--r:14px;
+  --light:#f0d9b5;--dark:#b58863;--hl:#f6f669;--hl2:#cdd26a;
+  --font:'Segoe UI',Tahoma,Arial,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden}
+body{display:flex;flex-direction:column;align-items:center}
+
+/* ═══ SCREENS ═══ */
+.scr{display:none;width:100%;max-width:480px;min-height:100vh;flex-direction:column;align-items:center;padding:16px;gap:12px}
+.scr.on{display:flex;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ COMMON ═══ */
+.logo{font-size:56px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.title{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--gold),#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--r);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;transition:transform .1s,box-shadow .1s;letter-spacing:.2px}
+.btn:active{transform:scale(.96)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#f97316);color:#000;box-shadow:0 4px 16px rgba(245,158,11,.3)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1.5px solid rgba(255,255,255,.08)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#1d4ed8);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--green),#15803d);color:#fff}
+.btn-sm{padding:9px 16px;font-size:13px;border-radius:10px;width:auto}
+.row{display:flex;gap:10px;width:100%}
+.card{background:var(--bg2);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,.06);width:100%}
+
+/* ═══ MODE CARDS ═══ */
+.mode-grid{display:flex;flex-direction:column;gap:10px;width:100%}
+.mode-card{background:var(--bg2);border-radius:16px;padding:18px;border:2px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+.mode-card:active{transform:scale(.97)}
+.mode-card:hover{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.05)}
+.mode-icon{font-size:32px;flex-shrink:0}
+.mode-info .name{font-size:16px;font-weight:800;margin-bottom:3px}
+.mode-info .desc{font-size:12px;color:var(--sub)}
+
+/* ═══ DIFFICULTY ═══ */
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.diff-card{background:var(--bg2);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;border:2px solid rgba(255,255,255,.06);transition:all .2s}
+.diff-card:active{transform:scale(.95)}
+.diff-card.selected{border-color:var(--gold);background:rgba(245,158,11,.08)}
+.diff-card .di{font-size:28px;margin-bottom:6px}
+.diff-card .dn{font-size:13px;font-weight:800}
+.diff-card .dd{font-size:10px;color:var(--sub);margin-top:3px}
+
+/* ═══ CHESS BOARD ═══ */
+#gameScreen{padding:8px}
+.game-top{width:100%;display:flex;justify-content:space-between;align-items:center;padding:0 4px;margin-bottom:6px}
+.player-info{display:flex;align-items:center;gap:8px}
+.player-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid transparent;transition:border-color .3s}
+.player-av.active{border-color:var(--gold);box-shadow:0 0 10px rgba(245,158,11,.4)}
+.player-name{font-size:13px;font-weight:700}
+.player-color{font-size:10px;color:var(--sub)}
+.captured{font-size:12px;min-height:16px;color:var(--sub)}
+
+.board-wrap{position:relative;width:100%}
+.board-coords{position:absolute;display:flex;flex-direction:column;justify-content:space-around;height:100%;right:-16px;top:0;font-size:9px;color:var(--sub);font-weight:700}
+.board-coords-bottom{position:absolute;display:flex;justify-content:space-around;width:100%;bottom:-16px;left:0;font-size:9px;color:var(--sub);font-weight:700}
+
+#board{
+  display:grid;grid-template-columns:repeat(8,1fr);
+  width:100%;aspect-ratio:1;border:3px solid var(--bg4);border-radius:4px;
+  overflow:hidden;
+}
+.sq{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(20px,7vw,36px);cursor:pointer;
+  transition:background .15s;position:relative;user-select:none;
+}
+.sq.light{background:var(--light)}
+.sq.dark{background:var(--dark)}
+.sq.selected{background:var(--hl)!important}
+.sq.move-hint::after{content:'';position:absolute;width:34%;height:34%;border-radius:50%;background:rgba(0,0,0,.2);pointer-events:none}
+.sq.capture-hint{background:rgba(255,0,0,.3)!important}
+.sq.last-move{background:var(--hl2)!important}
+.sq.check-king{background:#ff4444!important;animation:checkPulse .5s ease-in-out infinite}
+@keyframes checkPulse{50%{background:#ff8888!important}}
+.sq .piece{pointer-events:none;line-height:1;filter:drop-shadow(1px 1px 1px rgba(0,0,0,.4))}
+.sq.dark .piece{filter:drop-shadow(1px 1px 1px rgba(0,0,0,.6))}
+
+/* status bar */
+.status-bar{
+  width:100%;background:var(--bg2);border-radius:10px;
+  padding:10px 14px;display:flex;justify-content:space-between;align-items:center;
+  border:1px solid rgba(255,255,255,.06);
+}
+.status-text{font-size:13px;font-weight:700}
+.status-turn{font-size:11px;color:var(--sub)}
+
+/* promotion modal */
+.promo-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;
+  display:none;align-items:center;justify-content:center;
+}
+.promo-modal.show{display:flex}
+.promo-box{background:var(--bg2);border-radius:20px;padding:24px;border:2px solid var(--gold);text-align:center}
+.promo-title{font-size:16px;font-weight:800;margin-bottom:16px}
+.promo-pieces{display:flex;gap:12px;justify-content:center}
+.promo-piece{font-size:40px;cursor:pointer;padding:12px;border-radius:12px;background:var(--bg3);border:2px solid transparent;transition:all .2s}
+.promo-piece:hover{border-color:var(--gold);background:rgba(245,158,11,.1)}
+
+/* ═══ GAME CONTROLS ═══ */
+.game-controls{display:flex;gap:8px;width:100%}
+.ctrl-btn{flex:1;padding:10px;border:none;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;background:var(--bg3);color:var(--text);border:1px solid rgba(255,255,255,.08);transition:all .15s}
+.ctrl-btn:active{transform:scale(.95)}
+.ctrl-btn.danger{color:var(--red);border-color:rgba(239,68,68,.2)}
+
+/* ═══ TUTORIAL ═══ */
+.tutorial-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%}
+.tut-card{background:var(--bg2);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s;text-align:center}
+.tut-card:active{transform:scale(.96)}
+.tut-card:hover{border-color:rgba(59,130,246,.4)}
+.tut-icon{font-size:28px;margin-bottom:6px}
+.tut-name{font-size:13px;font-weight:800}
+.tut-desc{font-size:10px;color:var(--sub);margin-top:3px}
+
+/* tutorial lesson */
+.tut-board-wrap{width:100%;position:relative}
+#tutBoard{display:grid;grid-template-columns:repeat(8,1fr);width:100%;aspect-ratio:1;border:3px solid var(--bg4);border-radius:4px;overflow:hidden}
+.tut-sq{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,6vw,32px);position:relative}
+.tut-sq.light{background:var(--light)}
+.tut-sq.dark{background:var(--dark)}
+.tut-sq.tut-hl{background:rgba(34,197,94,.5)!important}
+.tut-sq.tut-piece{background:rgba(59,130,246,.3)!important}
+.tut-info{background:var(--bg2);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.06);width:100%}
+.tut-step{font-size:13px;line-height:1.7;color:var(--text)}
+.tut-nav{display:flex;gap:8px;width:100%;margin-top:4px}
+
+/* ═══ SETTINGS ═══ */
+.set-box{background:var(--bg2);border-radius:var(--r);padding:4px 16px;border:1px solid rgba(255,255,255,.05);width:100%}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.srow:last-child{border-bottom:none}
+.srow .sname{font-size:14px;font-weight:700}
+.srow .sdesc{font-size:11px;color:var(--sub);margin-top:2px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.tslider{position:absolute;inset:0;background:var(--bg4);border-radius:12px;cursor:pointer;transition:.25s;border:1.5px solid rgba(255,255,255,.08)}
+.tslider::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;left:3px;top:2px;background:var(--sub);transition:.25s}
+.toggle input:checked+.tslider{background:linear-gradient(135deg,var(--gold),#f97316)}
+.toggle input:checked+.tslider::before{transform:translateX(20px);background:#fff}
+
+/* ═══ TOAST & MODAL ═══ */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(20,20,32,.97);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 20px;border-radius:50px;font-size:13px;font-weight:700;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:800;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.show{display:flex}
+.modal-box{width:100%;max-width:480px;background:var(--bg2);border-radius:20px 20px 0 0;padding:22px 18px 36px;border-top:1px solid rgba(255,255,255,.08);animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;gap:12px}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:18px;font-weight:900;text-align:center}
+
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="promo-modal" id="promoModal">
+  <div class="promo-box">
+    <div class="promo-title">اختار القطعة 👑</div>
+    <div class="promo-pieces" id="promoPieces"></div>
+  </div>
+</div>
+<div class="modal-bg" id="modalBg" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div class="scr on" id="s_title">
+  <div style="height:16px"></div>
+  <div class="logo">♟️</div>
+  <div class="title">شطرنج</div>
+  <div class="sub">تعلم، تدرب، واكسب!</div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="go('s_ai')">
+      <div class="mode-icon">🤖</div>
+      <div class="mode-info"><div class="name">ضد الذكاء الاصطناعي</div><div class="desc">اختار المستوى وابدأ اللعب</div></div>
+    </div>
+    <div class="mode-card" onclick="startFriend()">
+      <div class="mode-icon">👥</div>
+      <div class="mode-info"><div class="name">مع صاحب</div><div class="desc">نفس الجهاز — بالتبادل</div></div>
+    </div>
+    <div class="mode-card" onclick="go('s_tutorial')">
+      <div class="mode-icon">📖</div>
+      <div class="mode-info"><div class="name">تعلم الشطرنج</div><div class="desc">تعلم حركة كل قطعة</div></div>
+    </div>
+    <div class="mode-card" onclick="go('s_settings')">
+      <div class="mode-icon">⚙️</div>
+      <div class="mode-info"><div class="name">الإعدادات</div><div class="desc">ألوان، صوت، تلميحات</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI DIFFICULTY -->
+<div class="scr" id="s_ai">
+  <div class="title" style="font-size:22px">اختار المستوى</div>
+  <div class="diff-grid">
+    <div class="diff-card selected" id="d0" onclick="selectDiff(0)">
+      <div class="di">😊</div><div class="dn">سهل</div><div class="dd">للمبتدئين</div>
+    </div>
+    <div class="diff-card" id="d1" onclick="selectDiff(1)">
+      <div class="di">🧠</div><div class="dn">متوسط</div><div class="dd">تحدي حقيقي</div>
+    </div>
+    <div class="diff-card" id="d2" onclick="selectDiff(2)">
+      <div class="di">💀</div><div class="dn">صعب</div><div class="dd">للمحترفين</div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">أنت تلعب بـ:</div>
+    <div class="row">
+      <div id="colorW" onclick="setColor('w')" style="flex:1;padding:12px;border-radius:10px;background:var(--light);border:2px solid var(--gold);text-align:center;cursor:pointer;font-weight:800;color:#000;transition:all .2s">♙ الأبيض</div>
+      <div id="colorB" onclick="setColor('b')" style="flex:1;padding:12px;border-radius:10px;background:var(--dark);border:2px solid transparent;text-align:center;cursor:pointer;font-weight:800;color:#fff;transition:all .2s">♟ الأسود</div>
+    </div>
+  </div>
+  <button class="btn btn-gold" onclick="startAI()">▶ ابدأ اللعبة</button>
+  <button class="btn btn-ghost" onclick="go('s_title')">← رجوع</button>
+</div>
+
+<!-- GAME -->
+<div class="scr" id="s_game" style="padding:8px;gap:8px">
+  <div class="game-top">
+    <div class="player-info">
+      <div class="player-av" id="p2av">♟</div>
+      <div><div class="player-name" id="p2name">الأسود</div><div class="captured" id="cap1"></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--sub);text-align:center" id="moveCount">حركة 1</div>
+    <div class="player-info" style="flex-direction:row-reverse">
+      <div class="player-av" id="p1av">♙</div>
+      <div style="text-align:left"><div class="player-name" id="p1name">الأبيض</div><div class="captured" id="cap2"></div></div>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div id="board"></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-text" id="statusText">ابدأ اللعبة</div>
+    <div class="status-turn" id="statusTurn"></div>
+  </div>
+
+  <div class="game-controls">
+    <button class="ctrl-btn" onclick="undoMove()">↩ تراجع</button>
+    <button class="ctrl-btn" onclick="toggleHints()">💡 تلميح</button>
+    <button class="ctrl-btn" onclick="offerDraw()">🤝 تعادل</button>
+    <button class="ctrl-btn danger" onclick="resignGame()">🏳 استسلام</button>
+    <button class="ctrl-btn" onclick="go('s_title')">🏠</button>
+  </div>
+</div>
+
+<!-- TUTORIAL LIST -->
+<div class="scr" id="s_tutorial">
+  <div class="title" style="font-size:22px">تعلم الشطرنج 📖</div>
+  <div class="sub">اضغط على أي قطعة عشان تتعلم حركتها</div>
+  <div class="tutorial-grid" id="tutGrid"></div>
+  <button class="btn btn-ghost" onclick="go('s_title')">← رجوع</button>
+</div>
+
+<!-- TUTORIAL LESSON -->
+<div class="scr" id="s_lesson">
+  <div class="title" id="lessonTitle" style="font-size:20px"></div>
+  <div class="board-wrap">
+    <div id="tutBoard"></div>
+  </div>
+  <div class="tut-info">
+    <div class="tut-step" id="tutStep"></div>
+  </div>
+  <div class="tut-nav">
+    <button class="btn btn-ghost" id="tutPrev" onclick="tutNav(-1)">← السابق</button>
+    <button class="btn btn-gold" id="tutNext" onclick="tutNav(1)">التالي →</button>
+  </div>
+  <button class="btn btn-ghost" onclick="go('s_tutorial')">↩ قائمة الدروس</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="scr" id="s_settings">
+  <div class="title" style="font-size:22px">الإعدادات ⚙️</div>
+  <div class="set-box">
+    <div class="srow">
+      <div><div class="sname">تلميحات الحركة</div><div class="sdesc">نقاط خضرا تبين الحركات الممكنة</div></div>
+      <label class="toggle"><input type="checkbox" id="optHints" checked><span class="tslider"></span></label>
+    </div>
+    <div class="srow">
+      <div><div class="sname">إظهار آخر حركة</div><div class="sdesc">تلوين المربعات الأخيرة</div></div>
+      <label class="toggle"><input type="checkbox" id="optLastMove" checked><span class="tslider"></span></label>
+    </div>
+    <div class="srow">
+      <div><div class="sname">تأثيرات الاهتزاز</div><div class="sdesc">اهتزاز عند الأكل أو الكش</div></div>
+      <label class="toggle"><input type="checkbox" id="optVib" checked><span class="tslider"></span></label>
+    </div>
+    <div class="srow">
+      <div><div class="sname">قلب الشبورة</div><div class="sdesc">قلب الشبورة بعد كل حركة</div></div>
+      <label class="toggle"><input type="checkbox" id="optFlip"><span class="tslider"></span></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px">ألوان الشبورة</div>
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <div onclick="setTheme('classic')" style="padding:8px 14px;border-radius:8px;background:#b58863;color:#f0d9b5;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent" id="th_classic">كلاسيك</div>
+      <div onclick="setTheme('blue')" style="padding:8px 14px;border-radius:8px;background:#4a7fa5;color:#dee3e6;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent" id="th_blue">أزرق</div>
+      <div onclick="setTheme('green')" style="padding:8px 14px;border-radius:8px;background:#6a9c5d;color:#ffffdd;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent" id="th_green">أخضر</div>
+      <div onclick="setTheme('purple')" style="padding:8px 14px;border-radius:8px;background:#7c5cbf;color:#e8d5f5;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent" id="th_purple">بنفسجي</div>
+    </div>
+  </div>
+
+  <button class="btn btn-ghost" onclick="go('s_title')">← رجوع</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   CHESS ENGINE
+══════════════════════════════════════ */
+const PIECES={
+  K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙',
+  k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'
+};
+const PIECE_VAL={p:100,n:320,b:330,r:500,q:900,k:20000};
+
+let GAME={
+  board:null, turn:'w', selected:null, moves:[],
+  lastFrom:null, lastTo:null,
+  castling:{wK:true,wQ:true,bK:true,bQ:true},
+  enPassant:null,
+  history:[], // for undo
+  mode:'friend', // 'ai' or 'friend'
+  aiColor:'b',
+  aiLevel:0,
+  playerColor:'w',
+  gameOver:false,
+  moveNum:1,
+  hintsOn:true,
+  captured:{w:[],b:[]},
+};
+
+function initBoard(){
+  const b=Array(8).fill(null).map(()=>Array(8).fill(null));
+  const back=['r','n','b','q','k','b','n','r'];
+  back.forEach((p,c)=>{b[0][c]='b'+p.toUpperCase();b[7][c]='w'+p.toUpperCase();});
+  for(let c=0;c<8;c++){b[1][c]='bP';b[6][c]='wP';}
+  return b;
+}
+
+function pieceColor(p){return p?p[0]:null;}
+function pieceType(p){return p?p[1].toLowerCase():null;}
+
+function getValidMoves(board,r,c,turn,castling,enPassant,checkCheck=true){
+  const p=board[r][c];
+  if(!p||pieceColor(p)!==turn)return[];
+  const t=pieceType(p);
+  let raw=[];
+
+  const add=(nr,nc)=>{
+    if(nr<0||nr>7||nc<0||nc>7)return false;
+    const tgt=board[nr][nc];
+    if(tgt&&pieceColor(tgt)===turn)return false;
+    raw.push([nr,nc]);
+    return !tgt;
+  };
+  const slide=(dr,dc)=>{for(let i=1;i<8;i++){if(!add(r+dr*i,c+dc*i))break;}};
+
+  if(t==='p'){
+    const dir=turn==='w'?-1:1;
+    const start=turn==='w'?6:1;
+    if(r+dir>=0&&r+dir<8&&!board[r+dir][c])raw.push([r+dir,c]);
+    if(r===start&&!board[r+dir][c]&&!board[r+2*dir][c])raw.push([r+2*dir,c]);
+    [[dir,-1],[dir,1]].forEach(([dr,dc])=>{
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>7||nc<0||nc>7)return;
+      if(board[nr][nc]&&pieceColor(board[nr][nc])!==turn)raw.push([nr,nc]);
+      if(enPassant&&enPassant[0]===nr&&enPassant[1]===nc)raw.push([nr,nc]);
+    });
+  }
+  if(t==='n'){[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>add(r+dr,c+dc));}
+  if(t==='b'||t==='q'){[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>slide(dr,dc));}
+  if(t==='r'||t==='q'){[[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>slide(dr,dc));}
+  if(t==='k'){
+    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>add(r+dr,c+dc));
+    // Castling
+    if(checkCheck){
+      if(turn==='w'&&r===7&&c===4){
+        if(castling.wK&&!board[7][5]&&!board[7][6]&&!isSquareAttacked(board,7,4,'b')&&!isSquareAttacked(board,7,5,'b'))raw.push([7,6]);
+        if(castling.wQ&&!board[7][3]&&!board[7][2]&&!board[7][1]&&!isSquareAttacked(board,7,4,'b')&&!isSquareAttacked(board,7,3,'b'))raw.push([7,2]);
+      }
+      if(turn==='b'&&r===0&&c===4){
+        if(castling.bK&&!board[0][5]&&!board[0][6]&&!isSquareAttacked(board,0,4,'w')&&!isSquareAttacked(board,0,5,'w'))raw.push([0,6]);
+        if(castling.bQ&&!board[0][3]&&!board[0][2]&&!board[0][1]&&!isSquareAttacked(board,0,4,'w')&&!isSquareAttacked(board,0,3,'w'))raw.push([0,2]);
+      }
+    }
+  }
+
+  if(!checkCheck)return raw;
+  return raw.filter(([nr,nc])=>{
+    const nb=applyMove(board,r,c,nr,nc,null,enPassant);
+    return !isKingInCheck(nb,turn);
+  });
+}
+
+function isSquareAttacked(board,r,c,byColor){
+  for(let rr=0;rr<8;rr++)for(let cc=0;cc<8;cc++){
+    if(board[rr][cc]&&pieceColor(board[rr][cc])===byColor){
+      const m=getValidMoves(board,rr,cc,byColor,{wK:false,wQ:false,bK:false,bQ:false},null,false);
+      if(m.some(([mr,mc])=>mr===r&&mc===c))return true;
+    }
+  }
+  return false;
+}
+
+function isKingInCheck(board,color){
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    if(board[r][c]===(color+'K'))return isSquareAttacked(board,r,c,color==='w'?'b':'w');
+  }
+  return false;
+}
+
+function applyMove(board,fr,fc,tr,tc,promo,enPassant){
+  const nb=board.map(r=>[...r]);
+  const p=nb[fr][fc];
+  const t=pieceType(p);
+  const col=pieceColor(p);
+  nb[tr][tc]=promo?(col+promo):p;
+  nb[fr][fc]=null;
+  // en passant capture
+  if(t==='p'&&enPassant&&tr===enPassant[0]&&tc===enPassant[1]){
+    nb[fr][tc]=null;
+  }
+  // castling rook move
+  if(t==='k'){
+    if(tc===fc+2){nb[tr][5]=col+'R';nb[tr][7]=null;}
+    if(tc===fc-2){nb[tr][3]=col+'R';nb[tr][0]=null;}
+  }
+  return nb;
+}
+
+function getAllMoves(board,color,castling,enPassant){
+  const moves=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    if(board[r][c]&&pieceColor(board[r][c])===color){
+      getValidMoves(board,r,c,color,castling,enPassant).forEach(([tr,tc])=>moves.push([r,c,tr,tc]));
+    }
+  }
+  return moves;
+}
+
+function isCheckmate(board,color,castling,enPassant){
+  return getAllMoves(board,color,castling,enPassant).length===0&&isKingInCheck(board,color);
+}
+function isStalemate(board,color,castling,enPassant){
+  return getAllMoves(board,color,castling,enPassant).length===0&&!isKingInCheck(board,color);
+}
+
+/* ══════════════════════════════════════
+   AI (Minimax + Alpha-Beta)
+══════════════════════════════════════ */
+const DEPTH_BY_LEVEL=[1,2,3];
+
+function evalBoard(board){
+  let score=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];
+    if(!p)continue;
+    const v=PIECE_VAL[pieceType(p)]||0;
+    score+=pieceColor(p)==='w'?v:-v;
+  }
+  return score;
+}
+
+function minimax(board,depth,alpha,beta,isMax,color,castling,enPassant){
+  if(depth===0)return evalBoard(board);
+  const moves=getAllMoves(board,color,castling,enPassant);
+  if(!moves.length)return isKingInCheck(board,color)?(isMax?-30000:30000):0;
+  const opp=color==='w'?'b':'w';
+  if(isMax){
+    let best=-Infinity;
+    for(const [fr,fc,tr,tc] of moves){
+      const nb=applyMove(board,fr,fc,tr,tc,null,enPassant);
+      const v=minimax(nb,depth-1,alpha,beta,false,opp,castling,enPassant);
+      best=Math.max(best,v);alpha=Math.max(alpha,v);
+      if(beta<=alpha)break;
+    }
+    return best;
+  } else {
+    let best=Infinity;
+    for(const [fr,fc,tr,tc] of moves){
+      const nb=applyMove(board,fr,fc,tr,tc,null,enPassant);
+      const v=minimax(nb,depth-1,alpha,beta,true,opp,castling,enPassant);
+      best=Math.min(best,v);beta=Math.min(beta,v);
+      if(beta<=alpha)break;
+    }
+    return best;
+  }
+}
+
+function getBestMove(){
+  const depth=DEPTH_BY_LEVEL[GAME.aiLevel];
+  const col=GAME.aiColor;
+  const isMax=col==='w';
+  const moves=getAllMoves(GAME.board,col,GAME.castling,GAME.enPassant);
+  if(!moves.length)return null;
+
+  // Add randomness for easy mode
+  if(GAME.aiLevel===0){
+    // Pick any random move
+    const shuffled=moves.sort(()=>Math.random()-.5);
+    return shuffled[0];
+  }
+
+  let best=isMax?-Infinity:Infinity;
+  let bestMove=moves[0];
+  // shuffle for variety
+  moves.sort(()=>Math.random()-.5);
+  for(const [fr,fc,tr,tc] of moves){
+    const nb=applyMove(GAME.board,fr,fc,tr,tc,null,GAME.enPassant);
+    const v=minimax(nb,depth-1,-Infinity,Infinity,!isMax,col==='w'?'b':'w',GAME.castling,GAME.enPassant);
+    if(isMax?v>best:v<best){best=v;bestMove=[fr,fc,tr,tc];}
+  }
+  return bestMove;
+}
+
+/* ══════════════════════════════════════
+   RENDER BOARD
+══════════════════════════════════════ */
+function renderBoard(){
+  const bd=document.getElementById('board');
+  bd.innerHTML='';
+  const flip=document.getElementById('optFlip')?.checked&&GAME.turn==='b'&&GAME.mode==='ai';
+  const pColor=GAME.playerColor;
+
+  for(let rr=0;rr<8;rr++)for(let cc=0;cc<8;cc++){
+    const r=flip?7-rr:rr;
+    const c=flip?7-cc:cc;
+    const sq=document.createElement('div');
+    sq.className='sq '+((r+c)%2===0?'light':'dark');
+    sq.dataset.r=r;sq.dataset.c=c;
+
+    const isLight=(r+c)%2===0;
+    const p=GAME.board[r][c];
+    if(p)sq.innerHTML=`<span class="piece">${PIECES[p[0]==='w'?p[1]:p[1].toLowerCase()]}</span>`;
+    if(GAME.selected&&GAME.selected[0]===r&&GAME.selected[1]===c)sq.classList.add('selected');
+
+    const hints=document.getElementById('optHints')?.checked&&GAME.hintsOn;
+    if(hints&&GAME.moves.some(([mr,mc])=>mr===r&&mc===c)){
+      if(GAME.board[r][c])sq.classList.add('capture-hint');
+      else sq.classList.add('move-hint');
+    }
+    if(document.getElementById('optLastMove')?.checked&&GAME.lastFrom&&GAME.lastTo){
+      if((GAME.lastFrom[0]===r&&GAME.lastFrom[1]===c)||(GAME.lastTo[0]===r&&GAME.lastTo[1]===c))sq.classList.add('last-move');
+    }
+    // Check highlight
+    if(isKingInCheck(GAME.board,GAME.turn)){
+      for(let sr=0;sr<8;sr++)for(let sc=0;sc<8;sc++){
+        if(GAME.board[sr][sc]===(GAME.turn+'K')&&sr===r&&sc===c)sq.classList.add('check-king');
+      }
+    }
+
+    sq.addEventListener('click',()=>onSquareClick(r,c));
+    bd.appendChild(sq);
+  }
+  // Update status
+  const inCheck=isKingInCheck(GAME.board,GAME.turn);
+  const noMoves=getAllMoves(GAME.board,GAME.turn,GAME.castling,GAME.enPassant).length===0;
+  let statusMsg=GAME.turn==='w'?'دور الأبيض ♙':'دور الأسود ♟';
+  if(inCheck&&noMoves)statusMsg=(GAME.turn==='w'?'الأسود':'الأبيض')+' كسب! 🏆';
+  else if(noMoves)statusMsg='تعادل! 🤝';
+  else if(inCheck)statusMsg+=' — كش! ⚠️';
+  document.getElementById('statusText').textContent=statusMsg;
+  document.getElementById('moveCount').textContent='حركة '+GAME.moveNum;
+
+  // Active player highlight
+  document.getElementById('p1av').classList.toggle('active',GAME.turn==='w');
+  document.getElementById('p2av').classList.toggle('active',GAME.turn==='b');
+
+  // Captured
+  document.getElementById('cap1').textContent=GAME.captured.b.map(p=>PIECES[p.toLowerCase()]||'').join('');
+  document.getElementById('cap2').textContent=GAME.captured.w.map(p=>PIECES[p.toLowerCase()]||'').join('');
+}
+
+function onSquareClick(r,c){
+  if(GAME.gameOver)return;
+  if(GAME.mode==='ai'&&GAME.turn===GAME.aiColor)return;
+
+  const p=GAME.board[r][c];
+
+  // If piece selected and clicking a valid move
+  if(GAME.selected&&GAME.moves.some(([mr,mc])=>mr===r&&mc===c)){
+    doMove(GAME.selected[0],GAME.selected[1],r,c);
+    return;
+  }
+
+  // Select piece
+  if(p&&pieceColor(p)===GAME.turn){
+    GAME.selected=[r,c];
+    GAME.moves=getValidMoves(GAME.board,r,c,GAME.turn,GAME.castling,GAME.enPassant);
+    renderBoard();
+    return;
+  }
+
+  // Deselect
+  GAME.selected=null;GAME.moves=[];renderBoard();
+}
+
+function doMove(fr,fc,tr,tc,promo=null){
+  const p=GAME.board[fr][fc];
+  const t=pieceType(p);
+  const col=pieceColor(p);
+  const captured=GAME.board[tr][tc];
+
+  // En passant capture target
+  let epCapture=null;
+  if(t==='p'&&GAME.enPassant&&tr===GAME.enPassant[0]&&tc===GAME.enPassant[1]){
+    epCapture=GAME.board[fr][tc];
+    if(epCapture)GAME.captured[col].push(epCapture[1]);
+  }
+  if(captured)GAME.captured[col].push(captured[1]);
+
+  // Check promotion
+  if(t==='p'&&(tr===0||tr===7)&&!promo){
+    showPromotion(fr,fc,tr,tc,col);
+    return;
+  }
+
+  // Update castling rights
+  if(t==='k'){GAME.castling[col+'K']=false;GAME.castling[col+'Q']=false;}
+  if(t==='r'){
+    if(fc===0)GAME.castling[col+'Q']=false;
+    if(fc===7)GAME.castling[col+'K']=false;
+  }
+
+  // En passant next turn
+  GAME.enPassant=null;
+  if(t==='p'&&Math.abs(tr-fr)===2)GAME.enPassant=[(fr+tr)/2,fc];
+
+  // Save to history
+  GAME.history.push({
+    board:GAME.board.map(r=>[...r]),
+    turn:GAME.turn,castling:{...GAME.castling},enPassant:GAME.enPassant,
+    lastFrom:GAME.lastFrom,lastTo:GAME.lastTo,captured:{w:[...GAME.captured.w],b:[...GAME.captured.b]},
+    moveNum:GAME.moveNum,
+  });
+
+  GAME.board=applyMove(GAME.board,fr,fc,tr,tc,promo,GAME.enPassant);
+  GAME.lastFrom=[fr,fc];GAME.lastTo=[tr,tc];
+  GAME.selected=null;GAME.moves=[];
+  GAME.turn=GAME.turn==='w'?'b':'w';
+  GAME.moveNum++;
+
+  // Vibrate on capture/check
+  if(captured||isKingInCheck(GAME.board,GAME.turn)){
+    if(document.getElementById('optVib')?.checked&&navigator.vibrate)navigator.vibrate(50);
+  }
+
+  renderBoard();
+  checkGameEnd();
+
+  // AI turn
+  if(!GAME.gameOver&&GAME.mode==='ai'&&GAME.turn===GAME.aiColor){
+    setTimeout(doAIMove,300);
+  }
+}
+
+function showPromotion(fr,fc,tr,tc,col){
+  const modal=document.getElementById('promoModal');
+  const pieces=document.getElementById('promoPieces');
+  const opts=['Q','R','B','N'];
+  pieces.innerHTML=opts.map(p=>`<div class="promo-piece" onclick="doMove(${fr},${fc},${tr},${tc},'${p}');document.getElementById('promoModal').classList.remove('show')">${PIECES[col==='w'?p:p.toLowerCase()]}</div>`).join('');
+  modal.classList.add('show');
+}
+
+function doAIMove(){
+  const move=getBestMove();
+  if(move){
+    const [fr,fc,tr,tc]=move;
+    const p=GAME.board[fr][fc];
+    const t=pieceType(p);
+    const col=pieceColor(p);
+    // Auto promote to queen
+    const promo=(t==='p'&&(tr===0||tr===7))?'Q':null;
+    doMove(fr,fc,tr,tc,promo);
+  }
+}
+
+function checkGameEnd(){
+  if(isCheckmate(GAME.board,GAME.turn,GAME.castling,GAME.enPassant)){
+    const winner=GAME.turn==='w'?'الأسود':'الأبيض';
+    GAME.gameOver=true;
+    setTimeout(()=>showResult(`🏆 ${winner} كسب!`,'checkmate'),500);
+  } else if(isStalemate(GAME.board,GAME.turn,GAME.castling,GAME.enPassant)){
+    GAME.gameOver=true;
+    setTimeout(()=>showResult('🤝 تعادل!','stalemate'),500);
+  }
+}
+
+function showResult(title,reason){
+  const reasons={checkmate:'كش مات 👑',stalemate:'لا حركات — تعادل 🤝',resign:'استسلام 🏳️',draw:'تعادل بالاتفاق 🤝'};
+  openModal(title,`
+    <div style="text-align:center;font-size:14px;color:var(--sub);margin-bottom:16px">${reasons[reason]||''}</div>
+    <button class="btn btn-gold" style="margin-bottom:10px" onclick="closeModal();startSameMode()">🔄 لعبة جديدة</button>
+    <button class="btn btn-ghost" onclick="closeModal();go('s_title')">🏠 القائمة الرئيسية</button>
+  `);
+}
+
+function undoMove(){
+  if(GAME.history.length<1)return;
+  let steps=GAME.mode==='ai'?2:1;
+  for(let i=0;i<steps;i++){
+    if(!GAME.history.length)break;
+    const h=GAME.history.pop();
+    Object.assign(GAME,{board:h.board,turn:h.turn,castling:h.castling,enPassant:h.enPassant,lastFrom:h.lastFrom,lastTo:h.lastTo,captured:h.captured,moveNum:h.moveNum});
+  }
+  GAME.selected=null;GAME.moves=[];GAME.gameOver=false;
+  renderBoard();toast('↩ تم التراجع');
+}
+
+function toggleHints(){
+  GAME.hintsOn=!GAME.hintsOn;
+  renderBoard();
+  toast(GAME.hintsOn?'💡 التلميحات شغالة':'💡 التلميحات مقفولة');
+}
+
+function offerDraw(){
+  if(GAME.mode==='friend'){showResult('🤝 تعادل!','draw');return;}
+  toast('🤖 الذكاء رفض التعادل 😤');
+}
+
+function resignGame(){
+  GAME.gameOver=true;
+  const winner=GAME.turn==='w'?'الأسود':'الأبيض';
+  showResult(`${winner} كسب!`,'resign');
+}
+
+function startSameMode(){
+  if(GAME.mode==='ai')startAI();else startFriend();
+}
+
+/* ══════════════════════════════════════
+   GAME SETUP
+══════════════════════════════════════ */
+let selectedDiff=0,playerColor='w';
+
+function selectDiff(d){
+  selectedDiff=d;
+  [0,1,2].forEach(i=>document.getElementById('d'+i).classList.toggle('selected',i===d));
+}
+function setColor(c){
+  playerColor=c;
+  document.getElementById('colorW').style.borderColor=c==='w'?'var(--gold)':'transparent';
+  document.getElementById('colorB').style.borderColor=c==='b'?'var(--gold)':'transparent';
+}
+
+function startAI(){
+  GAME={...GAME,
+    board:initBoard(),turn:'w',selected:null,moves:[],
+    lastFrom:null,lastTo:null,
+    castling:{wK:true,wQ:true,bK:true,bQ:true},enPassant:null,
+    history:[],mode:'ai',
+    aiColor:playerColor==='w'?'b':'w',
+    aiLevel:selectedDiff,
+    playerColor,gameOver:false,moveNum:1,
+    captured:{w:[],b:[]},
+  };
+  document.getElementById('p1name').textContent='أنت ('+( playerColor==='w'?'أبيض':'أسود')+')';
+  document.getElementById('p2name').textContent='🤖 AI';
+  document.getElementById('p1av').textContent=playerColor==='w'?'♙':'♟';
+  document.getElementById('p2av').textContent=playerColor==='w'?'♟':'♙';
+  document.getElementById('p1av').style.background=playerColor==='w'?'#f0d9b5':'#333';
+  document.getElementById('p2av').style.background=playerColor==='w'?'#333':'#f0d9b5';
+  go('s_game');
+  renderBoard();
+  if(GAME.turn===GAME.aiColor)setTimeout(doAIMove,500);
+}
+
+function startFriend(){
+  GAME={...GAME,
+    board:initBoard(),turn:'w',selected:null,moves:[],
+    lastFrom:null,lastTo:null,
+    castling:{wK:true,wQ:true,bK:true,bQ:true},enPassant:null,
+    history:[],mode:'friend',gameOver:false,moveNum:1,
+    captured:{w:[],b:[]},
+  };
+  document.getElementById('p1name').textContent='اللاعب الأبيض ♙';
+  document.getElementById('p2name').textContent='اللاعب الأسود ♟';
+  document.getElementById('p1av').textContent='♙';
+  document.getElementById('p2av').textContent='♟';
+  document.getElementById('p1av').style.background='#f0d9b5';
+  document.getElementById('p2av').style.background='#333';
+  go('s_game');
+  renderBoard();
+}
+
+/* ══════════════════════════════════════
+   TUTORIAL
+══════════════════════════════════════ */
+const LESSONS=[
+  {name:'الملك ♔',icon:'♔',desc:'أهم قطعة!',
+   steps:[
+     {text:'الملك ♔ هو أهم قطعة في الشطرنج. لو اتهاجم ولا قدرت تنقذه — تخسر اللعبة! (كش مات)',pieces:[[4,4,'♔']],hl:[]},
+     {text:'الملك يتحرك خطوة واحدة في أي اتجاه: أمام، خلف، يمين، شمال، أو قطري. ده كل الاتجاهات الـ 8!',pieces:[[4,4,'♔']],hl:[[3,3],[3,4],[3,5],[4,3],[4,5],[5,3],[5,4],[5,5]]},
+     {text:'⚠️ الملك ممنوع يمشي لأي مربع بيهاجمه العدو. خليه دايماً آمن!',pieces:[[4,4,'♔'],[2,4,'♜']],hl:[[5,3],[5,4],[5,5],[4,3],[4,5]]},
+     {text:'🏰 الملك له حركة خاصة اسمها التحصين (Castling) — بيتحرك خطوتين ناحية الرخ، والرخ بيقفز فوقيه!',pieces:[[7,4,'♔'],[7,7,'♖']],hl:[[7,6]]},
+   ]},
+  {name:'الوزير ♕',icon:'♕',desc:'الأقوى',
+   steps:[
+     {text:'الوزير ♕ هي أقوى قطعة في الشطرنج. بتجمع قوة الرخ والفيل مع بعض!',pieces:[[4,4,'♕']],hl:[]},
+     {text:'الوزير يتحرك أي عدد مربعات في أي اتجاه — أفقي، رأسي، وقطري. قوة هائلة!',pieces:[[4,4,'♕']],hl:[[4,0],[4,1],[4,2],[4,3],[4,5],[4,6],[4,7],[0,4],[1,4],[2,4],[3,4],[5,4],[6,4],[7,4],[0,0],[1,1],[2,2],[3,3],[5,5],[6,6],[7,7],[1,7],[2,6],[3,5],[5,3],[6,2],[7,1]]},
+     {text:'💡 خليك حذر مع الوزير — متحطوش في الأماكن الخطرة في بداية اللعبة. دي قطعة غالية!',pieces:[[4,4,'♕'],[2,2,'♜'],[6,6,'♝']],hl:[]},
+   ]},
+  {name:'الرخ ♖',icon:'♖',desc:'القلعة',
+   steps:[
+     {text:'الرخ ♖ (القلعة) قطعة قوية جداً! بيتحرك في خطوط مستقيمة — أفقياً ورأسياً.',pieces:[[4,4,'♖']],hl:[]},
+     {text:'الرخ بيتحرك أي عدد مربعات للأمام، الخلف، اليمين، أو الشمال. بس مش قطرياً!',pieces:[[4,4,'♖']],hl:[[4,0],[4,1],[4,2],[4,3],[4,5],[4,6],[4,7],[0,4],[1,4],[2,4],[3,4],[5,4],[6,4],[7,4]]},
+     {text:'🏰 الرخ والملك مع بعض بيعملوا التحصين — دفاع مهم خليه في البال!',pieces:[[7,4,'♔'],[7,7,'♖'],[7,0,'♖']],hl:[[7,6],[7,2]]},
+   ]},
+  {name:'الفيل ♗',icon:'♗',desc:'قطري',
+   steps:[
+     {text:'الفيل ♗ بيتحرك قطرياً فقط — لكن أي عدد مربعات تريدها!',pieces:[[4,4,'♗']],hl:[]},
+     {text:'كل فيل محصور على لون واحد طول اللعبة. واحد على المربعات الفاتحة وواحد على الداكنة.',pieces:[[4,4,'♗']],hl:[[0,0],[1,1],[2,2],[3,3],[5,5],[6,6],[7,7],[1,7],[2,6],[3,5],[5,3],[6,2],[7,1]]},
+     {text:'💡 الفيل بيكون قوي في الأماكن المفتوحة. في الأماكن المزدحمة بالبيادق — الحصان أفضل!',pieces:[[4,4,'♗'],[3,3,'♙'],[5,5,'♙'],[2,6,'♝']],hl:[]},
+   ]},
+  {name:'الحصان ♘',icon:'♘',desc:'القفز',
+   steps:[
+     {text:'الحصان ♘ أغرب قطعة في الشطرنج! بيقفز على شكل حرف L — ومينفعش يتوقف في النص.',pieces:[[4,4,'♘']],hl:[]},
+     {text:'الحصان بيتحرك: خطوتان في اتجاه وخطوة في اتجاه تاني (شكل L). بيقفز فوق باقي القطع!',pieces:[[4,4,'♘']],hl:[[2,3],[2,5],[3,2],[3,6],[5,2],[5,6],[6,3],[6,5]]},
+     {text:'⭐ الحصان هو القطعة الوحيدة اللي تقدر تقفز فوق القطع التانية. مفيد جداً في الأماكن المزدحمة!',pieces:[[4,4,'♘'],[3,3,'♙'],[3,4,'♙'],[3,5,'♙'],[4,3,'♙'],[4,5,'♙'],[5,3,'♙'],[5,4,'♙'],[5,5,'♙']],hl:[[2,3],[2,5],[3,2],[3,6],[5,2],[5,6],[6,3],[6,5]]},
+   ]},
+  {name:'البيدق ♙',icon:'♙',desc:'الجندي',
+   steps:[
+     {text:'البيدق ♙ هو أضعف قطعة بس أكتر قطعة في الشطرنج — لديك 8 منهم! صغيرة بتحمي الكبيرة.',pieces:[[4,4,'♙']],hl:[]},
+     {text:'البيدق بيتحرك للأمام خطوة واحدة. في أول حركة ليه بس — يقدر يتحرك خطوتان!',pieces:[[4,4,'♙'],[6,3,'♙']],hl:[[3,4],[5,3],[4,3]]},
+     {text:'⚔️ البيدق بياكل قطرياً — بس قطرياً للأمام فقط! مش مباشر.',pieces:[[4,4,'♙'],[3,3,'♟'],[3,5,'♟']],hl:[[3,3],[3,5]]},
+     {text:'🌟 لو وصل البيدق للصف الأخير — بيتحول لأي قطعة تريدها (عادةً الوزير)! ده "الترفيع".',pieces:[[1,4,'♙']],hl:[[0,4]]},
+   ]},
+  {name:'الكش مات ♟',icon:'👑',desc:'الهدف',
+   steps:[
+     {text:'الكش مات (Checkmate) هو هدف اللعبة! ملك العدو محاصر ولا يقدر يتحرك لأي مكان آمن.',pieces:[[0,5,'♚'],[1,7,'♕'],[1,5,'♖'],[0,7,'♔']],hl:[]},
+     {text:'مثال على كش مات: الملك الأسود في الزاوية، الوزير والرخ بيحاصروه — مش قادر يهرب!',pieces:[[0,7,'♚'],[0,5,'♖'],[1,5,'♕']],hl:[]},
+     {text:'💡 تذكر: الملك في خطر (كش) ≠ كش مات. في الكش لازم تنقذ الملك. في الكش مات مفيش حل!',pieces:[[0,4,'♚'],[2,4,'♖'],[0,7,'♔'],[1,7,'♕']],hl:[]},
+     {text:'🏆 للفوز: تدير على ملك العدو إنه مكنش مش قادر يهرب. خطط مسبقاً وفكر في حركات العدو!',pieces:[[0,7,'♚'],[0,5,'♖'],[2,7,'♔'],[1,5,'♕']],hl:[]},
+   ]},
+];
+
+let currentLesson=0,currentStep=0;
+
+function buildTutorialGrid(){
+  const g=document.getElementById('tutGrid');
+  g.innerHTML=LESSONS.map((l,i)=>`
+    <div class="tut-card" onclick="openLesson(${i})">
+      <div class="tut-icon">${l.icon}</div>
+      <div class="tut-name">${l.name}</div>
+      <div class="tut-desc">${l.desc}</div>
+    </div>`).join('');
+}
+
+function openLesson(i){
+  currentLesson=i;currentStep=0;
+  document.getElementById('lessonTitle').textContent=LESSONS[i].name;
+  renderTutStep();
+  go('s_lesson');
+}
+
+function renderTutStep(){
+  const lesson=LESSONS[currentLesson];
+  const step=lesson.steps[currentStep];
+  const total=lesson.steps.length;
+
+  document.getElementById('tutStep').textContent=step.text;
+  document.getElementById('tutPrev').disabled=currentStep===0;
+  document.getElementById('tutNext').textContent=currentStep===total-1?'✓ انهيت الدرس':'التالي →';
+
+  const bd=document.getElementById('tutBoard');
+  bd.innerHTML='';
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const sq=document.createElement('div');
+    sq.className='tut-sq '+((r+c)%2===0?'light':'dark');
+    const piece=step.pieces.find(([pr,pc])=>pr===r&&pc===c);
+    if(piece)sq.textContent=piece[2];
+    if(step.hl.some(([hr,hc])=>hr===r&&hc===c))sq.classList.add('tut-hl');
+    bd.appendChild(sq);
+  }
+}
+
+function tutNav(d){
+  const total=LESSONS[currentLesson].steps.length;
+  if(d>0&&currentStep===total-1){go('s_tutorial');return;}
+  currentStep=Math.max(0,Math.min(total-1,currentStep+d));
+  renderTutStep();
+}
+
+/* ══════════════════════════════════════
+   SETTINGS / THEMES
+══════════════════════════════════════ */
+const THEMES={
+  classic:{light:'#f0d9b5',dark:'#b58863'},
+  blue:{light:'#dee3e6',dark:'#4a7fa5'},
+  green:{light:'#ffffdd',dark:'#6a9c5d'},
+  purple:{light:'#e8d5f5',dark:'#7c5cbf'},
+};
+function setTheme(name){
+  const t=THEMES[name];
+  document.documentElement.style.setProperty('--light',t.light);
+  document.documentElement.style.setProperty('--dark',t.dark);
+  Object.keys(THEMES).forEach(k=>document.getElementById('th_'+k).style.borderColor='transparent');
+  document.getElementById('th_'+name).style.borderColor='var(--gold)';
+  if(document.getElementById('board').children.length)renderBoard();
+}
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById(id);if(el){el.classList.add('on');window.scrollTo(0,0);}
+}
+function toast(msg,dur=2200){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);
+}
+function openModal(title,body){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+
+/* INIT */
+buildTutorialGrid();
+setTheme('classic');
+</script>
+</body>
+</html>
